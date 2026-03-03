@@ -1,6 +1,6 @@
 ---
 name: rocq-cos-generator
-description: Generate and execute CoSProver-style Rocq/Coq proof steps from Chain of States data. Use when working in this repository on `.v` files to move between adjacent states, recover from tactic/state mismatches (ETR/ESR), capture proof state with `scripts/get-proof-state.ps1`, and validate with `scripts/check-proofs.ps1`.
+description: Generate and execute CoSProver-style Rocq/Coq proof steps from Chain of States data. Use when working in this repository on `.v` files to move between adjacent states, recover from tactic/state mismatches (ETR/ESR), capture proof state with `scripts/get-proof-state.ps1`, and validate with `scripts/check-target-proof.ps1` or `scripts/check-proofs.ps1`.
 ---
 
 # Rocq Cos Generator
@@ -19,6 +19,17 @@ Provide or infer these before editing:
 - `current_cursor_line` when state must be captured from source.
 - `formal_statement` if theorem scaffolding is needed.
 
+## Slash Invocation Defaults
+
+When invoked as `/rocq-cos-generator` with a CoS chain:
+
+- Assume edit-only mode by default.
+- Do not ask for confirmation before first edit.
+- Do not output planning/strategy text before first patch.
+- If `target_file` is omitted, infer it automatically:
+  - Prefer the currently active `.v` file when available.
+  - Otherwise default to `coq/CongModEq.v` in this repository.
+
 ## Direct Mode Trigger
 
 Enter direct mode immediately when the user provides:
@@ -28,6 +39,15 @@ Enter direct mode immediately when the user provides:
 - and at least one adjacent CoS state transition.
 
 In direct mode, start writing proof code at once. Do not run broad repository discovery.
+
+## Edit-Only Mode (Preferred)
+
+When the user says "edit this file" (or equivalent), or when slash invocation defaults apply:
+
+- Perform a direct patch to the target file first.
+- Run zero shell commands before the first edit.
+- Do not run `get-proof-state` or proof-check commands unless the user asks to verify/check/state-capture.
+- If verification is requested, run only `scripts/check-target-proof.ps1` for that file unless full-project check is explicitly requested.
 
 ## Read Budget (Anti-Overread)
 
@@ -39,6 +59,22 @@ When in direct mode, allow only this minimal read set before first edit:
 
 Do not scan docs, `.glob`, git history, or unrelated files unless blocked by a concrete compile/state error.
 If blocked, read only the single file needed to unblock.
+
+## Execution Contract (Edit-First)
+
+- After direct mode triggers, perform the first proof-file edit within the first 3 actions.
+- In edit-only mode, perform the first proof-file edit as action 1.
+- Do not spend more than one brief preflight pass before editing.
+- Do not answer with long strategy-only messages while the file remains unedited.
+- If the user gave a valid state transition, write tactics first, then explain if asked.
+
+## Tooling Guardrails (No REPL Thrash)
+
+- Do not run ad-hoc `coqtop` `Search`/`Check` loops as a first step.
+- Do not run non-Coq scratch commands (for example Python no-op snippets) during proof formalization.
+- Use repository scripts and direct file edits as the default mechanism.
+- Only use interactive probing when blocked by a specific unknown lemma, and run at most one focused probe.
+- In edit-only mode, skip interactive probing entirely unless user explicitly requests it.
 
 ## File Rules (Do Not Violate)
 
@@ -81,8 +117,10 @@ Write Rocq/Coq syntax only:
 ```powershell
 .\scripts\get-proof-state.ps1 -FilePath <target_file> -CursorLine <line>
 # apply tactics / edit proof
-.\scripts\check-proofs.ps1
+.\scripts\check-target-proof.ps1 -FilePath <target_file>
 ```
+
+- Run `.\scripts\check-proofs.ps1` only when user asks for full-project verification or when finishing.
 
 3. Establish the active proof state
 - Use:
@@ -120,5 +158,6 @@ Write Rocq/Coq syntax only:
 ## Resources
 
 - `scripts/get-proof-state.ps1`: capture current proof state block for agent context.
+- `scripts/check-target-proof.ps1`: compile only the current target file with `_CoqProject` flags.
 - `scripts/check-proofs.ps1`: compile all files listed in `_CoqProject`.
 - `docs/PROMPTS.md`: canonical prompt formats for rewrite, CoS generation, tactic generation, ETR, and ESR.

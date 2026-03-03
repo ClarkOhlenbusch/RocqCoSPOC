@@ -1,3 +1,4 @@
 interface:
   display_name: "Rocq CoS Generator"
   short_description: "Run CoS proof loop: capture state, apply tactics, verify proofs"
+  default_prompt: "Apply the provided CoS chain directly to the target Coq file. First action must be editing the file; do not run discovery commands or strategy preambles before the first patch."
