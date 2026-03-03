@@ -1,0 +1,3 @@
+interface:
+  display_name: "Rocq CoS Generator"
+  short_description: "Run CoS proof loop: capture state, apply tactics, verify proofs"

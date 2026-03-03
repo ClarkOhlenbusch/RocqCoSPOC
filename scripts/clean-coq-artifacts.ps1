@@ -9,7 +9,8 @@ param(
         "*.glob",
         "*.aux"
     ),
-    [switch]$NoRecurse
+    [switch]$NoRecurse,
+    [switch]$ResetVFiles
 )
 
 Set-StrictMode -Version Latest
@@ -36,10 +37,26 @@ foreach ($pattern in $Patterns) {
     }
 }
 
-$uniqueArtifacts = $artifacts | Sort-Object -Property FullName -Unique
+$sourceFiles = New-Object System.Collections.Generic.List[System.IO.FileInfo]
+if ($ResetVFiles) {
+    if ($NoRecurse) {
+        $sources = Get-ChildItem -Path $root.Path -Filter "*.v" -File -Force -ErrorAction SilentlyContinue
+    }
+    else {
+        $sources = Get-ChildItem -Path $root.Path -Filter "*.v" -Recurse -File -Force -ErrorAction SilentlyContinue
+    }
+
+    if ($null -ne $sources) {
+        foreach ($source in $sources) {
+            $sourceFiles.Add($source)
+        }
+    }
+}
+
+$uniqueArtifacts = @($artifacts | Sort-Object -Property FullName -Unique)
 if ($uniqueArtifacts.Count -eq 0) {
     Write-Host "No matching Coq artifacts found."
-    return
+    if (-not $ResetVFiles) { return }
 }
 
 $deleted = 0
@@ -50,7 +67,21 @@ foreach ($artifact in $uniqueArtifacts) {
     }
 }
 
-Write-Host "Cleaned up $deleted generated file(s) in: $($root.Path)"
+if ($ResetVFiles) {
+    $reset = 0
+    foreach ($source in $sourceFiles) {
+        if ($PSCmdlet.ShouldProcess($source.FullName, "Empty")) {
+            Set-Content -LiteralPath $source.FullName -Value "" -NoNewline
+            $reset++
+        }
+    }
+    Write-Host "Emptied $reset source file(s) in: $($root.Path)"
+    if ($deleted -eq 0) {
+        Write-Host "No matching generated artifacts were found."
+    }
+} else {
+    Write-Host "Cleaned up $deleted generated file(s) in: $($root.Path)"
+}
 if (-not $NoRecurse) {
     Write-Host "Used recursive search."
 } else {

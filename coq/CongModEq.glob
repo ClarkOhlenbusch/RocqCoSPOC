@@ -1,0 +1,59 @@
+DIGEST bffbf799af6a04aa9c96682a7d6a7184
+FRocqCoSPOC.CongModEq
+R15:20 Coq.ZArith.ZArith <> <> lib
+R22:31 Coq.ZArith.Znumtheory <> <> lib
+R33:35 Coq.micromega.Lia <> <> lib
+def 50:75 <> is_complete_residue_system
+R82:82 Coq.Numbers.BinNums <> Z ind
+binder 78:78 <> w:1
+R91:94 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R90:90 Coq.Numbers.BinNums <> Z ind
+R95:95 Coq.Numbers.BinNums <> Z ind
+binder 86:86 <> f:2
+R123:123 Coq.Numbers.BinNums <> Z ind
+binder 117:117 <> a:3
+binder 119:119 <> b:4
+R140:147 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R131:134 Coq.ZArith.BinInt <> ::Z_scope:x_'<='_x_'<'_x not
+R136:138 Coq.ZArith.BinInt <> ::Z_scope:x_'<='_x_'<'_x not
+R135:135 RocqCoSPOC.CongModEq <> a:3 var
+R135:135 RocqCoSPOC.CongModEq <> a:3 var
+R139:139 RocqCoSPOC.CongModEq <> w:1 var
+R158:165 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R149:152 Coq.ZArith.BinInt <> ::Z_scope:x_'<='_x_'<'_x not
+R154:156 Coq.ZArith.BinInt <> ::Z_scope:x_'<='_x_'<'_x not
+R153:153 RocqCoSPOC.CongModEq <> b:4 var
+R153:153 RocqCoSPOC.CongModEq <> b:4 var
+R157:157 RocqCoSPOC.CongModEq <> w:1 var
+R187:194 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R175:177 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R169:173 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R166:166 RocqCoSPOC.CongModEq <> f:2 var
+R168:168 RocqCoSPOC.CongModEq <> a:3 var
+R174:174 RocqCoSPOC.CongModEq <> w:1 var
+R181:185 Coq.ZArith.BinInt <> ::Z_scope:x_'mod'_x not
+R178:178 RocqCoSPOC.CongModEq <> f:2 var
+R180:180 RocqCoSPOC.CongModEq <> b:4 var
+R186:186 RocqCoSPOC.CongModEq <> w:1 var
+R196:198 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R195:195 RocqCoSPOC.CongModEq <> a:3 var
+R199:199 RocqCoSPOC.CongModEq <> b:4 var
+prf 211:247 <> congruence_is_complete_residue_system
+R268:268 Coq.Numbers.BinNums <> Z ind
+binder 260:260 <> w:5
+binder 262:262 <> E:6
+binder 264:264 <> j:7
+R288:295 Coq.Init.Logic <> ::type_scope:x_'->'_x not
+R284:286 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R275:279 Coq.ZArith.BinInt Z gcd def
+R281:281 RocqCoSPOC.CongModEq <> w:5 var
+R283:283 RocqCoSPOC.CongModEq <> E:6 var
+R296:321 RocqCoSPOC.CongModEq <> is_complete_residue_system def
+R323:323 RocqCoSPOC.CongModEq <> w:5 var
+binder 330:330 <> k:8
+R336:338 Coq.ZArith.BinInt <> ::Z_scope:x_'+'_x not
+R335:335 RocqCoSPOC.CongModEq <> j:7 var
+R340:342 Coq.ZArith.BinInt <> ::Z_scope:x_'*'_x not
+R339:339 RocqCoSPOC.CongModEq <> k:8 var
+R343:343 RocqCoSPOC.CongModEq <> E:6 var
+R363:388 RocqCoSPOC.CongModEq <> is_complete_residue_system def

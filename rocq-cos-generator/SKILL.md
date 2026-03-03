@@ -1,85 +1,124 @@
 ---
 name: rocq-cos-generator
-description: TODO: Complete and informative explanation of what the skill does and when to use it. Include WHEN to use this skill - specific scenarios, file types, or tasks that trigger it.
+description: Generate and execute CoSProver-style Rocq/Coq proof steps from Chain of States data. Use when working in this repository on `.v` files to move between adjacent states, recover from tactic/state mismatches (ETR/ESR), capture proof state with `scripts/get-proof-state.ps1`, and validate with `scripts/check-proofs.ps1`.
 ---
 
 # Rocq Cos Generator
 
 ## Overview
 
-[TODO: 1-2 sentences explaining what this skill enables]
+Implement the manual CoS workflow in this repo: take state pairs, apply Coq tactics, verify in Coq, and iterate until `No Goals`.
+Keep edits deterministic and project-aware by following `_CoqProject`, proof-state snapshots, and proof-check scripts.
 
-## Structuring This Skill
+## Required Inputs
 
-[TODO: Choose the structure that best fits this skill's purpose. Common patterns:
+Provide or infer these before editing:
 
-**1. Workflow-Based** (best for sequential processes)
-- Works well when there are clear step-by-step procedures
-- Example: CSV-Processor skill with "Workflow Decision Tree" → "Ingestion" → "Cleaning" → "Analysis"
-- Structure: ## Overview → ## Workflow Decision Tree → ## Step 1 → ## Step 2...
+- `target_file`: the `.v` file to edit (for example `coq/CongModEq.v`).
+- `state_chain`: CoS states (`State 0`, `State 1`, ... `No Goals`) or at least one adjacent pair.
+- `current_cursor_line` when state must be captured from source.
+- `formal_statement` if theorem scaffolding is needed.
 
-**2. Task-Based** (best for tool collections)
-- Works well when the skill offers different operations/capabilities
-- Example: PDF skill with "Quick Start" → "Merge PDFs" → "Split PDFs" → "Extract Text"
-- Structure: ## Overview → ## Quick Start → ## Task Category 1 → ## Task Category 2...
+## Direct Mode Trigger
 
-**3. Reference/Guidelines** (best for standards or specifications)
-- Works well for brand guidelines, coding standards, or requirements
-- Example: Brand styling with "Brand Guidelines" → "Colors" → "Typography" → "Features"
-- Structure: ## Overview → ## Guidelines → ## Specifications → ## Usage...
+Enter direct mode immediately when the user provides:
 
-**4. Capabilities-Based** (best for integrated systems)
-- Works well when the skill provides multiple interrelated features
-- Example: Product Management with "Core Capabilities" → numbered capability list
-- Structure: ## Overview → ## Core Capabilities → ### 1. Feature → ### 2. Feature...
+- `target_file` (or clear destination file),
+- a theorem statement (or equivalent state-0 goal),
+- and at least one adjacent CoS state transition.
 
-Patterns can be mixed and matched as needed. Most skills combine patterns (e.g., start with task-based, add workflow for complex operations).
+In direct mode, start writing proof code at once. Do not run broad repository discovery.
 
-Delete this entire "Structuring This Skill" section when done - it's just guidance.]
+## Read Budget (Anti-Overread)
 
-## [TODO: Replace with the first main section based on chosen structure]
+When in direct mode, allow only this minimal read set before first edit:
 
-[TODO: Add content here. See examples in existing skills:
-- Code samples for technical skills
-- Decision trees for complex workflows
-- Concrete examples with realistic user requests
-- References to scripts/templates/references as needed]
+- `target_file`
+- `_CoqProject`
+- `scripts/get-proof-state.ps1` only if state capture fails or needs debugging
+
+Do not scan docs, `.glob`, git history, or unrelated files unless blocked by a concrete compile/state error.
+If blocked, read only the single file needed to unblock.
+
+## File Rules (Do Not Violate)
+
+Treat these as hard constraints:
+
+- Use existing `.v` files by default. Do not create a new proof file unless explicitly requested.
+- Never blank or delete existing `.v` sources.
+- Never run `scripts/clean-coq-artifacts.ps1` with `-ResetVFiles` unless the user explicitly asks.
+- Treat `_CoqProject` as the source of truth for what `scripts/check-proofs.ps1` compiles.
+- If you create a new `.v` file intentionally, add it to `_CoqProject` in the same change.
+- Keep edits focused on the target theorem; avoid unrelated rewrites.
+- Default to one theorem in one target `.v` file per run.
+- Do not edit docs, prompts, or scripts unless explicitly requested.
+
+## Artifact Trust Rules
+
+- Do not treat `.glob`, `.vo`, `.vos`, `.vok`, or caches as authoritative source code.
+- Never infer "proof already exists" from compiled/generated artifacts.
+- Source of truth is `.v` text plus user-provided chain and statement.
+
+## Language Safety (Coq vs Lean)
+
+Write Rocq/Coq syntax only:
+
+- Allowed examples: `intros`, `destruct`, `induction`, `assert`, `pose proof`, `rewrite`, `apply`, `eapply`, `exact`, `lia`, `ring`, `omega`.
+- Disallowed Lean-style tokens in proof scripts: `have`, `rw`, `simp`, `simpa`, `by`, `by_cases`.
+- If generated tactics include Lean syntax, stop and rewrite them into Coq before saving.
+
+## Workflow
+
+1. Preflight
+- Confirm `target_file` exists.
+- Check whether `target_file` is listed in `_CoqProject`.
+- If user expects full-project validation, ensure intended files are in `_CoqProject`.
+- If `target_file` is empty and user provided statement/chain, write theorem scaffold immediately instead of searching for prior versions.
+
+2. Run the Golden Loop
+- Execute this loop repeatedly until the theorem reaches `No Goals`:
+
+```powershell
+.\scripts\get-proof-state.ps1 -FilePath <target_file> -CursorLine <line>
+# apply tactics / edit proof
+.\scripts\check-proofs.ps1
+```
+
+3. Establish the active proof state
+- Use:
+  - `.\scripts\get-proof-state.ps1 -FilePath <target_file> -CursorLine <line>`
+- If cursor is outside an unfinished proof, the script will return `No Goals`.
+
+4. Apply adjacent-state tactics
+- For each `(State p -> State p+1)`, add the smallest Coq tactic block that makes that transition.
+- Keep proof scripts readable; prefer one intentional tactic step at a time.
+- Prioritize user-provided state chain over inferred context from other files.
+
+5. Validate and iterate
+- Run:
+  - `.\scripts\check-proofs.ps1`
+- If Coq raises a tactic/syntax error, run ETR loop (Prompt #4 style).
+- If tactics run but land in wrong state, run ESR loop (Prompt #5 style).
+- Re-capture state and continue until final state is `No Goals`.
+
+6. Finalize
+- Leave only valid Coq code in theorem files.
+- Keep helper notes in chat output, not in `.v` source, unless asked.
+
+## ETR and ESR Decision Rule
+
+- Use ETR when Coq reports an error for a tactic sequence.
+- Use ESR when tactics succeed but produce the wrong intermediate goal.
+- Always include the exact state text when regenerating tactics.
+
+## Failure Policy
+
+- If `get-proof-state.ps1` fails, stop tactic generation and report the command error first.
+- If `get-proof-state.ps1` returns `No Goals` but proof is expected to be in progress, treat cursor line as wrong and re-sample at the theorem body.
+- If `check-proofs.ps1` fails in unrelated files, do not rewrite those files by default; isolate validation to the target file unless the user asks for whole-project fixes.
 
 ## Resources
 
-This skill includes example resource directories that demonstrate how to organize different types of bundled resources:
-
-### scripts/
-Executable code that can be run directly to perform specific operations.
-
-**Examples from other skills:**
-- PDF skill: fill_fillable_fields.cjs, extract_form_field_info.cjs - utilities for PDF manipulation
-- CSV skill: normalize_schema.cjs, merge_datasets.cjs - utilities for tabular data manipulation
-
-**Appropriate for:** Node.cjs scripts (cjs), shell scripts, or any executable code that performs automation, data processing, or specific operations.
-
-**Note:** Scripts may be executed without loading into context, but can still be read by Gemini CLI for patching or environment adjustments.
-
-### references/
-Documentation and reference material intended to be loaded into context to inform Gemini CLI's process and thinking.
-
-**Examples from other skills:**
-- Product management: communication.md, context_building.md - detailed workflow guides
-- BigQuery: API reference documentation and query examples
-- Finance: Schema documentation, company policies
-
-**Appropriate for:** In-depth documentation, API references, database schemas, comprehensive guides, or any detailed information that Gemini CLI should reference while working.
-
-### assets/
-Files not intended to be loaded into context, but rather used within the output Gemini CLI produces.
-
-**Examples from other skills:**
-- Brand styling: PowerPoint template files (.pptx), logo files
-- Frontend builder: HTML/React boilerplate project directories
-- Typography: Font files (.ttf, .woff2)
-
-**Appropriate for:** Templates, boilerplate code, document templates, images, icons, fonts, or any files meant to be copied or used in the final output.
-
----
-
-**Any unneeded directories can be deleted.** Not every skill requires all three types of resources.
+- `scripts/get-proof-state.ps1`: capture current proof state block for agent context.
+- `scripts/check-proofs.ps1`: compile all files listed in `_CoqProject`.
+- `docs/PROMPTS.md`: canonical prompt formats for rewrite, CoS generation, tactic generation, ETR, and ESR.
