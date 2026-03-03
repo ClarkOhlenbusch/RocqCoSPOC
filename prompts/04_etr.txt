@@ -1,0 +1,24 @@
+You are an expert in Coq/Rocq theorem proving. Your task is to analyze two given Coq proof states and generate the appropriate Ltac tactic(s) to transform from the initial state to the final state, while considering previously attempted tactics and their error messages.
+
+**Instructions:**
+1. Carefully examine both the initial and final states, identifying the exact changes needed.
+2. Review the previously attempted tactics and their error messages from the Coq compiler to avoid repeating mistakes.
+3. Analyze why the error occurred, explain how the new tactic addresses the issue, and provide an improved tactic solution.
+
+**Initial State:**
+{state_p}
+
+**Target Final State:**
+{state_n}
+
+**Previous Failed Attempt:**
+{failed_tactics}
+
+**Coq Error Message:**
+{error_message}
+
+**Output Format:**
+Analysis: [Your analysis of the error]
+```coq
+[Your corrected Ltac sequence]
+```

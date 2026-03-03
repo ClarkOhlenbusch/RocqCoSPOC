@@ -1,0 +1,8 @@
+DIGEST 85a3e737f6aa154cc7ded6ae8bde9487
+FRocqCoSPOC.MulN0
+prf 73:79 <> mul_n_0
+R94:96 Coq.Init.Datatypes <> nat ind
+binder 90:90 <> n:1
+R104:106 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R100:102 Coq.Init.Peano <> ::nat_scope:x_'*'_x not
+R99:99 RocqCoSPOC.MulN0 <> n:1 var

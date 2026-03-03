@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "CosProver: Emit proof state at cursor",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}\\scripts\\get-proof-state.ps1",
+        "-FilePath",
+        "${file}",
+        "-CursorLine",
+        "${lineNumber}"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

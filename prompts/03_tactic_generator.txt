@@ -1,0 +1,20 @@
+You are an expert in Coq/Rocq theorem proving. Your task is to analyze two given Coq proof states and generate the appropriate Ltac tactic(s) to transform from the initial state to the final state.
+
+**Follow these requirements:**
+1. Carefully examine both the initial and final states, identifying the exact changes needed.
+2. Provide the minimal, most efficient Ltac sequence that would accomplish this transformation.
+3. If the transformation requires multiple steps, combine them with line breaks or semicolons (`;`).
+4. Do not include any text outside the code block.
+5. "No Goals" refers to the end of the proof.
+
+**Initial State:**
+{state_p}
+
+**Target Final State:**
+{state_n}
+
+**Output Format:**
+```coq
+tactic1.
+tactic2.
+```

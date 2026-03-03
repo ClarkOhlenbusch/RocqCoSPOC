@@ -1,0 +1,39 @@
+Assume you are an expert in mathematics and Coq/Rocq. Your task is to read the following formal statement and informal proof, and generate a formal chain of states for Coq.
+
+While generating the state list, you should insert explanations before each state where you think it's needed, clarifying how the next state is derived from the previous ones.
+
+**Principles of chain of states:**
+1. Each state is a formal inference step in Coq.
+2. A state contains hypotheses above a double line (`============================`) and the current goal below it.
+3. The name of each state should be "State" followed by a natural number starting from 0 and incrementing sequentially.
+4. Different states are separated by two newline characters.
+
+**An example of a chain of states is:**
+
+State 0:
+a : R
+b : R
+h : a <= b
+============================
+rexp(a) <= rexp(b)
+
+State 1:
+a : R
+b : R
+h : a <= b
+============================
+a <= b
+
+State 2:
+No Goals
+
+**Instructions:**
+You should refer to the informal proof to generate the chain of states. Each state in your chain does not necessarily need to correspond one-to-one with each step in the informal proof. If necessary, intermediate reasoning steps required for formalization should be added.
+
+**Formal Statement:**
+{coq_formal_statement}
+
+**Coq-Friendly Informal Proof:**
+{coq_friendly_proof}
+
+**Output:**

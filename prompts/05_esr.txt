@@ -1,0 +1,18 @@
+I'm working on a Coq/Rocq proof where we need to transform State A to State B. However, the current tactics only achieve a transformation from State A to State C.
+
+Please analyze the proof context and:
+1. Carefully examine both the current state (State C) and our actual target state (State B).
+2. Identify what additional transformations are needed to bridge the gap between State C and State B.
+3. Suggest the most appropriate Ltac sequence to complete the proof from State A all the way to State B.
+
+**State A (Starting Point):**
+{state_a}
+
+**State B (Our Actual Target):**
+{state_b}
+
+**State C (Where your last tactics accidentally left us):**
+{state_c}
+
+**Output:**
+Please output the final working Ltac sequence inside triple backticks to get us from State A to State B. Include brief explanatory comments for each step.
