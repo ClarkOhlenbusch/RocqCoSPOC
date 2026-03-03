@@ -12,6 +12,13 @@ Require Import ZArith.
 Require Import Znumtheory.
 Require Import Lia.
 
+Definition is_complete_residue_system (w : Z) (f : Z -> Z) : Prop :=
+  forall a b : Z,
+    0 <= a < w ->
+    0 <= b < w ->
+    f a mod w = f b mod w ->
+    a = b.
+
 Theorem cong_mod_implies_eq :
   forall j w E a b : Z,
     Z.gcd w E = 1 ->
@@ -59,4 +66,13 @@ Proof.
   - (* t <> 0 and w > 0 => |t*w| >= w, contradiction with Hbound *)
     assert (Hw_pos : 0 < w) by lia.
     nia.
+Qed.
+
+Theorem complete_residue_system_add_mul :
+  forall j w E : Z,
+    Z.gcd w E = 1 ->
+    is_complete_residue_system w (fun k => j + k * E).
+Proof.
+  intros j w E H_gcd a b Ha Hb Hmod.
+  exact (cong_mod_implies_eq j w E a b H_gcd Ha Hb Hmod).
 Qed.
