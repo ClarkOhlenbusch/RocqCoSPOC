@@ -1,0 +1,3 @@
+We prove that for every natural number n, n + 0 = n.
+
+By induction on n. When n = 0, we have 0 + 0 = 0 by the definition of addition and reflexivity. For the inductive step, assume n = S m and that m + 0 = m. Then S m + 0 = S (m + 0) by the definition of plus, which equals S m by the inductive hypothesis and reflexivity.

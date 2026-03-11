@@ -1,0 +1,19 @@
+# Environment and secrets
+.env
+
+# Coq build artifacts
+*.vo
+*.vos
+*.vok
+.glob
+*.aux
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# IDE
+.vscode/settings.json.local

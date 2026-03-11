@@ -100,3 +100,15 @@ No Goals
 - **ESR (Error State Renewal):** When the tactics run but the resulting state (State C) is not the intended state (State B), paste State A (start), State B (target), and State C (actual) into prompt #5 and send to the agent. The agent suggests a tactic sequence from A to B.
 
 No automated loop: you decide when to invoke ETR or ESR and paste the relevant prompt.
+
+---
+
+## 6. Autonomous Pipeline (Open Router)
+
+An **autonomous** pipeline is provided in `pipeline/`. It replicates the same workflow using the Open Router API and free models, with no manual copy-paste:
+
+- **Rewrite** and **Chain of States** use free Open Router models (default: openrouter/free router).
+- **Tactics**, **ETR**, and **ESR** use the same configured models (default: openrouter/free); you can pin DeepSeek V3 or paid DeepSeek R1 in pipeline/config.yaml if you want to match the paper's model more closely.
+- The pipeline calls `scripts/check-target-proof.ps1` and `scripts/get-proof-state.ps1` for verification and state capture, and edits the target `.v` file automatically.
+
+See `pipeline/README.md` for setup (OPENROUTER_API_KEY in `.env`), configuration (`pipeline/config.yaml`), and usage (`python pipeline/run.py --informal ... --formal ... --target ...`).

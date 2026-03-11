@@ -1,0 +1,24 @@
+# Open Router model IDs for the CoS pipeline (free-tier where possible).
+# See https://openrouter.ai/collections/free-models
+
+# Default: route to any free model. You can pin specific models here if you prefer,
+# e.g. deepseek/deepseek-chat-v3-0324:free or a paid deepseek/deepseek-r1.
+rewrite_model:
+  - "openrouter/free"
+cos_model:
+  - "openrouter/free"
+tactic_model:
+  - "openrouter/free"
+etr_model:
+  - "openrouter/free"
+esr_model:
+  - "openrouter/free"
+
+# Optional: max retries per transition (human-readable names)
+max_tactic_errors: 3
+max_state_mismatch: 2
+
+# Generation defaults
+max_tokens: 8192
+temperature: 0.3
+

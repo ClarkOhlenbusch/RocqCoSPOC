@@ -1,0 +1,90 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+.header p {
+  margin-top: 8px;
+  color: #566074;
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #d6dbe7;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.controls select {
+  min-width: 340px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.summary-card {
+  border: 1px solid #dde3ef;
+  border-radius: 8px;
+  padding: 8px;
+  background: #f8fbff;
+}
+
+.summary-label {
+  font-size: 12px;
+  color: #5f6b81;
+}
+
+.summary-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.error {
+  border-color: #d84b4b;
+  color: #8d1515;
+  background: #fff5f5;
+}
+
+pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 12px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+details {
+  margin: 8px 0;
+}
+
+.transition-block,
+.state-block,
+.attempt-block {
+  border: 1px solid #e4e8f2;
+  border-radius: 8px;
+  padding: 8px;
+  background: #fbfdff;
+}
+
+.transition-block > summary,
+.state-block > summary,
+.attempt-block > summary {
+  cursor: pointer;
+  font-weight: 600;
+}

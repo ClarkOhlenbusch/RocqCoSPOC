@@ -33,3 +33,9 @@ Short reference mapping the CoSProver paper (Lean) to our manual Coq emulation.
 - Fine-tuned CoS generator (paper: 7B model + Leanjixia / elaboration trees). We use a **Gemini gem** with few-shot prompting instead.
 - Automated Coq REPL / verifier. Verification is done by editing the `.v` file and running Coq in the IDE; the **IDE coding agent** gets errors directly.
 - Common-tactic prover or CoqHammer in front of the agent. Optional: you can try `lia`, `omega`, `auto` or CoqHammer yourself before asking the agent.
+
+---
+
+## Autonomous pipeline
+
+The `pipeline/` directory implements a fully automated run using the **Open Router** API: rewrite, CoS, and tactic generation (with ETR/ESR) are performed by LLMs; Coq verification uses the existing scripts. Models are configured in `pipeline/config.yaml`; tactics (and ETR/ESR) use **DeepSeek R1 (free)** to match the paper. See `pipeline/README.md` and `docs/ARCHITECTURE.md` §6.

@@ -1,0 +1,3 @@
+We show that for all natural numbers a and b, if a <= b then a <= S b.
+
+Assume a and b are natural numbers and H : a <= b. We must prove a <= S b. This follows from linear arithmetic: since a <= b, we have a <= b < S b, so a <= S b.
