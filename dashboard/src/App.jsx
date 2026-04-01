@@ -30,6 +30,9 @@ function App() {
     setError("");
     try {
       const res = await fetch("/api/traces");
+      if (!res.ok) {
+        throw new Error(`Server returned ${res.status}`);
+      }
       const data = await res.json();
       setFiles(data.files || []);
       if (!selectedName && data.files?.length) {
@@ -63,8 +66,7 @@ function App() {
     const transitionCount = trace.summary?.transition_count ?? trace.transitions?.length ?? 0;
     const etr = trace.summary?.etr_retries ?? 0;
     const esr = trace.summary?.esr_retries ?? 0;
-    const stateCount = trace.chain_of_states?.count ?? 0;
-    return { transitionCount, etr, esr, stateCount };
+    return { transitionCount, etr, esr };
   }, [trace]);
 
   return (
@@ -95,7 +97,7 @@ function App() {
         <>
           <section className="panel summary-grid">
             <SummaryCard label="Status" value={trace.status || "unknown"} />
-            <SummaryCard label="States" value={summary.stateCount} />
+            <SummaryCard label="Mode" value="Direct" />
             <SummaryCard label="Transitions" value={summary.transitionCount} />
             <SummaryCard label="ETR Retries" value={summary.etr} />
             <SummaryCard label="ESR Retries" value={summary.esr} />
@@ -107,10 +109,10 @@ function App() {
           </section>
 
           <section className="panel">
-            <h2>Step 2 - Chain of States</h2>
-            <p>Parsed states: {trace.chain_of_states?.count ?? 0}</p>
+            <h2>Step 2 - Proof Goal</h2>
+            <p>Direct proving (State 0 → No Goals)</p>
             {(trace.chain_of_states?.states || []).map((stateText, idx) => (
-              <StateBlock key={idx} title={`State ${idx}`} content={stateText} />
+              <StateBlock key={idx} title={idx === 0 ? "Initial Goal" : "Target"} content={stateText} />
             ))}
           </section>
 

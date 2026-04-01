@@ -15,4 +15,5 @@ Please analyze the proof context and:
 {state_c}
 
 **Output:**
-Please output the final working Ltac sequence inside triple backticks to get us from State A to State B. Include brief explanatory comments for each step.
+Please output the final working Ltac sequence inside triple backticks to get us from State A to State B.
+Do not include explanatory text or comments outside the code block.

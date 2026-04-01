@@ -1,61 +1,10 @@
-Theorem ex1 : forall n : nat, n + 0 = n.
+Theorem n_plus_zero_equals_n : forall n : nat, n + 0 = n.
 Proof.
-Theorem ex1 : forall n : nat, n + 0 = n.
-Proof.
-  Okay, let's see. The user wants to transform the initial state to the final state using Coq tactics. The initial state is a goal that says for all natural numbers n, n plus 0 equals n. The target is the same, but they mention starting with an induction on n.
-  Wait, the initial state is already a goal. The target is the same, but maybe the user wants to apply an induction tactic to start proving this. But why? Because the current state is just the goal, and maybe they want to apply induction to n to prove it. But the problem is, the initial state is the goal, and the target is the same. So perhaps the user is showing that after applying some tactics, the state remains the same, but the process involves induction.
-  Wait, maybe the initial state is the goal, and the target is the same, but the user is showing that after applying induction on n, the state is the same. But that's not possible. Because induction on n would split the goal into base case and inductive step. But the initial and target states are the same. So maybe the answer is to apply induction on n, but that would split the goal. However, the target is the same as the initial. So perhaps the user is confused, or maybe there's a trick here.
-  Wait, perhaps the initial state is the goal, and the target is the same, but the user is showing that after applying induction on n, the state is the same. But that's not correct. Because induction would split the goal into base case and inductive step. So maybe the answer is to apply induction on n, but that would not leave the state the same. So perhaps the user made a mistake in the problem statement. Alternatively, maybe the initial state is the goal, and the target is the same, but the user wants to apply some tactics to reach the same state. But that's not possible unless you do nothing.
-  Alternatively, maybe the initial state is the goal, and the target is the same, but the user is showing that after applying some tactics, the state is the same. For example, maybe the initial state is the goal, and the target is the same, but the user wants to apply some tactics that don't change the state. But that's not useful.
-  Alternatively, maybe the initial state is the goal, and the target is the same, but the user is showing that after applying some tactics, the state is the same. For example, maybe the initial state is the goal, and the target is the same, but the user wants to apply some tactics that are redundant. But that's not helpful.
-  Wait, perhaps the initial state is the goal, and the target is the same, but the user is showing that after applying some tactics, the state is the same. For example, maybe the initial state is the goal, and the target is the same, but the user wants to apply some tactics that are not changing anything. But that's not possible.
-  Alternatively, maybe the initial state is the goal, and the target is the same, but the user is showing that after applying some tactics, the state is the same. For example, maybe the initial state is the goal, and the target is the same, but the user wants to apply some tactics that are not changing the state. But that's not possible.
-  Alternatively, maybe the initial state is the goal, and the target is the same, but the user is showing that after applying some tactics, the state is the same. For example, maybe the initial state is the goal, and the target is the same, but the user wants to apply some tactics that are not changing the state. But that's not possible.
-  Alternatively, maybe the user is confused and the initial and target states are the same, but the correct answer is to apply induction on n. But that would split the goal.
-  Wait, maybe the initial state is the goal, and the target is the same, but the user is showing that after applying induction on n, the state is the same. But that's not correct. Because induction would split the goal into base case and inductive step. So the state would change.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply induction on n. But that would not leave the state the same.
-  Alternatively, maybe the user is showing that after applying some tactics, the state is the same. For example, maybe the initial state is the goal, and the target is the same, but the user wants to apply some tactics that are not changing the state. But that's not possible.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics. But since the states are the same, there's no need.
-  Alternatively, maybe the user is showing that after applying some tactics, the state is the same. For example, maybe the initial state is the goal, and the target is the same, but the user wants to apply some tactics that are not changing the state. But that's not possible.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply induction on n. But that would split the goal.
-  Wait, maybe the user is showing that after applying induction on n, the state is the same. But that's not correct. Because induction would split the goal into base case and inductive step.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  Alternatively, maybe the user is showing that after applying some tactics, the state is the same. For example, maybe the initial state is the goal, and the target is the same, but the user wants to apply some tactics that are not changing the state. But that's not possible.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply induction on n. But that would split the goal.
-  Wait, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply induction on n. But that would not leave the state the same.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  Alternatively, maybe the user is showing that after applying some tactics, the state is the same. For example, maybe the initial state is the goal, and the target is the same, but the user wants to apply some tactics that are not changing the state. But that's not possible.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply induction on n. But that would split the goal.
-  Alternatively, maybe the user is showing that after applying some tactics, the state is the same. For example, maybe the initial state is the goal, and the target is the same, but the user wants to apply some tactics that are not changing the state. But that's not possible.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  But I'm not sure. Given the problem statement, I think the answer is to apply no tactics. But that's not possible.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  Alternatively, maybe the user is showing that after applying some tactics, the state is the same. For example, maybe the initial state is the goal, and the target is the same, but the user wants to apply some tactics that are not changing the state. But that's not possible.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  I think there's a mistake in the problem statement. But given the information, I'll proceed with the assumption that the initial and target are the same, and the answer is to do nothing. But since that's not a valid tactic, I'm not sure.
-  Alternatively, maybe the user is showing that after applying some tactics, the state is the same. For example, maybe the initial state is the goal, and the target is the same, but the user wants to apply some tactics that are not changing the state. But that's not possible.
-  So I think the correct answer is to apply no tactics. But that's not possible.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  Given the confusion, I'll proceed to answer that the correct tactic is to apply no tactics. But that's not possible.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  Alternatively, maybe the user is showing that after applying some tactics, the state is the same. For example, maybe the initial state is the goal, and the target is the same, but the user wants to apply some tactics that are not changing the state. But that's not possible.
-  Therefore, I'm unable to provide a valid answer. But given the problem statement, I'll proceed to say that the answer is to apply no tactics. But that's not possible.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  I think there's a mistake in the problem statement. But given the information, I'll proceed to answer that the correct tactic is to apply no tactics. But that's not possible.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  Therefore, I'm unable to provide a valid answer. But given the problem statement, I'll proceed to say that the answer is to apply no tactics. But that's not possible.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  I think the problem statement is incorrect. But given the information, I'll proceed to answer that the correct tactic is to apply no tactics. But that's not possible.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  Therefore, I'm unable to provide a valid answer. But given the problem statement, I'll proceed to say that the answer is to apply no tactics. But that's not possible.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  I think there's a mistake in the problem statement. But given the information, I'll proceed to answer that the correct tactic is to apply no tactics. But that's not possible.
-  Alternatively, maybe the user is showing that the initial state is the goal, and the target is the same, but the correct tactic is to apply some other tactics.
-  induction n.
-  induction n.
+  induction n as [| m IHm].
+  - (* Base: 0 + 0 = 0 *)
+    reflexivity.
+  - (* Step: S m + 0 = S m — use S m + 0 = S (m + 0) and IH m + 0 = m *)
+    simpl.
+    rewrite IHm.
+    reflexivity.
+Qed.

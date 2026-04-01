@@ -111,6 +111,7 @@ def chat(
     max_tokens: int = 4096,
     temperature: float = 0.3,
     timeout: int = DEFAULT_TIMEOUT,
+    retries: int = DEFAULT_RETRIES,
 ) -> str:
     """
     Send a single user message to Open Router and return the assistant message text.
@@ -128,7 +129,7 @@ def chat(
         "Content-Type": "application/json",
         "HTTP-Referer": "https://github.com/RocqCoSPOC",
     }
-    resp = _request_chat(payload, headers, timeout, retries=DEFAULT_RETRIES)
+    resp = _request_chat(payload, headers, timeout, retries=retries)
     data = resp.json()
     choices = data.get("choices") or []
     if not choices:
@@ -153,6 +154,7 @@ def chat_raw(
     max_tokens: int = 4096,
     temperature: float = 0.3,
     timeout: int = DEFAULT_TIMEOUT,
+    retries: int = DEFAULT_RETRIES,
 ):
     """Same as chat() but returns the full JSON response for debugging."""
     key = get_api_key()
@@ -167,5 +169,5 @@ def chat_raw(
         "Content-Type": "application/json",
         "HTTP-Referer": "https://github.com/RocqCoSPOC",
     }
-    resp = _request_chat(payload, headers, timeout, retries=DEFAULT_RETRIES)
+    resp = _request_chat(payload, headers, timeout, retries=retries)
     return resp.json()

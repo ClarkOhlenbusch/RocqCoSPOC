@@ -3,7 +3,7 @@ You are an expert in Coq/Rocq theorem proving. Your task is to analyze two given
 **Instructions:**
 1. Carefully examine both the initial and final states, identifying the exact changes needed.
 2. Review the previously attempted tactics and their error messages from the Coq compiler to avoid repeating mistakes.
-3. Analyze why the error occurred, explain how the new tactic addresses the issue, and provide an improved tactic solution.
+3. Provide an improved tactic solution that avoids the reported error.
 
 **Initial State:**
 {state_p}
@@ -18,7 +18,7 @@ You are an expert in Coq/Rocq theorem proving. Your task is to analyze two given
 {error_message}
 
 **Output Format:**
-Analysis: [Your analysis of the error]
 ```coq
-[Your corrected Ltac sequence]
+[Your corrected Ltac sequence only]
 ```
+Do not output analysis or any text outside the code block.

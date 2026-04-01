@@ -1,0 +1,53 @@
+{
+  "started_at": "2026-03-25T13:52:47",
+  "status": "success",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\_tmp_e2e.v",
+    "target_rel": "coq/_tmp_e2e.v"
+  },
+  "config": {
+    "max_tactic_errors": 3,
+    "max_state_mismatch": 1,
+    "temperature": 0.0,
+    "max_tokens": 2048
+  },
+  "rewrite": {
+    "text": "We aim to prove that for every natural number $ n $, the equation $ n + 0 = n $ holds.\n\nWe proceed by induction on $ n $.\n\n**Base Case:** When $ n = 0 $, we have $ 0 + 0 = 0 $. This follows directly from the definition of addition and the reflexivity property of addition.\n\n**Inductive Step:** Assume the statement holds for some arbitrary natural number $ m $, i.e., $ m + 0 = m $. We now prove it for $ S m $, the successor of $ m $.\n\nBy the definition of addition, $ S m + 0 = S (m + 0) $. By the inductive hypothesis, $ m + 0 = m $, so we have:\n$$\nS m + 0 = S m\n$$\nApplying the definition of addition again, $ S m = S (m + 0) $, and by reflexivity of addition, this equals $ S m + 0 $. But from the inductive hypothesis, $ S m + 0 = S (m + 0) = S m $. Therefore, by the uniqueness of equality in Coq, we conclude:\n$$\nS m + 0 = S m\n$$\nHowever, we want to show $ S m + 0 = m + S 0 $. Since $ 0 = 0 + 0 $, by the base case, $ 0 + 0 = 0 $, so $ m + 0 = m $. Thus, $ S m + 0 = m $, which implies $ S m = S (m + 0) $, and by the inductive hypothesis, this completes the inductive step.\n\nBy the principle of mathematical induction, the statement holds for all natural numbers $ n $."
+  },
+  "chain_of_states": {
+    "count": 2,
+    "states": [
+      "State 0:\n============================\nforall n : nat, n + 0 = n",
+      "No Goals"
+    ]
+  },
+  "transitions": [
+    {
+      "transition_index": 1,
+      "from_state_index": 0,
+      "to_state_index": 1,
+      "from_state": "State 0:\n============================\nforall n : nat, n + 0 = n",
+      "to_state": "No Goals",
+      "attempts": [
+        {
+          "attempt": 1,
+          "tactic": "intros n.\nsymmetry.\napply plus_n_O.",
+          "check_exit_code": 0,
+          "check_stdout": "Checking coq/_tmp_e2e.v ...\nProof check passed: coq/_tmp_e2e.v",
+          "check_stderr": "",
+          "actual_state": "State 0:\nNo Goals",
+          "status": "success_no_goals"
+        }
+      ],
+      "status": "success"
+    }
+  ],
+  "summary": {
+    "transition_count": 1,
+    "etr_retries": 0,
+    "esr_retries": 0
+  },
+  "ended_at": "2026-03-25T13:52:53"
+}

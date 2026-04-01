@@ -1,0 +1,53 @@
+{
+  "started_at": "2026-03-25T14:00:11",
+  "status": "success",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\_run_ex1.v",
+    "target_rel": "coq/_run_ex1.v"
+  },
+  "config": {
+    "max_tactic_errors": 3,
+    "max_state_mismatch": 2,
+    "temperature": 0.0,
+    "max_tokens": 2048
+  },
+  "rewrite": {
+    "text": "Here is the Coq-friendly rewrite of the proof:\n\n**Proof Structure:** By induction on `n`.\n\n**Base Case (n = 0):**  \nWe must show `0 + 0 = 0`.  \nBy the definition of addition, `0 + 0` evaluates to `0`.  \nBy reflexivity, `0 = 0` holds.  \n\n**Inductive Step (n = S m):**  \nAssume the induction hypothesis: `m + 0 = m` for some natural number `m`.  \nWe must show `S m + 0 = S m`.  \nBy the definition of addition, `S m + 0` evaluates to `S (m + 0)`.  \nBy the induction hypothesis, `m + 0 = m`, so `S (m + 0) = S m`.  \nBy reflexivity, `S m = S m` holds.  \n\n**Conclusion:**  \nBy the principle of induction on `n`, `n + 0 = n` holds for all natural numbers `n`."
+  },
+  "chain_of_states": {
+    "count": 2,
+    "states": [
+      "State 0:\n============================\nforall n : nat, n + 0 = n",
+      "No Goals"
+    ]
+  },
+  "transitions": [
+    {
+      "transition_index": 1,
+      "from_state_index": 0,
+      "to_state_index": 1,
+      "from_state": "State 0:\n============================\nforall n : nat, n + 0 = n",
+      "to_state": "No Goals",
+      "attempts": [
+        {
+          "attempt": 1,
+          "tactic": "intros n.\nsymmetry.\napply plus_n_O.",
+          "check_exit_code": 0,
+          "check_stdout": "Checking coq/_run_ex1.v ...\nProof check passed: coq/_run_ex1.v",
+          "check_stderr": "",
+          "actual_state": "State 0:\nNo Goals",
+          "status": "success_no_goals"
+        }
+      ],
+      "status": "success"
+    }
+  ],
+  "summary": {
+    "transition_count": 1,
+    "etr_retries": 0,
+    "esr_retries": 0
+  },
+  "ended_at": "2026-03-25T14:00:21"
+}

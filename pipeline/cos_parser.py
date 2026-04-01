@@ -79,7 +79,9 @@ def parse_chain_of_states(text: str) -> List[str]:
     if not states and "============================" in text:
         states.append(f"State 0:\n{text}".strip())
 
-    return _select_best_chain(states)
+    best = _select_best_chain(states)
+    cleaned = [_clean_state_block(s) for s in best]
+    return _dedupe_consecutive_states(cleaned)
 
 
 def _select_best_chain(states: List[str]) -> List[str]:
@@ -134,6 +136,39 @@ def _select_best_chain(states: List[str]) -> List[str]:
             return run
     # Otherwise prefer the latest run.
     return runs[-1][0]
+
+
+def _clean_state_block(state: str) -> str:
+    if state.strip().lower() == "no goals":
+        return "No Goals"
+
+    lines = state.replace("\r\n", "\n").split("\n")
+    if not lines:
+        return state.strip()
+
+    header = lines[0].strip()
+    body = []
+    for line in lines[1:]:
+        stripped = line.strip()
+        # Drop model-added comments/explanations from state bodies.
+        if stripped.startswith("(*") and stripped.endswith("*)"):
+            continue
+        body.append(line.rstrip())
+
+    # Keep internal structure but trim trailing blank lines.
+    while body and not body[-1].strip():
+        body.pop()
+    return "\n".join([header] + body).strip()
+
+
+def _dedupe_consecutive_states(states: List[str]) -> List[str]:
+    if not states:
+        return states
+    out = [states[0]]
+    for s in states[1:]:
+        if normalize_state(s) != normalize_state(out[-1]):
+            out.append(s)
+    return out
 
 
 def normalize_state(s: str) -> str:

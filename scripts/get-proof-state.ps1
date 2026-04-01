@@ -73,27 +73,27 @@ function Resolve-CoqTopPath {
 function Get-CoqProjectArgs {
   param([string]$ProjectRoot)
 
-  $args = New-Object System.Collections.Generic.List[string]
+  $coqArgs = New-Object System.Collections.Generic.List[string]
   $project = Join-Path $ProjectRoot "_CoqProject"
   if (-not (Test-Path $project)) {
-    return $args.ToArray()
+    return $coqArgs.ToArray()
   }
 
   foreach ($line in Get-Content -LiteralPath $project) {
     $text = $line.Trim()
     if ($text -match '^-R\s+(.+)\s+(\S+)\s*$') {
-      $args.Add("-R")
-      $args.Add($Matches[1].Trim())
-      $args.Add($Matches[2].Trim())
+      $coqArgs.Add("-R")
+      $coqArgs.Add($Matches[1].Trim())
+      $coqArgs.Add($Matches[2].Trim())
     }
     elseif ($text -match '^-Q\s+(.+)\s+(\S+)\s*$') {
-      $args.Add("-Q")
-      $args.Add($Matches[1].Trim())
-      $args.Add($Matches[2].Trim())
+      $coqArgs.Add("-Q")
+      $coqArgs.Add($Matches[1].Trim())
+      $coqArgs.Add($Matches[2].Trim())
     }
   }
 
-  $args.ToArray()
+  $coqArgs.ToArray()
 }
 
 function Parse-ProofState {
@@ -124,6 +124,7 @@ function Parse-ProofState {
     if ($line -match '^\d+\s+goals?$') { break }
     if ($line -match '^No goals\.?$' -or $line -match '^No more goals\.?$') { continue }
     if ($line -match '^Welcome to Coq' -or $line -match '^Coq ' ) { continue }
+    if ($line -match '^\S+\s*<\s*$') { continue }
     [void]$hyps.Insert(0, $line)
   }
 
@@ -133,25 +134,26 @@ function Parse-ProofState {
     if ($line -eq "") { continue }
     if ($line -match '^No goals\.?$' -or $line -match '^No more goals\.?$') {
       return @(
-        "$StateLabel:",
+        "${StateLabel}:",
         "No Goals"
       ) -join "`n"
     }
     if ($line -match '^\d+\s+goals?$') { continue }
     if ($line -match '^Welcome to Coq' -or $line -match '^Coq ') { continue }
+    if ($line -match '^\S+\s*<\s*$') { continue }
     if ($line -match '^-+$') { continue }
     [void]$goal.Add($line)
   }
 
   if ($goal.Count -eq 0) {
     return @(
-      "$StateLabel:",
+      "${StateLabel}:",
       "No Goals"
     ) -join "`n"
   }
 
   @(
-    "$StateLabel:"
+    "${StateLabel}:"
     ($hyps | ForEach-Object { $_ })
     $sep
     ($goal -join "`n")
@@ -194,7 +196,7 @@ if ($depth -le 0) {
 }
 
 $coqTop = Resolve-CoqTopPath -ExplicitPath $CoqTop
-$coqArgs = @("-q", "-noinit")
+$coqArgs = @("-q")
 $coqArgs += Get-CoqProjectArgs -ProjectRoot $repoRoot
 
 $tempInput = Join-Path $env:TEMP ("coq-state-" + [guid]::NewGuid().ToString("N") + ".v")
@@ -204,19 +206,25 @@ $tempErr = Join-Path $env:TEMP ("coq-state-" + [guid]::NewGuid().ToString("N") +
 try {
   $scriptBody = New-Object System.Collections.Generic.List[string]
   $scriptBody.Add("(* Auto-generated proof state snapshot for agent pipeline. *)")
-  $scriptBody.AddRange($prefix)
-  $scriptBody.AddRange($snippet)
+  foreach ($line in @($prefix)) { [void]$scriptBody.Add([string]$line) }
+  foreach ($line in @($snippet)) { [void]$scriptBody.Add([string]$line) }
   $scriptBody.Add("Show.")
   $scriptBody.Add("Abort.")
   $scriptText = $scriptBody -join [Environment]::NewLine
 
-  Set-Content -LiteralPath $tempInput -Value $scriptText -Encoding UTF8
+  $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+  [System.IO.File]::WriteAllText($tempInput, $scriptText, $utf8NoBom)
 
   $proc = Start-Process -FilePath $coqTop -ArgumentList $coqArgs -NoNewWindow -PassThru -Wait `
     -RedirectStandardInput $tempInput -RedirectStandardOutput $tempOut -RedirectStandardError $tempErr
 
   $rawOut = if (Test-Path $tempOut) { Get-Content -LiteralPath $tempOut -Raw } else { "" }
   $rawErr = if (Test-Path $tempErr) { Get-Content -LiteralPath $tempErr -Raw } else { "" }
+
+  if (-not [string]::IsNullOrWhiteSpace($rawErr) -and ($rawErr -match 'Error:')) {
+    Write-Error $rawErr
+    return
+  }
 
   if ($proc.ExitCode -ne 0 -and [string]::IsNullOrWhiteSpace($rawOut)) {
     if (-not [string]::IsNullOrWhiteSpace($rawErr)) {
@@ -232,10 +240,9 @@ try {
     Write-Output $stateText
   }
   else {
-    Write-Output ($StateName + ":")
-    Write-Output "No Goals"
-    Write-Host "Could not parse coqtop output. Use -Verbose to inspect raw trace." -ForegroundColor Yellow
+    Write-Error "Could not parse coqtop output into a proof state."
     Write-Verbose ($rawOut + "`n" + $rawErr)
+    return
   }
 }
 finally {

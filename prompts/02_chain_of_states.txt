@@ -1,7 +1,5 @@
 Assume you are an expert in mathematics and Coq/Rocq. Your task is to read the following formal statement and informal proof, and generate a formal chain of states for Coq.
 
-While generating the state list, you should insert explanations before each state where you think it's needed, clarifying how the next state is derived from the previous ones.
-
 **Principles of chain of states:**
 1. Each state is a formal inference step in Coq.
 2. A state contains hypotheses above a double line (`============================`) and the current goal below it.
@@ -29,6 +27,12 @@ No Goals
 
 **Instructions:**
 You should refer to the informal proof to generate the chain of states. Each state in your chain does not necessarily need to correspond one-to-one with each step in the informal proof. If necessary, intermediate reasoning steps required for formalization should be added.
+Output ONLY state blocks in this exact format:
+- `State N:` header
+- hypotheses and goal separated by `============================`
+- blank line between states
+- final terminal state as `State N:` followed by `No Goals`
+Do not add explanations, comments, markdown, bullets, or any text outside the state blocks.
 
 **Formal Statement:**
 {coq_formal_statement}

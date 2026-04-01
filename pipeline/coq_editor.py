@@ -15,6 +15,7 @@ class CoqEditor:
         self._lines: list[str] = []
         self._proof_start: Optional[int] = None   # 0-based index of line containing "Proof."
         self._proof_end: Optional[int] = None     # 0-based index of line containing "Qed." or end of body
+        self._has_qed: bool = False
         self._last_block_start: Optional[int] = None  # 0-based line index of first line of last tactic block
         self._last_block_end: Optional[int] = None   # 0-based line index of last line of last tactic block
 
@@ -29,12 +30,14 @@ class CoqEditor:
     def _find_proof(self) -> None:
         self._proof_start = None
         self._proof_end = None
+        self._has_qed = False
         for i, line in enumerate(self._lines):
             stripped = line.strip()
             if re.match(r"^\s*Proof\.\s*$", line):
                 self._proof_start = i
             if self._proof_start is not None and re.match(r"^\s*Qed\.\s*$", line):
                 self._proof_end = i
+                self._has_qed = True
                 break
         if self._proof_start is not None and self._proof_end is None:
             # Proof. with no Qed. yet
@@ -52,8 +55,20 @@ class CoqEditor:
             self._lines.append("Proof.")
             self._proof_start = len(self._lines) - 1
             self._proof_end = len(self._lines)
+            self._has_qed = False
             return True
         return False
+
+    def ensure_qed(self) -> bool:
+        """Ensure there is a closing Qed. line for the current proof block."""
+        if self._proof_start is None:
+            return False
+        if self._has_qed:
+            return True
+        self._lines.append("Qed.")
+        self._proof_end = len(self._lines) - 1
+        self._has_qed = True
+        return True
 
     def append_tactics(self, tactic_text: str) -> int:
         """
@@ -121,6 +136,13 @@ class CoqEditor:
         if self._proof_end is not None and self._proof_end > 0:
             return self._proof_end
         return (self._proof_start or 0) + 1
+
+    def has_last_tactic_block(self) -> bool:
+        return self._last_block_start is not None and self._last_block_end is not None
+
+    def reset_last_tactic_block(self) -> None:
+        self._last_block_start = None
+        self._last_block_end = None
 
     def write(self) -> None:
         self.path.write_text("\n".join(self._lines) + "\n", encoding="utf-8")

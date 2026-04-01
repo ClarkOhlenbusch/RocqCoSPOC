@@ -1,9 +1,9 @@
-DIGEST 20079f5e3ef59fd1a00874bbb602ec48
-FRocqCoSPOC.Example
-prf 8:10 <> ex1
-R25:27 Coq.Init.Datatypes <> nat ind
-binder 21:21 <> n:1
-R35:37 Coq.Init.Logic <> ::type_scope:x_'='_x not
-R31:33 Coq.Init.Peano <> ::nat_scope:x_'+'_x not
-R30:30 RocqCoSPOC.Example <> n:1 var
-R38:38 RocqCoSPOC.Example <> n:1 var
+DIGEST 28b105ad37133199f4c77ac7efe1af31
+FExample
+prf 8:27 <> n_plus_zero_equals_n
+R42:44 Coq.Init.Datatypes <> nat ind
+binder 38:38 <> n:1
+R52:54 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R48:50 Coq.Init.Peano <> ::nat_scope:x_'+'_x not
+R47:47 Example <> n:1 var
+R55:55 Example <> n:1 var

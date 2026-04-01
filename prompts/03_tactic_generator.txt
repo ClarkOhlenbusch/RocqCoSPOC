@@ -6,6 +6,8 @@ You are an expert in Coq/Rocq theorem proving. Your task is to analyze two given
 3. If the transformation requires multiple steps, combine them with line breaks or semicolons (`;`).
 4. Do not include any text outside the code block.
 5. "No Goals" refers to the end of the proof.
+6. Every line inside the code block must be valid Coq tactic syntax (no English explanation).
+7. Never output analysis/reasoning, markdown bullets, or comments.
 
 **Initial State:**
 {state_p}

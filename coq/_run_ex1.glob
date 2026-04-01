@@ -1,0 +1,11 @@
+DIGEST b57ce404640ad879aa018f10353e8863
+FRocqCoSPOC._run_ex1
+prf 8:10 <> ex1
+R25:27 Coq.Init.Datatypes <> nat ind
+binder 21:21 <> n:1
+R35:37 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R31:33 Coq.Init.Peano <> ::nat_scope:x_'+'_x not
+R30:30 RocqCoSPOC._run_ex1 <> n:1 var
+R38:38 RocqCoSPOC._run_ex1 <> n:1 var
+R80:87 Coq.Init.Peano <> plus_n_O thm
+R80:87 Coq.Init.Peano <> plus_n_O thm

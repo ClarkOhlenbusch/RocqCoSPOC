@@ -1,11 +1,8 @@
 # Open Router model IDs for the CoS pipeline (free-tier where possible).
 # See https://openrouter.ai/collections/free-models
 
-# Default: route to any free model. You can pin specific models here if you prefer,
-# e.g. deepseek/deepseek-chat-v3-0324:free or a paid deepseek/deepseek-r1.
+# Default: route to any free model. You can pin specific models here if you prefer.
 rewrite_model:
-  - "openrouter/free"
-cos_model:
   - "openrouter/free"
 tactic_model:
   - "openrouter/free"
@@ -19,6 +16,10 @@ max_tactic_errors: 3
 max_state_mismatch: 2
 
 # Generation defaults
-max_tokens: 8192
-temperature: 0.3
+max_tokens: 2048
+temperature: 0.0
+
+# Open Router request controls (to avoid long hangs on transient failures)
+request_timeout_sec: 60
+request_retries: 2
 

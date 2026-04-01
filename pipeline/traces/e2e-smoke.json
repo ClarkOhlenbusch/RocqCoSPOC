@@ -1,0 +1,113 @@
+{
+  "started_at": "2026-03-25T13:42:24",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\_tmp_e2e.v",
+    "target_rel": "coq/_tmp_e2e.v"
+  },
+  "config": {
+    "max_tactic_errors": 8,
+    "max_state_mismatch": 2,
+    "temperature": 0.0,
+    "max_tokens": 2048
+  },
+  "rewrite": {
+    "text": "By induction on $ n $. The base case $ n = 0 $ holds: $ 0 + 0 = 0 $ by definition. For the inductive step, assuming $ n = S m $ and $ m + 0 = m $, we derive $ S m + 0 = S(m + 0) = S m $ via the inductive hypothesis and reflexivity. Since $ n $ is a natural number, exhaustive enumeration is feasible in Coq's brute-force solvers. This step follows from linear arithmetic."
+  },
+  "chain_of_states": {
+    "count": 5,
+    "states": [
+      "State 0:\n============================\nforall n : nat, n + 0 = n",
+      "State 1:\n============================\n0 + 0 = 0",
+      "State 2:\nm : nat\nIHm : m + 0 = m\n============================\nS m + 0 = S m",
+      "State 3:",
+      "No Goals"
+    ]
+  },
+  "transitions": [
+    {
+      "transition_index": 1,
+      "from_state_index": 0,
+      "to_state_index": 1,
+      "from_state": "State 0:\n============================\nforall n : nat, n + 0 = n",
+      "to_state": "State 1:\n============================\n0 + 0 = 0",
+      "attempts": [
+        {
+          "attempt": 1,
+          "tactic": "apply nat_add_0_r.",
+          "actual_state": "",
+          "status": "no_state_etr_retry",
+          "etr_tactic": "intros n; simpl; reflexivity."
+        },
+        {
+          "attempt": 2,
+          "tactic": "rewrite n_add_zero.",
+          "actual_state": "",
+          "status": "no_state_etr_retry",
+          "etr_tactic": "reflexivity."
+        },
+        {
+          "attempt": 3,
+          "tactic": "apply nat_add_0_r.",
+          "actual_state": "",
+          "status": "no_state_etr_retry",
+          "etr_tactic": "intro n.\nrewrite <- nat_add_0_l."
+        },
+        {
+          "attempt": 4,
+          "tactic": "intros n.\nspecialize 0.",
+          "actual_state": "State 0:\nn : nat\n============================\nnat -> n + 0 = n",
+          "status": "state_mismatch_esr_retry",
+          "esr_tactic": "intro H; specialize (H 0); exact H."
+        },
+        {
+          "attempt": 5,
+          "tactic": "apply nat_add_0_r.",
+          "actual_state": "",
+          "status": "no_state_etr_retry",
+          "etr_tactic": "reflexivity."
+        },
+        {
+          "attempt": 6,
+          "tactic": "rewrite n_add_zero.",
+          "actual_state": "",
+          "status": "no_state_etr_retry",
+          "etr_tactic": "reflexivity."
+        },
+        {
+          "attempt": 7,
+          "tactic": "reflexivity.",
+          "actual_state": "",
+          "status": "no_state_etr_retry",
+          "etr_tactic": "reflexivity."
+        },
+        {
+          "attempt": 8,
+          "tactic": "apply tactic1.\napply tactic2.",
+          "actual_state": "",
+          "status": "no_state_etr_retry",
+          "etr_tactic": "intros n; simpl; reflexivity."
+        },
+        {
+          "attempt": 9,
+          "tactic": "reflexivity.",
+          "actual_state": "",
+          "status": "no_state_etr_retry",
+          "etr_tactic": "reflexivity."
+        },
+        {
+          "attempt": 10,
+          "tactic": "apply (funn => n + 0 = n) with (n:=0).",
+          "actual_state": "",
+          "status": "etr_limit_exceeded_no_state"
+        }
+      ],
+      "status": "failed"
+    }
+  ],
+  "summary": {},
+  "error": "  Max ETR retries (8) exceeded.",
+  "ended_at": "2026-03-25T13:51:28"
+}
