@@ -1,6 +1,6 @@
 # Automatic proof-state bridge for agent default context
 
-This project can be used with the existing manual CoS workflow and still keep the coding agent in the loop.  
+This project can be used with the current direct proving workflow and still keep the coding agent in the loop.  
 The script below gives the agent default access to the current proof state by querying Coq
 directly from the file position you are editing.
 
@@ -10,7 +10,7 @@ directly from the file position you are editing.
 - Finds the nearest theorem/lemma that contains that line.
 - Replays the code up to that point in a `coqtop` session.
 - Runs `Show.` to capture the current goal and hypotheses.
-- Emits a state block in the same style used by prompt `#3`:
+- Emits a state block in the same style used by the tactic prompt:
 
 ```text
 State 0:

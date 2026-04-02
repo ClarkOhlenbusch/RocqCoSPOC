@@ -1,0 +1,75 @@
+{
+  "started_at": "2026-04-01T12:29:20",
+  "status": "success",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\02_inequality\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\02_inequality\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\_run_direct_ineq2.v",
+    "target_rel": "coq/_run_direct_ineq2.v"
+  },
+  "config": {
+    "max_tactic_errors": 3,
+    "max_state_mismatch": 2,
+    "temperature": 0.0,
+    "max_tokens": 2048
+  },
+  "rewrite": {
+    "text": "By implication, assuming $ a \\leq b $, we conclude $ a \\leq S b $. This follows from linear arithmetic.",
+    "used_for_tactics": true
+  },
+  "goal_sequence": {
+    "count": 2,
+    "states": [
+      "State 0:\n============================\nforall a b : nat, a <= b -> a <= S b",
+      "No Goals"
+    ]
+  },
+  "transitions": [
+    {
+      "transition_index": 1,
+      "from_state_index": 0,
+      "to_state_index": 1,
+      "from_state": "State 0:\n============================\nforall a b : nat, a <= b -> a <= S b",
+      "to_state": "No Goals",
+      "attempts": [
+        {
+          "attempt": 1,
+          "tactic": "apply Suc.\napply Exact.",
+          "tactic_source": "model",
+          "check_exit_code": 1,
+          "check_stdout": "Checking coq/_run_direct_ineq2.v ...",
+          "check_stderr": "File \".\\coq/_run_direct_ineq2.v\", line 3, characters 8-11:\nError: The variable Suc was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/_run_direct_ineq2.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+          "status": "coq_error_etr_retry",
+          "etr_tactic": "intros; apply le_S; assumption."
+        },
+        {
+          "attempt": 2,
+          "tactic": "intros a b H.\napply Nat.le_succ_r.",
+          "tactic_source": "model",
+          "check_exit_code": 1,
+          "check_stdout": "Checking coq/_run_direct_ineq2.v ...",
+          "check_stderr": "File \".\\coq/_run_direct_ineq2.v\", line 4, characters 8-21:\nError: The reference Nat.le_succ_r was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/_run_direct_ineq2.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+          "status": "coq_error_etr_retry",
+          "etr_tactic": "simpl."
+        },
+        {
+          "attempt": 3,
+          "tactic": "intros a b H.\napply le_S.\nassumption.",
+          "tactic_source": "model",
+          "check_exit_code": 0,
+          "check_stdout": "Checking coq/_run_direct_ineq2.v ...\nProof check passed: coq/_run_direct_ineq2.v",
+          "check_stderr": "",
+          "actual_state": "State 0:\nNo Goals",
+          "status": "success_no_goals"
+        }
+      ],
+      "status": "success"
+    }
+  ],
+  "summary": {
+    "transition_count": 1,
+    "etr_retries": 2,
+    "esr_retries": 0
+  },
+  "ended_at": "2026-04-01T12:32:29"
+}

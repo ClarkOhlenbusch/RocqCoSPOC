@@ -1,11 +1,13 @@
-# CoS Pipeline Dashboard
+# Proof Pipeline Dashboard
 
-Simple React dashboard for visualizing intermediate pipeline steps from JSON traces.
+React dashboard for launching proof-pipeline runs and visualizing intermediate pipeline steps from JSON traces.
 
 ## What It Shows
 
+- A form to launch a new pipeline run from the browser
+- Live run status plus pipeline stdout/stderr
 - Rewrite output text
-- Parsed Chain-of-States blocks
+- Goal-sequence blocks for direct proving
 - Per-transition attempts
 - ETR / ESR retries and errors
 - Final summary metrics
@@ -22,18 +24,22 @@ pnpm dev:all
 - UI: `http://localhost:5173`
 - Trace API: `http://localhost:8787`
 
-## Generate Trace Data
+## Launching Runs
 
-From repository root, run the pipeline. It now writes trace JSON files to `pipeline/traces/` by default:
+Open the dashboard and use **Start A Run**.
 
-```powershell
-python pipeline/run.py --informal data/examples/01_simple_eq/informal.txt --formal data/examples/01_simple_eq/formal.v --target coq/Example.v
-```
+- **Formal theorem source** accepts either:
+  - a full theorem header or source snippet, or
+  - a bare proposition such as `forall n : nat, n + 0 = n.`
+- **Informal proof** is the proof text the rewrite step consumes
+- **Run label** is optional and is only used to name the temporary run artifacts
 
-Optional custom trace path:
+The dashboard backend creates a temporary theorem file, starts `pipeline/run.py`, and writes live trace data into `pipeline/traces/`.
 
-```powershell
-python pipeline/run.py ... --trace-out pipeline/traces/my-run.json
-```
+## Browsing Existing Traces
 
-Then open the dashboard, click **Refresh Trace List**, select a trace, and click **Open Trace**.
+You can still open any saved trace manually:
+
+1. Click **Refresh Trace List**.
+2. Select a trace.
+3. Click **Open Trace**.

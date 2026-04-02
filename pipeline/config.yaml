@@ -1,25 +1,33 @@
-# Open Router model IDs for the CoS pipeline (free-tier where possible).
+# Open Router model IDs for the automated proof pipeline.
 # See https://openrouter.ai/collections/free-models
 
-# Default: route to any free model. You can pin specific models here if you prefer.
 rewrite_model:
   - "openrouter/free"
+skeleton_model:
+  - "openrouter/free"
+fill_model:
+  - "openrouter/free"
+
+# Max retries per sub-goal fill (compile-retry)
+max_fill_attempts: 3
+
+# Generation defaults
+max_tokens: 2048
+temperature: 0.0
+
+# Open Router request controls
+request_timeout_sec: 60
+request_retries: 2
+
+# Legacy models (kept for manual tactic/ETR/ESR workflows)
 tactic_model:
   - "openrouter/free"
 etr_model:
   - "openrouter/free"
 esr_model:
   - "openrouter/free"
-
-# Optional: max retries per transition (human-readable names)
+prove_model:
+  - "openrouter/free"
 max_tactic_errors: 3
 max_state_mismatch: 2
-
-# Generation defaults
-max_tokens: 2048
-temperature: 0.0
-
-# Open Router request controls (to avoid long hangs on transient failures)
-request_timeout_sec: 60
-request_retries: 2
-
+max_prove_attempts: 3

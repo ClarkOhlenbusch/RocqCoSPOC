@@ -9,7 +9,7 @@ TACTIC_START_RE = re.compile(
     r"reflexivity|assumption|auto|lia|nia|ring|nlinarith|easy|trivial|"
     r"subst|constructor|unfold|change|replace|assert|pose|specialize|"
     r"remember|clear|rename|exists|split|left|right|symmetry|"
-    r"transitivity|inversion|discriminate|congruence|firstorder|now"
+    r"transitivity|inversion|discriminate|congruence|firstorder|now|admit"
     r")\b",
     re.IGNORECASE,
 )

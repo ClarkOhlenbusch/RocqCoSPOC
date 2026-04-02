@@ -1,0 +1,19 @@
+{
+  "started_at": "2026-04-01T14:05:23",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\test_skeleton.v",
+    "target_rel": "coq/test_skeleton.v"
+  },
+  "config": {
+    "max_fill_attempts": 3
+  },
+  "rewrite": {},
+  "skeleton": {},
+  "fills": [],
+  "summary": {},
+  "error": "Rewrite failed: Rewrite output is not strict Angelito: first non-empty line must start with 'PROVE '.\nRaw output:\nWe need to output Angelito proof for theorem: ∀ n : ℕ, n + 0 = n. Use strict Angelito syntax with required keywords. Must include PROVE, BEGIN, END, ASSUME, GOAL, SIMPLIFY, APPLY, SPLIT INTO, INDUCTION, FACT, WITNESS_AT, FOR_ALL, EXTRACT, SINCE, THEREFORE, CONCLUDE, BY, INDUCTIVE_HYPOTHESIS. Must name intermediate facts (FACT h1:, etc.). Must end each PROVE block with exactly one CONCLUDE. Must output only Angelito proof, no commentary, no markdown fences.\n\nWe need to structure proof: PROVE theorem_name: ∀ n : ℕ. n + 0 = n\n\nSignature: ∀ n : ℕ . n + 0 = n\n\nProof body: BEGIN ... END\n\nInside, we need ASSUME n : ℕ\n\nThen maybe GOAL: n + 0 = n\n\nThen INDUCTION n\n\nThen PROVE BASE_CASE: n = 0\n\nInside base case, we need to prove 0 + 0 = 0. Use SIMPLIFY maybe, then THEREFORE, then CONCLUDE.\n\nBut we need to end each PROVE block with exactly one CONCLUDE. So for base case PROVE block, we need to end with CONCLUDE: ... [QED] maybe.\n\nSimilarly for INDUCTIVE_CASE: n = S n'\n\nWe need to introduce INDUCTIVE_HYPOTHESIS ih: ∀ m. m + 0 = m [BY ...] maybe.\n\nWe need to use FACT statements to record intermediate facts.\n\nWe need to use APPLY maybe to apply some lemma like plus_zero_r? But we can just use de\n...[truncated]...",
+  "ended_at": "2026-04-01T14:05:33"
+}

@@ -1,0 +1,28 @@
+{
+  "started_at": "2026-04-01T13:43:03",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\test_skeleton.v",
+    "target_rel": "coq/test_skeleton.v"
+  },
+  "config": {
+    "max_fill_attempts": 3
+  },
+  "rewrite": {
+    "text": "PROVE n_plus_zero: ∀n. n + 0 = n\nBEGIN\n  ASSUME n : ℕ\n  GOAL: n + 0 = n\n\n  INDUCTION n\n  PROVE BASE_CASE: n = 0\n    SIMPLIFY:\n      0 + 0\n      = 0    [BY add_zero_left]\n    THEREFORE 0 + 0 = 0\n    CONCLUDE: Base case holds by definition of addition\n\n  PROVE INDUCTIVE_CASE: n = S m\n    ASSUME m : ℕ\n    INDUCTIVE_HYPOTHESIS ih: m + 0 = m\n\n    SIMPLIFY:\n      S m + 0\n      = S (m + 0)    [BY add_succ_left]\n      = S m          [BY ih, reflexivity]\n    THEREFORE S m + 0 = S m\n    CONCLUDE: Inductive case holds by definition of addition and IH\n\n  CONCLUDE: By induction on n, n + 0 = n for all natural numbers [QED]\nEND"
+  },
+  "skeleton": {
+    "text": "intros n.\ninduction n.\n- admit.\n- admit.",
+    "compiles": false,
+    "check_stdout": "Checking coq/test_skeleton.v ...",
+    "stdout": "Checking coq/test_skeleton.v ...",
+    "check_stderr": "File \".\\coq/test_skeleton.v\", line 8, characters 0-4:\nError:  (in proof ex1): Attempt to save an incomplete proof\n(the proof term is not complete because of given up (admitted) goals).\nIf this is really what you want to do, use Admitted in place of Qed.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+    "stderr": "File \".\\coq/test_skeleton.v\", line 8, characters 0-4:\nError:  (in proof ex1): Attempt to save an incomplete proof\n(the proof term is not complete because of given up (admitted) goals).\nIf this is really what you want to do, use Admitted in place of Qed.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1"
+  },
+  "fills": [],
+  "summary": {},
+  "error": "Final proof does not compile:\nFile \".\\coq/test_skeleton.v\", line 8, characters 0-4:\nError:  (in proof ex1): Attempt to save an incomplete proof\n(the proof term is not complete because of given up (admitted) goals).\nIf this is really what you want to do, use Admitted in place of Qed.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1\n \n",
+  "ended_at": "2026-04-01T13:44:30"
+}

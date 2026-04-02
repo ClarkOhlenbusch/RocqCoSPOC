@@ -1,66 +1,59 @@
-# Autonomous CoS Pipeline (Open Router)
+# Automated Proof Pipeline (Open Router)
 
-This directory implements the autonomous proof pipeline: informal proof → Coq-friendly rewrite → direct tactic proving (with ETR/ESR), using the Open Router API and free models.
+This directory implements the automated proof pipeline: informal proof → strict Angelito → Rocq skeleton → iterative goal filling, using the OpenRouter API.
 
 ## Setup
 
-1. **API key**  
-   Create a `.env` file in the repository root with:
+1. API key — create `.env` in the repo root:
+
    ```bash
    OPENROUTER_API_KEY=sk-or-v1-...
    ```
-   Do not commit `.env` (it is in `.gitignore`).
 
-2. **Python**  
-   From the repo root:
-   ```bash
-   pip install -r requirements.txt
-   ```
+2. Python — `pip install -r requirements.txt`
 
-3. **Coq**  
-   The pipeline calls `scripts/check-target-proof.ps1` and `scripts/get-proof-state.ps1`. Ensure Coq is on PATH or configured in `.vscode/settings.json` / `scripts/check-proofs.ps1`.
+3. Rocq/Coq — ensure `coqc` is on PATH. The pipeline calls `scripts/check-target-proof.ps1`.
 
 ## Configuration
 
-Edit `pipeline/config.yaml` to change models or limits:
+Edit `pipeline/config.yaml`:
 
-- **Models** (all free-tier by default):
-  - `rewrite_model`: rewrite step
-  - `tactic_model`, `etr_model`, `esr_model`: proving and error recovery
-- **Limits**: `max_tactic_errors`, `max_state_mismatch` — max retries per transition for tactic errors and state mismatch.
-- **Generation**: `max_tokens`, `temperature`.
+- `rewrite_model` — model for informal → Angelito rewrite
+- `skeleton_model` — model for Angelito → Rocq skeleton
+- `fill_model` — model for filling each `admit.` sub-goal
+- `max_fill_attempts` — compile-retry limit per sub-goal (default 3)
+- `max_tokens`, `temperature` — generation defaults
 
 ## Usage
-
-Run from the **repository root**. Use **actual file paths** (do not type angle brackets in PowerShell—they are redirection operators).
 
 ```powershell
 python pipeline/run.py --informal path/to/informal.txt --formal path/to/formal.v --target coq/CongModEq.v
 ```
 
-Example:
+- `--informal`: text file with the informal proof
+- `--formal`: file with the theorem statement
+- `--target`: the `.v` file to write the proof into
+- `--max-fill-attempts`: override retry limit per sub-goal
+- `--trace-out`: custom JSON trace path
 
-```powershell
-python pipeline/run.py --informal data/informal.txt --formal coq/CongModEq.v --target coq/CongModEq.v
-```
+## What The Pipeline Does
 
-See **`data/examples/README.md`** for ready-made examples (simple equality and inequality) and exact commands.
+1. **Rewrite** — Informal proof → strict Angelito syntax (PROVE, ASSUME, FACT, SIMPLIFY, THEREFORE, CONCLUDE, etc.)
+2. **Skeleton** — Angelito → Rocq outer structure with `admit.` for each leaf goal. Compiles with `Admitted.`.
+3. **Fill** — For each `admit.`, ask the model to produce replacement tactics using the Angelito proof as guidance and the available custom tactics. Compile after each fill. Retry with structured error feedback on failure.
+4. **Trace** — JSON trace under `pipeline/traces/`.
 
-- **`--informal`**: Text file containing the informal proof.
-- **`--formal`**: File containing the Coq theorem statement (or the same target file if it already has the statement and `Proof.`).
-- **`--target`**: The `.v` file to edit. It must already contain a theorem and a `Proof.` line; the pipeline appends tactics and optionally adds `Proof.` if the file has content but no proof block.
-- **`--max-etr`**, **`--max-esr`**: Override config retry limits per transition.
+## Prompt Files
 
-The pipeline will:
-
-1. Rewrite the informal proof (Coq-friendly).
-2. Build a direct proving transition from the formal statement goal to `No Goals` (CoS disabled).
-3. Generate tactics, append them to the target file, run `check-target-proof.ps1`; on Coq error, run ETR and replace the last block; on success, run `get-proof-state.ps1` to verify that no goals remain.
-4. Print a summary (transitions, ETR/ESR counts).
-
-All configured models are free-tier where possible (e.g. `deepseek/deepseek-r1:free`).
+| File | Purpose |
+|------|---------|
+| `prompts/01_rewrite.txt` | Informal → strict Angelito |
+| `prompts/02a_skeleton.txt` | Angelito → Rocq skeleton with admits |
+| `prompts/02b_fill_goal.txt` | Fill one admit with real tactics |
+| `prompts/tactics_reference.md` | Available tactics for the model |
 
 ## Troubleshooting
 
-- **404 Not Found:** The client now prints Open Router’s response body. If you see 404, check that your API key is valid at [Open Router Keys](https://openrouter.ai/keys) and that you can reach `https://openrouter.ai/api/v1/chat/completions` (e.g. from a browser or `curl`). Corporate proxies or firewalls can sometimes block or alter requests.
-- **401/403:** Invalid or missing `OPENROUTER_API_KEY`. Ensure `.env` is in the repo root and contains `OPENROUTER_API_KEY=sk-or-v1-...`.
+- Skeleton doesn't compile: check that the formal statement is well-formed and the Angelito rewrite produced valid structure.
+- Fill keeps failing: check the trace JSON for the exact Coq errors. The model may need a different tactic approach.
+- API errors: verify `.env` has a valid `OPENROUTER_API_KEY`.

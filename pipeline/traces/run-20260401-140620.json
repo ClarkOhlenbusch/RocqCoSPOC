@@ -1,0 +1,62 @@
+{
+  "started_at": "2026-04-01T14:06:20",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\test_skeleton.v",
+    "target_rel": "coq/test_skeleton.v"
+  },
+  "config": {
+    "max_fill_attempts": 3
+  },
+  "rewrite": {
+    "text": "PROVE plus_zero_right: ∀n. n + 0 = n\nBEGIN\n  ASSUME n : ℕ\n  GOAL: n + 0 = n\n\n  INDUCTION n\n    PROVE BASE_CASE: n = 0\n      GOAL: 0 + 0 = 0\n      SIMPLIFY LHS:\n        0 + 0\n        = 0    [BY plus_zero]\n      THEREFORE 0 + 0 = 0\n      CONCLUDE: Base case holds [QED]\n\n    PROVE INDUCTIVE_CASE: n = S m\n      INDUCTIVE_HYPOTHESIS ih: m + 0 = m\n      GOAL: S m + 0 = S m\n      SIMPLIFY LHS:\n        S m + 0\n        = S (m + 0)    [BY plus_S]\n      SIMPLIFY RHS:\n        S (m + 0)\n        = S m          [BY ih]\n      THEREFORE S m + 0 = S m\n      CONCLUDE: Inductive case holds [QED]\n\n  CONCLUDE: By induction, n + 0 = n for all natural numbers n [QED]\nEND"
+  },
+  "skeleton": {
+    "text": "intros n.\ninduction n.\nadmit.\nadmit.",
+    "compiles": true,
+    "check_stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+    "stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+    "check_stderr": "",
+    "stderr": ""
+  },
+  "fills": [
+    {
+      "admit_index": 2,
+      "attempt": 1,
+      "replacement": "reflexivity. rewriteIHn. reflexivity.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/test_skeleton.v ...",
+      "stdout": "Checking coq/test_skeleton.v ...",
+      "check_stderr": "File \".\\coq/test_skeleton.v\", line 5, characters 15-25:\nError: The reference rewriteIHn was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "stderr": "File \".\\coq/test_skeleton.v\", line 5, characters 15-25:\nError: The reference rewriteIHn was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "status": "compile_error"
+    },
+    {
+      "admit_index": 2,
+      "attempt": 2,
+      "replacement": "simpl.\nrewrite IHn.\nreflexivity.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/test_skeleton.v ...",
+      "stdout": "Checking coq/test_skeleton.v ...",
+      "check_stderr": "File \".\\coq/test_skeleton.v\", line 6, characters 10-13:\nError: The variable IHn was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "stderr": "File \".\\coq/test_skeleton.v\", line 6, characters 10-13:\nError: The variable IHn was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "status": "compile_error"
+    },
+    {
+      "admit_index": 2,
+      "attempt": 3,
+      "replacement": "intros x y H.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/test_skeleton.v ...",
+      "stdout": "Checking coq/test_skeleton.v ...",
+      "check_stderr": "File \".\\coq/test_skeleton.v\", line 5, characters 2-14:\nError: No product even after head-reduction.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "stderr": "File \".\\coq/test_skeleton.v\", line 5, characters 2-14:\nError: No product even after head-reduction.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "status": "compile_error"
+    }
+  ],
+  "summary": {},
+  "error": "Failed to fill admit #1 after 3 attempts.",
+  "ended_at": "2026-04-01T14:08:53"
+}

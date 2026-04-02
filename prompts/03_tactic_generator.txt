@@ -8,6 +8,10 @@ You are an expert in Coq/Rocq theorem proving. Your task is to analyze two given
 5. "No Goals" refers to the end of the proof.
 6. Every line inside the code block must be valid Coq tactic syntax (no English explanation).
 7. Never output analysis/reasoning, markdown bullets, or comments.
+8. Use the Rocq-friendly proof as strategy guidance when choosing tactics, but output tactics justified by the actual proof state.
+
+**Rocq-Friendly Proof Guidance:**
+{coq_friendly_proof}
 
 **Initial State:**
 {state_p}

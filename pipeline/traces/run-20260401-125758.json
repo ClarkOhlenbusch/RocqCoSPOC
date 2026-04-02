@@ -1,0 +1,83 @@
+{
+  "started_at": "2026-04-01T12:57:58",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\Example.v",
+    "target_rel": "coq/Example.v"
+  },
+  "config": {
+    "max_tactic_errors": 3,
+    "max_state_mismatch": 2,
+    "temperature": 0.0,
+    "max_tokens": 2048
+  },
+  "rewrite": {
+    "text": "We need to rewrite the informal proof into Angelito-friendly natural language proof using Angelito anchors. Must not include meta commentary. Must output only the rewritten proof. Use uppercase anchors at start of lines where they apply. Must not force full PROVE ... BEGIN ... END unless structure genuinely helpful; default hybrid rewrite. Must explicitly state proof structure being used, using Angelito-compatible anchors when possible. Must mark theorem, lemma usage with FACT, APPLY, etc. Must suggest exhaustive enumeration if finite ranges, but not needed. Must mention linear arithmetic with \"this step follows from linear arithmetic\". Must not include meta commentary. Must not include summaries, compliance notes, etc.\n\nWe need to produce a proof that uses Angelito anchors appropriately. The informal proof: \"We prove that for every natural number n, n + 0 = n. By induction on n. When n = 0, we have 0 + 0 = 0 by the definition of addition and reflexivity. For the inductive step, assume n = S m and that m + 0 = m. Then S m + 0 = S (m + 0) by the definition of plus, which equals S m by the inductive hypothesis and reflexivity.\"\n\nWe need to rewrite as Angelito-friendly natural language proof, using anchors like PROVE, BEGIN, ASSUME, INDUCTION, PROVE (nested), SIMPLIFY, GOAL, APPLY, SPLIT INTO maybe, FACT, THEREFORE, CONCLUDE, etc.\n\nWe need to explicitly state proof structure being used, such as induction, case analysis, contradiction, or theorem application, using Angelito-compatible anchors when possible.\n\nWe need to mark theorem, lemma, or previously established result used, through FACT, APPLY, or BY.\n\nWe need to explicitly state \"this step follows from linear arithmetic\" if needed. Not needed here; it's about addition definition.\n\nWe need to use anchors only when justified.\n\nWe need to output only the rewritten proof, no extra commentary.\n\nLet's design the proof:\n\nWe can start with PROVE addition_zero_rw: ∀ n : ℕ. n + 0 = n\n\nThen BEGIN\n\nASSUME n : ℕ\n\nGOAL: n + 0 = n\n\nINDUCTION n\n\nPROVE BASE_CASE: n = 0\n\n   SIMPLIFY: 0 + 0 = 0 [BY add_zero] maybe.\n\n   THEREFORE 0 = 0 [BY rfl] or just THEREFORE 0 + 0 = 0\n\n   CONCLUDE: 0 + 0 = 0 [QED] maybe.\n\nBut we need to follow Angelito spec: PROVE is used for subgoals after SPLIT INTO. However we can just use PROVE BASE_CASE: as a subgoal.\n\nBut we need to use SPLIT INTO? Not necessary; we can just use PROVE BASE_CASE: and then reasoning.\n\nBut we need to mark the induction step.\n\nWe can do:\n\nINDUCTION n\n\nPROVE BASE_CASE: n = 0\n\n   SIMPLIFY: 0 + 0 = 0 [BY add_zero]\n\n   THEREFORE 0 = 0\n\n   CONCLUDE: 0 + 0 = 0 [QED]\n\nPROVE INDUCTIVE_CASE: n = S m\n\n   ASSUME m : ℕ\n\n   INDUCTIVE_HYPOTHESIS ih: m + 0 = m\n\n   SIMPLIFY: S m + 0 = S (m + 0) [BY plus_succ_r] maybe.\n\n   THEREFORE S (m + 0) = S m [BY ih]\n\n   CONCLUDE: S m + 0 = S m [QED]\n\nBut we need to use APPLY maybe? Not necessary.\n\nWe need to mark the theorem \"plus_succ_r\" maybe as a FACT.\n\nWe can have FACT h1: S m + 0 = S (m + 0) [BY plus_succ_r] etc.\n\nBut we need to keep it natural language with Angelito anchors.\n\nLet's produce a proof:\n\nPROVE addition_zero_rw: ∀ n : ℕ. n + 0 = n\n  ↑ States the theorem to be proven\n\nBEGIN\n  ASSUME n : ℕ\n    ↑ Introduces the universally quantified variable\n\n  GOAL: n + 0 = n\n    ↑ States the proof objective after simplification\n\n  INDUCTION n\n    ↑ Declares structural induction on n, dividing the proof into base and inductive cases\n\n  PROVE BASE_CASE: n = 0\n    ↑ Focuses on the base case of the induction\n\n    SIMPLIFY: 0 + 0 = 0 [BY add_zero]\n      ↑ Uses the definition of addition to reduce 0 + 0 to 0\n\n    THEREFORE 0 = 0\n      ↑ Concludes the equality in the base case\n\n    CONCLUDE: 0 + 0 = 0 [QED]\n      ↑ Closes the base case\n\n  PROVE INDUCTIVE_CASE: n = S m\n    ↑ Focuses on the inductive case where n is the successor of m\n\n    ASSUME m : ℕ\n      ↑ Introduces the predecessor variable\n\n    INDUCTIVE_HYPOTHESIS ih: m + 0 = m\n      ↑ Introduces the inductive hypothesis for the smaller case\n\n    SIMPLIFY: S m + 0 = S (m + 0) [BY plus_succ_r]\n      ↑ Applies the definition of addition for successor arguments\n\n    THEREFORE S (m + 0) = S m [BY ih]\n      ↑ Uses the inductive hypothesis to replace m + 0 with m\n\n    CONCLUDE: S m + 0 = S m [QED]\n      ↑ Closes the inductive case\n\n  CONCLUDE: By induction on n, n + 0 = n for all natural numbers n [QED]\n    ↑ All cases are proven, so the theorem holds universally\n\nEND\n\nBut we need to ensure we use Angelito anchors correctly: PROVE at top-level, BEGIN, ASSUME, GOAL, INDUCTION, PROVE (nested), SIMPLIFY, THEREFORE, CONCLUDE, etc. Also need to mark FACT if we use a lemma. We used BY add_zero and plus_succ_r; we could mark them as FACT? Actually we can just use [BY add_zero] which is justification. That's okay.\n\nWe need to ensure we use uppercase anchors at start of line. So each line should start with the anchor keyword if it applies. For example:\n\nPROVE addition_zero_rw: ∀ n : ℕ. n + 0 = n\n\nBEGIN\n\nASSUME n : ℕ\n\nGOAL: n + 0 = n\n\nINDUCTION n\n\nPROVE BASE_CASE: n = 0\n\n   SIMPLIFY: 0 + 0 = 0 [BY add_zero]\n\n   THEREFORE 0 = 0\n\n   CONCLUDE: 0 + 0 = 0 [QED]\n\nPROVE INDUCTIVE_CASE: n = S m\n\n   ASSUME m : ℕ\n\n   INDUCTIVE_HYPOTHESIS ih: m + 0 = m\n\n   SIMPLIFY: S m + 0 = S (m + 0) [BY plus_succ_r]\n\n   THEREFORE S (m + 0) = S m [BY ih]\n\n   CONCLUDE: S m + 0 = S m [QED]\n\nCONCLUDE: By induction on n, n + 0 = n for all natural numbers n [QED]\n\nEND\n\nBut we need to ensure we use uppercase anchors at start of line. So each line should start with the anchor keyword. For example:\n\nPROVE addition_zero_rw: ∀ n : ℕ. n + 0 = n\n\nBEGIN\n\nASSUME n : ℕ\n\nGOAL: n + 0 = n\n\nINDUCTION n\n\nPROVE BASE_CASE: n = 0\n\n   SIMPLIFY: 0 + 0 = 0 [BY add_zero]\n\n   THEREFORE 0 = 0\n\n   CONCLUDE: 0 + 0 = 0 [QED]\n\nPROVE INDUCTIVE_CASE: n = S m\n\n   ASSUME m : ℕ\n\n   INDUCTIVE_HYPOTHESIS ih: m + 0 = m\n\n   SIMPLIFY: S m + 0 = S (m + 0) [BY plus_succ_r]\n\n   THEREFORE S (m + 0) = S m [BY ih]\n\n   CONCLUDE: S m + 0 = S m [QED]\n\nCONCLUDE: By induction on n, n + 0 = n for all natural numbers n [QED]\n\nEND\n\nBut we need to ensure we don't force a full PROVE ... BEGIN ... END block unless structure genuinely helpful. The default output should be a hybrid rewrite, not a pure Angelito program. However we are using PROVE at top-level and then BEGIN ... END. That's okay because it's genuinely helpful to show the proof structure. The spec says \"Do not force a full PROVE ... BEGIN ... END block unless the structure is genuinely helpful; the default output should be a hybrid rewrite, not a pure Angelito program.\" But we are using PROVE ... BEGIN ... END, which is a full block. Is that allowed? It says \"Do not force a full PROVE ... BEGIN ... END block unless the structure is genuinely helpful\". Our structure is genuinely helpful because we are using induction and subgoals. So it's okay",
+    "used_for_tactics": true,
+    "angelito_spec_source": "angelito-spec.md",
+    "format": "rocq_friendly_hybrid_anchors"
+  },
+  "goal_sequence": {
+    "count": 2,
+    "states": [
+      "State 0:\n============================\nforall n : nat, n + 0 = n",
+      "No Goals"
+    ]
+  },
+  "transitions": [
+    {
+      "transition_index": 1,
+      "from_state_index": 0,
+      "to_state_index": 1,
+      "from_state": "State 0:\n============================\nforall n : nat, n + 0 = n",
+      "to_state": "No Goals",
+      "attempts": [
+        {
+          "attempt": 1,
+          "tactic": "induction.",
+          "tactic_source": "model",
+          "check_exit_code": 1,
+          "check_stdout": "Checking coq/Example.v ...",
+          "check_stderr": "File \".\\coq/Example.v\", line 10, characters 11-12:\nError:\nSyntax error: [induction_clause_list] expected after 'induction' (in [simple_tactic]).\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check \nfailed: coq/Example.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorExce \n   ption\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorExcepti \n   on,check-target-proof.ps1",
+          "status": "coq_error_etr_retry",
+          "etr_tactic": "intros n.\nsymmetry.\napply plus_n_O."
+        },
+        {
+          "attempt": 2,
+          "tactic": "intros n.\nsymmetry.\napply plus_n_O.",
+          "tactic_source": "heuristic_fallback",
+          "check_exit_code": 1,
+          "check_stdout": "Checking coq/Example.v ...",
+          "check_stderr": "File \".\\coq/Example.v\", line 10, characters 2-11:\nError: No such goal.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check \nfailed: coq/Example.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorExce \n   ption\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorExcepti \n   on,check-target-proof.ps1",
+          "status": "coq_error_etr_retry",
+          "etr_tactic": "intros n.\nsymmetry.\napply plus_n_O."
+        },
+        {
+          "attempt": 3,
+          "tactic": "induction n as [| n IH]; simpl; [ reflexivity | rewrite IH; reflexivity ].",
+          "tactic_source": "model",
+          "check_exit_code": 1,
+          "check_stdout": "Checking coq/Example.v ...",
+          "check_stderr": "File \".\\coq/Example.v\", line 10, characters 2-76:\nError: No such goal.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check \nfailed: coq/Example.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorExce \n   ption\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorExcepti \n   on,check-target-proof.ps1",
+          "status": "coq_error_etr_retry",
+          "etr_tactic": "intros n.\nsymmetry.\napply plus_n_O."
+        },
+        {
+          "attempt": 4,
+          "tactic": "induction n.\nsimpl. reflexivity.\nsimpl. rewrite IHn. reflexivity.",
+          "tactic_source": "model",
+          "check_exit_code": 1,
+          "check_stdout": "Checking coq/Example.v ...",
+          "check_stderr": "File \".\\coq/Example.v\", line 10, characters 2-14:\nError: No such goal.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check \nfailed: coq/Example.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorExce \n   ption\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorExcepti \n   on,check-target-proof.ps1",
+          "status": "etr_limit_exceeded"
+        }
+      ],
+      "status": "failed"
+    }
+  ],
+  "summary": {},
+  "error": "  Max ETR retries (3) exceeded.",
+  "ended_at": "2026-04-01T13:00:43"
+}

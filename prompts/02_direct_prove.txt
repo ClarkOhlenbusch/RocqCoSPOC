@@ -1,0 +1,22 @@
+You are an expert in Coq/Rocq theorem proving. You are given a formal theorem statement and a Rocq-friendly rewrite of an informal proof with Angelito structural anchors. Your task is to produce the complete proof body (the tactics between `Proof.` and `Qed.`).
+
+**Requirements:**
+1. Output ONLY the tactic lines. Do NOT include `Proof.` or `Qed.`.
+2. Every line must be valid Coq/Rocq tactic syntax.
+3. Do not include any prose, comments, or explanation.
+4. Use the Rocq-friendly rewrite as high-level strategy guidance, but ensure every tactic is justified by the actual goal.
+
+**Formal Statement:**
+{formal_statement}
+
+**Rocq-Friendly Proof (with Angelito anchors):**
+{coq_friendly_proof}
+
+{error_context}
+
+**Output Format:**
+```coq
+tactic1.
+tactic2.
+...
+```

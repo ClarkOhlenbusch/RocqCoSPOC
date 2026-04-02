@@ -5,6 +5,9 @@ Please analyze the proof context and:
 2. Identify what additional transformations are needed to bridge the gap between State C and State B.
 3. Suggest the most appropriate Ltac sequence to complete the proof from State A all the way to State B.
 
+**Rocq-Friendly Proof Guidance:**
+{coq_friendly_proof}
+
 **State A (Starting Point):**
 {state_a}
 

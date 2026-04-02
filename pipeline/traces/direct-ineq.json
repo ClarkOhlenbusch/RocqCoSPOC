@@ -1,0 +1,62 @@
+{
+  "started_at": "2026-04-01T12:20:26",
+  "status": "success",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\02_inequality\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\02_inequality\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\_run_direct_ineq.v",
+    "target_rel": "coq/_run_direct_ineq.v"
+  },
+  "config": {
+    "max_tactic_errors": 3,
+    "max_state_mismatch": 2,
+    "temperature": 0.0,
+    "max_tokens": 2048
+  },
+  "rewrite": {
+    "text": "**Proof Structure:** Direct proof using the transitivity of the less-than-or-equal-to relation.\n\nLet `a` and `b` be arbitrary natural numbers. Assume the hypothesis `H : a <= b`. We must prove `a <= S b`.\n\n1. First, establish the auxiliary fact that `b <= S b` holds for any natural number `b`. This follows directly from the definition of the successor function and the reflexive property of `<=` (formalized in Coq as `le_n_Sn`).\n2. Next, apply the transitivity of the `<=` relation to the hypothesis `H : a <= b` and the auxiliary fact `b <= S b`. By transitivity, we deduce `a <= S b`.\n3. The derivation relies solely on basic ordering properties and the successor function. Therefore, this step follows from linear arithmetic and can be automatically discharged by Coq's `lia` tactic.\n\nConsequently, for all natural numbers `a` and `b`, `a <= b` implies `a <= S b`. ∎"
+  },
+  "goal_sequence": {
+    "count": 2,
+    "states": [
+      "State 0:\n============================\nforall a b : nat, a <= b -> a <= S b",
+      "No Goals"
+    ]
+  },
+  "transitions": [
+    {
+      "transition_index": 1,
+      "from_state_index": 0,
+      "to_state_index": 1,
+      "from_state": "State 0:\n============================\nforall a b : nat, a <= b -> a <= S b",
+      "to_state": "No Goals",
+      "attempts": [
+        {
+          "attempt": 1,
+          "tactic": "intros a b H.\ninduction b.\nsimpl.\nreflexivity.\nsimpl.\nrewrite <- H.\nreflexivity.",
+          "check_exit_code": 1,
+          "check_stdout": "Checking coq/_run_direct_ineq.v ...",
+          "check_stderr": "File \".\\coq/_run_direct_ineq.v\", line 6, characters 2-13:\nError:\n The relation le is not a declared reflexive relation. Maybe you need to require the Coq.Classes.RelationClasses library\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/_run_direct_ineq.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+          "status": "coq_error_etr_retry",
+          "etr_tactic": "apply reflexivity."
+        },
+        {
+          "attempt": 2,
+          "tactic": "intros a b H.\napply le_S.\nexact H.",
+          "check_exit_code": 0,
+          "check_stdout": "Checking coq/_run_direct_ineq.v ...\nProof check passed: coq/_run_direct_ineq.v",
+          "check_stderr": "",
+          "actual_state": "State 0:\nNo Goals",
+          "status": "success_no_goals"
+        }
+      ],
+      "status": "success"
+    }
+  ],
+  "summary": {
+    "transition_count": 1,
+    "etr_retries": 1,
+    "esr_retries": 0
+  },
+  "ended_at": "2026-04-01T12:24:00"
+}

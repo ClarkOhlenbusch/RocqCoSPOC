@@ -1,50 +1,31 @@
-# RocqCoSPOC — CoSProver-for-Coq Experimental Manual Workflow
+# Rocq Proof Pipeline
 
-A manual, experimental emulation of **CoSProver** ("Translating Informal Proofs into Formal Proofs Using a Chain of States") for Coq/Rocq. No Python pipeline or Coq REPL driver: you use **ChatGPT** for the rewrite, a **Gemini gem** for the chain of states (free), and an **IDE coding agent** for tactics; error feedback (ETR/ESR) happens naturally in the agent conversation.
+This repo contains an experimental Rocq/Coq proof pipeline that uses the Angelito pseudo-proof language as an intermediate representation between informal proofs and executable Rocq.
 
-**Reference:** CoSProver paper — *Translating Informal Proofs into Formal Proofs Using a Chain of States* (Lean); we adapt the pipeline to Coq and run it manually.
+## Current workflow
 
----
+1. **Rewrite** — Turn an informal proof into strict Angelito syntax (`PROVE`, `ASSUME`, `FACT`, `SIMPLIFY`, `THEREFORE`, `CONCLUDE`, etc.) using the [Angelito spec](angelito-spec.md).
+2. **Skeleton** — Translate the Angelito proof's outer structure into Rocq with `admit.` placeholders for each leaf goal.
+3. **Fill** — Iteratively fill each `admit.` with real tactics, compiling after each fill. On error, feed the structured error back and retry (up to 3 attempts per sub-goal).
 
-## Optional default state handoff (agent sees state on demand)
+The pipeline runs through [pipeline/run.py](pipeline/run.py) or can be done manually in your IDE.
 
-To avoid manual copy/paste of Coq state blocks, you can generate the current proof state from your cursor line with:
-
-```powershell
-.\scripts\get-proof-state.ps1 -FilePath <path-to-file> -CursorLine <line>
-```
-
-The repo also includes `.vscode/tasks.json`, which runs the same script with the current `${file}` and `${lineNumber}`.
-Use that output as the `state_p` payload for prompt #3 (or #4/#5 when errors appear).
-
-See [docs/AUTOMATED_STATE_PIPELINE.md](docs/AUTOMATED_STATE_PIPELINE.md) for the quick setup and workflow.
-
-## The three-step process
-
-1. **Rewrite** — Paste your informal proof into **ChatGPT** with prompt #1 ([docs/PROMPTS.md](docs/PROMPTS.md) or [prompts/01_rewrite.txt](prompts/01_rewrite.txt)). Copy the Coq-friendly proof.
-2. **Chain of states** — Paste the formal statement and Coq-friendly proof into your **Gemini gem** (see [docs/GEMINI_GEM.md](docs/GEMINI_GEM.md)). Copy the state sequence.
-3. **Tactics** — In your IDE, use the **coding agent** to apply tactics between adjacent states; paste prompts #3–#5 from [docs/PROMPTS.md](docs/PROMPTS.md) (or [prompts/](prompts/)) when you need tactic generation, ETR, or ESR.
-
----
-
-## Where things live
+## Key files
 
 | Item | Location |
 |------|----------|
-| Architecture & data flow | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
-| Paper → our steps | [docs/PAPER_MAPPING.md](docs/PAPER_MAPPING.md) |
-| All five prompts (copy-paste) | [docs/PROMPTS.md](docs/PROMPTS.md) |
-| Gemini gem setup | [docs/GEMINI_GEM.md](docs/GEMINI_GEM.md) |
-| Prompt templates (quick copy) | [prompts/](prompts/) — `01_rewrite.txt` … `05_esr.txt` |
-| Few-shot examples for Gemini | [data/few_shot/](data/few_shot/) |
-
----
+| Angelito spec | [angelito-spec.md](angelito-spec.md) |
+| Angelito → Rocq translation guide | [angelito-to-rocq.md](angelito-to-rocq.md) |
+| Architecture and data flow | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| Prompt templates | [prompts/](prompts/) |
+| Tactics reference | [prompts/tactics_reference.md](prompts/tactics_reference.md) |
+| IDE setup | [docs/SETUP_IDE.md](docs/SETUP_IDE.md) |
+| Proof-state bridge | [docs/AUTOMATED_STATE_PIPELINE.md](docs/AUTOMATED_STATE_PIPELINE.md) |
+| Automated pipeline | [pipeline/README.md](pipeline/README.md) |
+| Example inputs | [data/examples/README.md](data/examples/README.md) |
 
 ## Setup
 
-- **Coq** (or Rocq) and an IDE with Coq support (e.g. VS Code + Coq extension, Proof General).  
-  **→ Full steps:** [docs/SETUP_IDE.md](docs/SETUP_IDE.md) (install Rocq/Coq, VsRocq/VsCoq extension, set `vsrocq.path` in `.vscode/settings.json`, open this folder).
-- **ChatGPT** (web) and **Gemini** (web or app) — no API keys required for this workflow.
-- Optional: CoqHammer or manual tries with `lia`/`omega`/`auto` before asking the agent.
-
-Run experiments by following the three steps above and iterating with ETR/ESR when Coq reports errors or the state doesn’t match the blueprint.
+- Rocq/Coq plus an IDE with proof support. See [docs/SETUP_IDE.md](docs/SETUP_IDE.md).
+- An LLM (ChatGPT, OpenRouter, etc.) for the rewrite/prove flow.
+- Optional: an OpenRouter API key for the automated pipeline — see [pipeline/README.md](pipeline/README.md).

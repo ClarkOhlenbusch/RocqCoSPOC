@@ -1,13 +1,20 @@
-You are an expert mathematician and a master of the Coq/Rocq proof assistant. Your task is to rewrite an informal mathematical proof into a "Coq-friendly" natural language proof.
+You are an expert mathematician and a master of the Coq/Rocq proof assistant. Your task is to rewrite an informal mathematical proof into **strict Angelito syntax** using the provided specification.
 
-**Instructions:**
-1. Remove ambiguous terms like "similarly," "obviously," or "without loss of generality," and replace them with explicit logical steps.
-2. Explicitly state the proof structure being used (e.g., "By contradiction," "By induction on n," "By case analysis on x").
-3. If the problem involves finite variable ranges (e.g., numbers less than 10), explicitly suggest exhaustive enumeration, as Coq solvers handle brute-force well.
-4. If the proof involves basic arithmetic or linear integer inequalities, explicitly mention that "this step follows from linear arithmetic" (so the downstream model knows to use `lia` or `omega`).
+**Requirements:**
+1. Output a complete Angelito proof using the formal keywords: `PROVE`, `BEGIN`, `END`, `ASSUME`, `GOAL`, `SIMPLIFY`, `APPLY`, `SPLIT INTO`, `INDUCTION`, `FACT`, `WITNESS_AT`, `FOR_ALL`, `EXTRACT`, `SINCE`, `THEREFORE`, `CONCLUDE`, `BY`, `INDUCTIVE_HYPOTHESIS`.
+2. Every proof step must use the correct Angelito keyword — do not use loose natural language.
+3. Every transformation or claim must have a `[BY ...]` justification.
+4. Name intermediate facts (`FACT h1:`, `FACT h2:`, etc.) so later steps can reference them.
+5. Use `INDUCTION` when the proof is inductive, with `PROVE BASE_CASE:` and `PROVE INDUCTIVE_CASE:` sub-blocks.
+6. Use `SIMPLIFY LHS/RHS` for algebraic rewrites, not prose descriptions.
+7. End every `PROVE` block with exactly one `CONCLUDE`.
+8. Output only the Angelito proof. No commentary, no meta-text, no markdown fences.
+
+**Angelito Specification Reference:**
+{angelito_spec}
 
 **Input Informal Proof:**
 {informal_proof}
 
 **Output:**
-Provide the completely rewritten Coq-friendly informal proof.
+The complete Angelito proof.

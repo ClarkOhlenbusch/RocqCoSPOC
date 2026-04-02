@@ -1,0 +1,57 @@
+{
+  "started_at": "2026-04-01T14:17:19",
+  "status": "success",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\test_skeleton.v",
+    "target_rel": "coq/test_skeleton.v"
+  },
+  "config": {
+    "max_fill_attempts": 3
+  },
+  "rewrite": {
+    "text": "PROVE n_plus_zero: ∀n. n + 0 = n\nBEGIN\n  ASSUME n : ℕ\n  GOAL: n + 0 = n\n  INDUCTION n\n  PROVE BASE_CASE:\n    SIMPLIFY LHS:\n      0 + 0\n      = 0 [BY plus_0_r]\n    THEREFORE 0 + 0 = 0 [BY plus_0_r]\n    CONCLUDE: Base case holds [QED]\n  PROVE INDUCTIVE_CASE:\n    ASSUME m : ℕ\n    INDUCTIVE_HYPOTHESIS ih: m + 0 = m\n    FACT h1: S m + 0 = S (m + 0) [BY plus_succ_r]\n    FACT h2: S (m + 0) = S m [BY ih]\n    THEREFORE S m + 0 = S m [BY h1, h2]\n    CONCLUDE: Inductive case holds [QED]\n  CONCLUDE: By induction, n + 0 = n for all n [QED]\nEND"
+  },
+  "skeleton": {
+    "text": "intros n.\ninduction n.\n- admit.\n- admit.",
+    "compiles": true,
+    "check_stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+    "stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+    "check_stderr": "",
+    "stderr": ""
+  },
+  "fills": [
+    {
+      "admit_index": 2,
+      "attempt": 1,
+      "current_goal_state": "State 0:\n============================\n0 + 0 = 0",
+      "source": "heuristic_fallback",
+      "replacement": "reflexivity.",
+      "exit_code": 0,
+      "check_stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+      "stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+      "check_stderr": "",
+      "stderr": "",
+      "status": "success"
+    },
+    {
+      "admit_index": 3,
+      "attempt": 1,
+      "current_goal_state": "State 0:\nn : nat\nIHn : n + 0 = n\n============================\nS n + 0 = S n\nNo more goals, but there are some goals you gave up:",
+      "source": "heuristic_fallback",
+      "replacement": "simpl.\nrewrite IHn.\nreflexivity.",
+      "exit_code": 0,
+      "check_stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+      "stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+      "check_stderr": "",
+      "stderr": "",
+      "status": "success"
+    }
+  ],
+  "summary": {
+    "admits_filled": 2,
+    "total_attempts": 2
+  },
+  "ended_at": "2026-04-01T14:20:01"
+}

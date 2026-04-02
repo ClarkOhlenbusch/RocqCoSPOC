@@ -1,0 +1,21 @@
+{
+  "started_at": "2026-04-01T14:04:39",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\test_skeleton.v",
+    "target_rel": "coq/test_skeleton.v"
+  },
+  "config": {
+    "max_fill_attempts": 3
+  },
+  "rewrite": {
+    "text": "PROVE plus_zero_identity: ∀n. n + 0 = n\nBEGIN\n  ASSUME n : ℕ\n  GOAL: n + 0 = n\n  INDUCTION n\n    PROVE BASE_CASE: n = 0\n      SIMPLIFY RHS: 0 + 0 = 0 [BY plus_def, reflexivity]\n      THEREFORE 0 + 0 = 0\n      CONCLUDE: Base case holds [QED]\n    PROVE INDUCTIVE_CASE: n = S n'\n      ASSUME n' : ℕ\n      INDUCTIVE_HYPOTHESIS ih: ∀m. m + 0 = m\n      SIMPLIFY RHS: S n' + 0 = S (n' + 0) [BY plus_def]\n      APPLY IH SPLIT INTO: (1) n' + 0 = n' [BY ih]\n      PROVE (1): n' + 0 = n'\n        SIMPLIFY RHS: n' + 0 = n' [BY plus_def]\n        THEREFORE n' + 0 = n'\n        CONCLUDE: Subgoal holds [QED]\n      SIMPLIFY LHS: S (n' + 0) = S n' [BY plus_def]\n      THEREFORE S n' + 0 = S n'\n      CONCLUDE: Inductive case holds [QED]\n  CONCLUDE: By induction on n, n + 0 = n for all n [QED]\nEND"
+  },
+  "skeleton": {},
+  "fills": [],
+  "summary": {},
+  "error": "Skeleton generation failed: Skeleton model did not return a valid Coq tactic block.\nRaw output:\n- admit.",
+  "ended_at": "2026-04-01T14:05:00"
+}

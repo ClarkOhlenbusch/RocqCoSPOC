@@ -1,6 +1,6 @@
 # Pipeline examples
 
-Ready-to-run inputs for the autonomous CoS pipeline. Each subfolder has an informal proof and a formal statement; the pipeline rewrites the proof, generates a chain of states, and fills in the corresponding Coq file.
+Ready-to-run inputs for the automated proof pipeline. Each subfolder has an informal proof and a formal statement; the pipeline rewrites the proof, builds a direct goal sequence, and fills in the corresponding Coq file.
 
 ## Example 1: Simple equality (`n + 0 = n`)
 

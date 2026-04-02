@@ -1,0 +1,83 @@
+{
+  "started_at": "2026-04-01T13:15:00",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\Example.v",
+    "target_rel": "coq/Example.v"
+  },
+  "config": {
+    "max_tactic_errors": 3,
+    "max_state_mismatch": 2,
+    "temperature": 0.0,
+    "max_tokens": 2048
+  },
+  "rewrite": {
+    "text": "PROVE plus_zero_right: ∀n. n + 0 = n\nBEGIN\n  ASSUME n : ℕ\n    GOAL: n + 0 = n\n      INDUCTION n\n        PROVE BASE_CASE: n = 0\n          SINCE n = 0:\n            n + 0 = 0 + 0 [BY addition_def]\n            = 0 [BY zero_add]\n          THEREFORE n + 0 = 0\n        PROVE INDUCTIVE_CASE: n = S m\n          ASSUME m : ℕ\n          INDUCTIVE_HYPOTHESIS ih: m + 0 = m\n          SINCE n = S m:\n            n + 0 = S m + 0 [BY addition_def]\n            = S (m + 0) [BY plus_s]\n          APPLY ih:\n            FACT h1: m + 0 = m [BY ih]\n          SIMPLIFY:\n            S (m + 0)\n            = S m [BY h1]\n          THEREFORE n + 0 = S m\n      CONCLUDE: By induction on n, n + 0 = n [QED]\nEND",
+    "used_for_tactics": true,
+    "angelito_spec_source": "angelito-spec.md",
+    "format": "rocq_friendly_hybrid_anchors"
+  },
+  "goal_sequence": {
+    "count": 2,
+    "states": [
+      "State 0:\n============================\nforall n : nat, n + 0 = n",
+      "No Goals"
+    ]
+  },
+  "transitions": [
+    {
+      "transition_index": 1,
+      "from_state_index": 0,
+      "to_state_index": 1,
+      "from_state": "State 0:\n============================\nforall n : nat, n + 0 = n",
+      "to_state": "No Goals",
+      "attempts": [
+        {
+          "attempt": 1,
+          "tactic": "induction n.\nsimpl.\nreflexivity.",
+          "tactic_source": "model",
+          "check_exit_code": 1,
+          "check_stdout": "Checking coq/Example.v ...",
+          "check_stderr": "File \".\\coq/Example.v\", line 10, characters 2-14:\nError: No such goal.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/Example.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+          "status": "coq_error_etr_retry",
+          "etr_tactic": "intros n.\nsymmetry.\napply plus_n_O."
+        },
+        {
+          "attempt": 2,
+          "tactic": "apply definition_add.",
+          "tactic_source": "model",
+          "check_exit_code": 1,
+          "check_stdout": "Checking coq/Example.v ...",
+          "check_stderr": "File \".\\coq/Example.v\", line 10, characters 2-14:\nError: No such goal.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/Example.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+          "status": "coq_error_etr_retry",
+          "etr_tactic": "intros n.\nsymmetry.\napply plus_n_O."
+        },
+        {
+          "attempt": 3,
+          "tactic": "induction n; simpl; rewrite ?IHn; reflexivity.",
+          "tactic_source": "model",
+          "check_exit_code": 1,
+          "check_stdout": "Checking coq/Example.v ...",
+          "check_stderr": "File \".\\coq/Example.v\", line 10, characters 2-14:\nError: No such goal.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/Example.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+          "status": "coq_error_etr_retry",
+          "etr_tactic": "intros n.\nsymmetry.\napply plus_n_O."
+        },
+        {
+          "attempt": 4,
+          "tactic": "exact true.",
+          "tactic_source": "model",
+          "check_exit_code": 1,
+          "check_stdout": "Checking coq/Example.v ...",
+          "check_stderr": "File \".\\coq/Example.v\", line 10, characters 2-14:\nError: No such goal.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/Example.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+          "status": "etr_limit_exceeded"
+        }
+      ],
+      "status": "failed"
+    }
+  ],
+  "summary": {},
+  "error": "  Max ETR retries (3) exceeded.",
+  "ended_at": "2026-04-01T13:19:06"
+}

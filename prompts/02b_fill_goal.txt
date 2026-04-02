@@ -1,0 +1,55 @@
+You are an expert in Coq/Rocq theorem proving. You are given a partial Rocq proof that contains an `admit.` placeholder at a specific sub-goal. Your task is to replace that single `admit.` with real tactics that discharge the goal.
+
+**Context:**
+- The full proof so far (with remaining `admit.` placeholders elsewhere) is shown below.
+- The specific `admit.` to fill is marked with `(* FILL THIS *)`.
+- The Angelito proof provides the intended reasoning for this goal.
+
+**Available custom tactics** (from Angelito Tactics library):
+{tactics_reference}
+
+**Translation rules for Angelito -> Rocq:**
+- `FACT h: stmt [BY lemma]` -> `assert (h : stmt). { apply lemma. }` or `{ exact lemma. }`
+- `SIMPLIFY RHS x = y [BY lemma1, lemma2]` -> `simplify rhs x = y using ltac:(rewrite lemma1, lemma2).`
+- `SIMPLIFY LHS x = y [BY lemma1, lemma2]` -> `simplify lhs x = y using ltac:(rewrite lemma1, lemma2).`
+- `THEREFORE conclusion [BY h1, h2]` -> `exact ...` or `apply ...` using h1, h2
+- `SINCE condition` -> `assert (h : condition). { ... }`
+- `INDUCTIVE_HYPOTHESIS ih: stmt` -> reference the `IH...` hypothesis already in context
+- For basic arithmetic / linear inequalities -> use `lia`
+- For ring equalities -> use `ring`
+
+**Standard tactic whitelist:**
+`intros`, `assert`, `apply`, `exact`, `rewrite`, `rewrite <-`, `replace ... with ... by ring`, `destruct`, `exists`, `lia`, `nia`, `ring`, `auto`, `split`, `left`, `right`, `unfold`, `simpl`, `induction`
+
+**Requirements:**
+1. Output ONLY the replacement tactics for the marked `admit.` - no `Proof.`, no `Qed.`, no surrounding code.
+2. Every line must be valid Coq tactic syntax.
+3. Do not modify any other part of the proof.
+4. No prose, comments, or explanation.
+5. If structured compiler feedback is present, use it as the primary source of truth for the current proof mismatch. Use raw Coq errors only as supporting context.
+
+**Formal Statement:**
+{formal_statement}
+
+**Angelito Proof (for reasoning guidance):**
+{angelito_proof}
+
+**Current Proof (with `(* FILL THIS *)` marking the target `admit.`):**
+```coq
+{current_proof}
+```
+
+**Current Goal State At The Marked `admit.`:**
+```text
+{current_goal_state}
+```
+
+{structured_feedback_context}
+
+{error_context}
+
+**Output Format:**
+```coq
+tactic1.
+tactic2.
+```

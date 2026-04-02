@@ -1,0 +1,19 @@
+{
+  "started_at": "2026-04-01T13:55:02",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\test_skeleton.v",
+    "target_rel": "coq/test_skeleton.v"
+  },
+  "config": {
+    "max_fill_attempts": 3
+  },
+  "rewrite": {},
+  "skeleton": {},
+  "fills": [],
+  "summary": {},
+  "error": "Rewrite failed: Rewrite output is not strict Angelito: expected at least one CONCLUDE line.\nRaw output:\nPROVE n_plus_zero_equals_n: ∀n. n + 0 = n\n\nBEGIN\n  ASSUME n : ℕ\n  SIMPLIFY LHS:\n    n + 0\n    = n    [BY definition of addition]\n  SIMPLIFY RHS:\n    n\n    = n    [BY reflexivity]\n  THEREFORE n + 0 = n    [BY definition of addition and reflexivity]\nEND",
+  "ended_at": "2026-04-01T13:55:05"
+}

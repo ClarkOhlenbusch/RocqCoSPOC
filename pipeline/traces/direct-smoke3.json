@@ -1,0 +1,75 @@
+{
+  "started_at": "2026-04-01T12:33:55",
+  "status": "success",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\_run_direct_smoke3.v",
+    "target_rel": "coq/_run_direct_smoke3.v"
+  },
+  "config": {
+    "max_tactic_errors": 3,
+    "max_state_mismatch": 2,
+    "temperature": 0.0,
+    "max_tokens": 2048
+  },
+  "rewrite": {
+    "text": "**Proof (Coq‑friendly natural language).**\n\nWe will prove the statement  \n\n\\[\\forall n : \\mathbb{N},\\; n + 0 = n\n\\]\n\nby **induction on the natural number \\(n\\)**.\n\n---\n\n### 1. Base case  \n\nTake \\(n = 0\\).  \n- By the definition of the addition operation on natural numbers,  \n  \\[\n  0 + 0 = 0 .\n  \\]  \n- The equality \\(0 = 0\\) follows by **reflexivity**.  \n\nHence the property holds for \\(n = 0\\).\n\n---\n\n### 2. Inductive step  \n\nAssume that for an arbitrary natural number \\(m\\) the induction hypothesis  \n\n\\[\n\\text{IH}(m) :\\; m + 0 = m\n\\]\n\nholds.  \nWe must show that the property also holds for the successor of \\(m\\), i.e. for \\(S(m)\\).\n\n- By the definition of addition on successors,  \n  \\[\n  S(m) + 0 = S(m + 0).\n  \\]  \n- Apply the induction hypothesis to the term \\(m + 0\\):  \n  \\[\n  m + 0 = m \\quad\\text{(by IH}(m)\\text{)}.\n  \\]  \n- Substitute this equality into the previous line:  \n  \\[\n  S(m) + 0 = S(m).\n  \\]  \n- The equality \\(S(m) + 0 = S(m)\\) is therefore established by **substitution** and **reflexivity**.\n\nThus, the property holds for \\(S(m)\\) assuming it holds for \\(m\\).\n\n---\n\n### 3. Conclusion  \n\nSince the property holds for the base case \\(0\\) and the inductive step shows that truth for an arbitrary \\(m\\) implies truth for \\(S(m)\\), by the **principle of induction** the statement  \\[\n\\forall n : \\mathbb{N},\\; n + 0 = n\n\\]\n\nis true for every natural number \\(n\\).\n\n---\n\n**Notes for a Coq proof.**  \n- The base case corresponds to the tactic `simpl` followed by `reflexivity`.  - The inductive step uses the definition of `plus` on successors (`S m + 0 = S (m + 0)`) and the induction hypothesis; these can be discharged with `simpl` and `rewrite IH`.  \n- The final equality is closed with `reflexivity`.  \n- No calls to `lia` or `omega` are needed here because the arithmetic involved is purely definitional; however, if a step involved linear integer inequalities, one would invoke `lia` (or `omega` in the integer setting).",
+    "used_for_tactics": true
+  },
+  "goal_sequence": {
+    "count": 2,
+    "states": [
+      "State 0:\n============================\nforall n : nat, n + 0 = n",
+      "No Goals"
+    ]
+  },
+  "transitions": [
+    {
+      "transition_index": 1,
+      "from_state_index": 0,
+      "to_state_index": 1,
+      "from_state": "State 0:\n============================\nforall n : nat, n + 0 = n",
+      "to_state": "No Goals",
+      "attempts": [
+        {
+          "attempt": 1,
+          "tactic": "induction.",
+          "tactic_source": "model",
+          "check_exit_code": 1,
+          "check_stdout": "Checking coq/_run_direct_smoke3.v ...",
+          "check_stderr": "File \".\\coq/_run_direct_smoke3.v\", line 3, characters 11-12:\nError:\nSyntax error: [induction_clause_list] expected after 'induction' (in [simple_tactic]).\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/_run_direct_smoke3.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+          "status": "coq_error_etr_retry",
+          "etr_tactic": "induction n."
+        },
+        {
+          "attempt": 2,
+          "tactic": "intros n; induction n as [| n IH]; simpl; rewrite IH; reflexivity.",
+          "tactic_source": "model",
+          "check_exit_code": 1,
+          "check_stdout": "Checking coq/_run_direct_smoke3.v ...",
+          "check_stderr": "File \".\\coq/_run_direct_smoke3.v\", line 3, characters 52-54:\nError: The variable IH was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/_run_direct_smoke3.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+          "status": "coq_error_etr_retry",
+          "etr_tactic": "simpl.\nrewrite IH.\nreflexivity."
+        },
+        {
+          "attempt": 3,
+          "tactic": "induction n.\nsimpl.\nreflexivity.\nsimpl.\nrewrite IHn.\nreflexivity.",
+          "tactic_source": "model",
+          "check_exit_code": 0,
+          "check_stdout": "Checking coq/_run_direct_smoke3.v ...\nProof check passed: coq/_run_direct_smoke3.v",
+          "check_stderr": "",
+          "actual_state": "State 0:\nNo Goals",
+          "status": "success_no_goals"
+        }
+      ],
+      "status": "success"
+    }
+  ],
+  "summary": {
+    "transition_count": 1,
+    "etr_retries": 2,
+    "esr_retries": 0
+  },
+  "ended_at": "2026-04-01T12:34:16"
+}

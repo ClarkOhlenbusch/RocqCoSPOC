@@ -1,0 +1,65 @@
+{
+  "started_at": "2026-04-01T14:10:40",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\test_skeleton.v",
+    "target_rel": "coq/test_skeleton.v"
+  },
+  "config": {
+    "max_fill_attempts": 3
+  },
+  "rewrite": {
+    "text": "PROVE plus_zero_rw: ∀n. n + 0 = n  \nBEGIN  \nASSUME n : ℕ  \nGOAL: n + 0 = n  \nINDUCTION n  \nPROVE BASE_CASE: n = 0  \nFACT h1: 0 + 0 = 0 [BY definition_of_add]  \nTHEREFORE 0 + 0 = 0 [BY h1]  \nCONCLUDE: 0 + 0 = 0 [QED]  \nPROVE INDUCTIVE_CASE: n = S m  \nASSUME m : ℕ  \nINDUCTIVE_HYPOTHESIS ih: m + 0 = m  \nSINCE n = S m:  \nFACT h2: S m + 0 = S (m + 0) [BY plus_succ_rw]  \nTHEREFORE S m + 0 = S m [BY h2, ih]  \nCONCLUDE: S m + 0 = S m [QED]  \nCONCLUDE: ∀n. n + 0 = n [BY induction]  \nEND"
+  },
+  "skeleton": {
+    "text": "intros n.\ninduction n.\nadmit.\nadmit.",
+    "compiles": true,
+    "check_stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+    "stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+    "check_stderr": "",
+    "stderr": ""
+  },
+  "fills": [
+    {
+      "admit_index": 2,
+      "attempt": 1,
+      "current_goal_state": "State 0:\nn : nat\nIHn : n + 0 = n\n============================\nS n + 0 = S n",
+      "replacement": "simpl.\nrewrite IHn.\nreflexivity.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/test_skeleton.v ...",
+      "stdout": "Checking coq/test_skeleton.v ...",
+      "check_stderr": "File \".\\coq/test_skeleton.v\", line 6, characters 10-13:\nError: The variable IHn was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "stderr": "File \".\\coq/test_skeleton.v\", line 6, characters 10-13:\nError: The variable IHn was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "status": "compile_error"
+    },
+    {
+      "admit_index": 2,
+      "attempt": 2,
+      "current_goal_state": "State 0:\nn : nat\nIHn : n + 0 = n\n============================\nS n + 0 = S n",
+      "replacement": "rewrite IHn.\nreflexivity.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/test_skeleton.v ...",
+      "stdout": "Checking coq/test_skeleton.v ...",
+      "check_stderr": "File \".\\coq/test_skeleton.v\", line 5, characters 10-13:\nError: The variable IHn was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "stderr": "File \".\\coq/test_skeleton.v\", line 5, characters 10-13:\nError: The variable IHn was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "status": "compile_error"
+    },
+    {
+      "admit_index": 2,
+      "attempt": 3,
+      "current_goal_state": "State 0:\nn : nat\nIHn : n + 0 = n\n============================\nS n + 0 = S n",
+      "replacement": "simpl.\nrewrite IHn.\nreflexivity.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/test_skeleton.v ...",
+      "stdout": "Checking coq/test_skeleton.v ...",
+      "check_stderr": "File \".\\coq/test_skeleton.v\", line 6, characters 10-13:\nError: The variable IHn was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "stderr": "File \".\\coq/test_skeleton.v\", line 6, characters 10-13:\nError: The variable IHn was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "status": "compile_error"
+    }
+  ],
+  "summary": {},
+  "error": "Failed to fill admit #1 after 3 attempts.",
+  "ended_at": "2026-04-01T14:13:49"
+}

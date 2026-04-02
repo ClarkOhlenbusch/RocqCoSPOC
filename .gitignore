@@ -1,6 +1,9 @@
 # Environment and secrets
 .env
 
+# Local Coq/Rocq scratch and pipeline targets (testing only)
+coq/
+
 # Coq build artifacts
 *.vo
 *.vos

@@ -1,9 +1,9 @@
-DIGEST 28b105ad37133199f4c77ac7efe1af31
-FExample
+DIGEST ae8af3fa22059136dff71a5c462d11aa
+FRocqCoSPOC.Example
 prf 8:27 <> n_plus_zero_equals_n
 R42:44 Coq.Init.Datatypes <> nat ind
 binder 38:38 <> n:1
 R52:54 Coq.Init.Logic <> ::type_scope:x_'='_x not
 R48:50 Coq.Init.Peano <> ::nat_scope:x_'+'_x not
-R47:47 Example <> n:1 var
-R55:55 Example <> n:1 var
+R47:47 RocqCoSPOC.Example <> n:1 var
+R55:55 RocqCoSPOC.Example <> n:1 var

@@ -4,6 +4,10 @@ You are an expert in Coq/Rocq theorem proving. Your task is to analyze two given
 1. Carefully examine both the initial and final states, identifying the exact changes needed.
 2. Review the previously attempted tactics and their error messages from the Coq compiler to avoid repeating mistakes.
 3. Provide an improved tactic solution that avoids the reported error.
+4. Use the Rocq-friendly proof as guidance for the intended proof strategy, unless the actual proof state shows that the plan must change.
+
+**Rocq-Friendly Proof Guidance:**
+{coq_friendly_proof}
 
 **Initial State:**
 {state_p}

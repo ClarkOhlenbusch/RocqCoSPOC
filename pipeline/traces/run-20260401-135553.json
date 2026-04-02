@@ -1,0 +1,19 @@
+{
+  "started_at": "2026-04-01T13:55:53",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\test_skeleton.v",
+    "target_rel": "coq/test_skeleton.v"
+  },
+  "config": {
+    "max_fill_attempts": 3
+  },
+  "rewrite": {},
+  "skeleton": {},
+  "fills": [],
+  "summary": {},
+  "error": "Rewrite failed: Rewrite output contains non-Angelito lines.\nExamples:\n0 + 0\n= 0 [BY plus_def]\nS m + 0\n= S (m + 0) [BY plus_def]\n\nRaw output:\nPROVE add_zero_right: ∀n. n + 0 = n\nBEGIN\n  ASSUME n : ℕ\n  GOAL: n + 0 = n\n  INDUCTION n\n  PROVE BASE_CASE: n = 0\n    SIMPLIFY LHS:\n      0 + 0\n      = 0 [BY plus_def]\n    THEREFORE 0 + 0 = 0 [BY eq_refl]\n    CONCLUDE: Base case holds [QED]\n  PROVE INDUCTIVE_CASE: n = S m\n    ASSUME m : ℕ\n    INDUCTIVE_HYPOTHESIS ih: m + 0 = m\n    SIMPLIFY LHS:\n      S m + 0\n      = S (m + 0) [BY plus_def]\n    FACT h1: S (m + 0) = S m [BY f_equal ih]\n    THEREFORE S m + 0 = S m [BY h1]\n    CONCLUDE: Inductive case holds [QED]\n  CONCLUDE: By induction on n, n + 0 = n for all n [QED]\nEND",
+  "ended_at": "2026-04-01T13:59:02"
+}

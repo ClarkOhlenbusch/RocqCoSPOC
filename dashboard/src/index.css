@@ -13,12 +13,15 @@ body {
 }
 
 button,
-select {
+select,
+input,
+textarea {
   border: 1px solid #c9d2e3;
   background: #ffffff;
   color: #1e2b40;
   border-radius: 8px;
   padding: 8px 10px;
+  font: inherit;
 }
 
 button {
@@ -28,4 +31,15 @@ button {
 button:disabled {
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
 }

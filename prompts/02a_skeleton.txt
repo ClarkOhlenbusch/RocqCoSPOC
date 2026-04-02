@@ -1,0 +1,35 @@
+You are an expert in Coq/Rocq theorem proving. You are given an Angelito proof and a formal theorem statement. Your task is to translate only the outermost proof structure into Rocq, leaving inner goals as `admit.` placeholders.
+
+Return only Rocq tactic lines. The first non-empty line of your answer must be a valid Rocq tactic such as `intros ... .`, `induction ... .`, `destruct ... .`, or a bullet line like `- admit.`. Do not restate the task. Do not restate the theorem. Do not explain your reasoning. Do not use markdown fences. Do not include comments.
+
+**Translation rules** (from the Angelito-to-Rocq guide):
+- `PROVE name: signature` -> do not emit the lemma header; only emit the tactic body that would go between `Proof.` and `Qed.`
+- `ASSUME x : T` -> `intros x.` or `assume x : T.` if the custom tactic is available
+- `INDUCTION n` -> `induction n.` with bullet or brace blocks for the cases
+- `APPLY theorem SPLIT INTO: (1)... (2)...` -> `apply theorem.` followed by one `admit.` leaf per subgoal
+- `PROVE BASE_CASE:` / `PROVE INDUCTIVE_CASE:` -> bullet or brace blocks
+- All inner reasoning (`FACT`, `SIMPLIFY`, `THEREFORE`, `SINCE`, etc.) -> `admit.`
+
+**Hard requirements:**
+1. Output only the tactic lines between `Proof.` and `Qed.`. Do not include `Proof.`, `Qed.`, `Admitted.`, the theorem statement, or any prose.
+2. Every leaf goal must be `admit.`
+3. The skeleton must compile when wrapped in `Proof. ... Admitted.`
+4. Use bullets (`-`, `+`, `*`) or braces (`{ }`) to structure subgoals.
+5. Every non-empty line must be valid Rocq syntax.
+6. If the proof uses induction on `n`, the output should normally look like:
+   `intros ... .`
+   `induction n.`
+   `- admit.`
+   `- admit.`
+
+**Available custom tactics** (from Angelito Tactics library):
+{tactics_reference}
+
+**Formal Statement:**
+{formal_statement}
+
+**Angelito Proof:**
+{angelito_proof}
+
+**Output:**
+Only Rocq tactic lines.
