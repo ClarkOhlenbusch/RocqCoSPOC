@@ -1,0 +1,66 @@
+{
+  "started_at": "2026-04-08T12:14:12",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\02_inequality\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\02_inequality\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\MulN0.v",
+    "target_rel": "coq/MulN0.v"
+  },
+  "config": {
+    "max_fill_attempts": 3,
+    "rewrite_model": [
+      "openrouter/free"
+    ],
+    "skeleton_model": [
+      "openrouter/free"
+    ],
+    "fill_model": [
+      "openrouter/free"
+    ],
+    "request_retries": 4,
+    "request_backoff_base_sec": 1.5,
+    "request_backoff_multiplier": 2.0,
+    "request_backoff_max_sec": 20.0,
+    "request_backoff_jitter_sec": 0.35
+  },
+  "model_log_path": "C:\\Users\\clark\\RocqCoSPOC\\pipeline\\traces\\run-ineq-jinja-1-model-log.jsonl",
+  "rewrite": {
+    "text": "PROVE ex2: ∀ a b : nat, a <= b -> a <= S b\nBEGIN\n  ASSUME a : nat\n  ASSUME b : nat\n  ASSUME H : a <= b\n  GOAL: a <= S b\n  FACT h1: a <= b [BY H]\n  FACT h2: a <= S b [BY le_n_S h1]\n  THEREFORE a <= S b [BY h2]\n  CONCLUDE: a <= S b [QED]\nEND",
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "openrouter/free",
+        "raw_output": "PROVE ex2: ∀ a b : nat, a <= b -> a <= S b\nBEGIN\n  ASSUME a : nat\n  ASSUME b : nat\n  ASSUME H : a <= b\n  GOAL: a <= S b\n  FACT h1: a <= b [BY H]\n  FACT h2: a <= S b [BY le_n_S h1]\n  THEREFORE a <= S b [BY h2]\n  CONCLUDE: a <= S b [QED]\nEND",
+        "status": "parsed",
+        "parsed_output": "PROVE ex2: ∀ a b : nat, a <= b -> a <= S b\nBEGIN\n  ASSUME a : nat\n  ASSUME b : nat\n  ASSUME H : a <= b\n  GOAL: a <= S b\n  FACT h1: a <= b [BY H]\n  FACT h2: a <= S b [BY le_n_S h1]\n  THEREFORE a <= S b [BY h2]\n  CONCLUDE: a <= S b [QED]\nEND"
+      }
+    ]
+  },
+  "skeleton": {
+    "text": "intros a b H.\napply le_n_S.\nadmit.\nadmit.",
+    "rendered_text": "intros a b H.\napply le_n_S.\nadmit.\nadmit.",
+    "slot_names": [
+      "slot_1",
+      "slot_2"
+    ],
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "openrouter/free",
+        "raw_output": "intros a b H.\napply le_n_S.\n- admit.\n- admit.",
+        "status": "parsed",
+        "parsed_output": "intros a b H.\napply le_n_S.\nadmit.\nadmit."
+      }
+    ],
+    "compiles": false,
+    "check_stdout": "Checking coq/MulN0.v ...",
+    "stdout": "Checking coq/MulN0.v ...",
+    "check_stderr": "File \".\\coq/MulN0.v\", line 6, characters 8-14:\nError: In environment\na, b : nat\nH : a <= b\nUnable to unify \"S ?M1358 <= S ?M1359\" with \"a <= S b\".\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/MulN0.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1",
+    "stderr": "File \".\\coq/MulN0.v\", line 6, characters 8-14:\nError: In environment\na, b : nat\nH : a <= b\nUnable to unify \"S ?M1358 <= S ?M1359\" with \"a <= S b\".\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/MulN0.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1"
+  },
+  "fills": [],
+  "summary": {},
+  "error": "Skeleton does not compile. Refusing to start fill retries on an invalid proof scaffold.\nFile \".\\coq/MulN0.v\", line 6, characters 8-14:\nError: In environment\na, b : nat\nH : a <= b\nUnable to unify \"S ?M1358 <= S ?M1359\" with \"a <= S b\".\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/MulN0.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1\n \n",
+  "ended_at": "2026-04-08T12:15:06"
+}

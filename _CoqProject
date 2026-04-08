@@ -1,4 +1,6 @@
 -R coq RocqCoSPOC
+coq/Angelito.v
 coq/Example.v
 coq/MulN0.v
 coq/CongModEq.v
+coq/test_skeleton.v

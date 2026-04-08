@@ -1,0 +1,137 @@
+{
+  "started_at": "2026-04-08T12:46:13",
+  "status": "success",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\test_skeleton.v",
+    "target_rel": "coq/test_skeleton.v"
+  },
+  "config": {
+    "max_fill_attempts": 3,
+    "rewrite_model": [
+      "openrouter/free"
+    ],
+    "skeleton_model": [
+      "openrouter/free"
+    ],
+    "fill_model": [
+      "openrouter/free"
+    ],
+    "request_retries": 4,
+    "request_backoff_base_sec": 1.5,
+    "request_backoff_multiplier": 2.0,
+    "request_backoff_max_sec": 20.0,
+    "request_backoff_jitter_sec": 0.35
+  },
+  "model_log_path": "C:\\Users\\clark\\RocqCoSPOC\\pipeline\\traces\\run-simple-angelito-lib-model-log.jsonl",
+  "rewrite": {
+    "text": "PROVE ex1: ∀n : nat, n + 0 = n\nBEGIN\n  ASSUME n : nat\n  INDUCTION n\n  PROVE BASE_CASE:\n    SIMPLIFY LHS: 0 + 0 = 0 [BY add_zero]\n    CONCLUDE: 0 + 0 = 0 [QED]\n  PROVE INDUCTIVE_CASE:\n    ASSUME m : nat\n    INDUCTIVE_HYPOTHESIS ih: m + 0 = m\n    SIMPLIFY LHS: S m + 0 = S (m + 0) [BY add_S]\n    SIMPLIFY RHS: S (m + 0) = S m [BY ih]\n    CONCLUDE: S m + 0 = S m [QED]\nEND",
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "openrouter/free",
+        "raw_output": "```angelito\nPROVE max_pointwise_sub_rw: ∀n. max(pointwise_sub(seq(0), make(n))) = max(seq(0)) - max(make(n))\n  ↑ Formal proof of the theorem\n\nBEGIN\n  ASSUME n : ℕ\n  ↔ Goal: Establish equality between max(pointwise_sub(seq(0), make(n))) and max(seq(0)) - max(make(n))\n\n  SIMPLIFY RHS: max(seq(0)) - max(make(n)) = Dim.prec - n [BY max_seq_rw, max_make_rw]\n    ↑ Algebraic simplification of the difference\n\n  GOAL: Show that the left-hand side equals the right-hand side\n\n  APPLY max_iff SPLIT INTO:\n    (1) MEMBERSHIP: element exists at position 0\n    (2) UPPER_BOUND: all elements are bounded by max(seq(0))\n    (3) LOWER_BOUND: constructed via inductive hypothesis\n\n  PROVE MEMBERSHIP:\n    ↑ Use FACT h1: seq(0)[Dim.prec] = Dim.prec\n    ↑ Pass by Dim.prec to apply maps_to_seq\n\n  PROVE UPPER_BOUND:\n    ↑ Assume n' = S n', apply induction hypothesis to tail\n    ↑ Use FACT h2: make(n')[Dim.prec] = n'\n    ↑ Combine to get bound value\n\n  PROVE LOWER_BOUND:\n    ↑ Construct a smaller instance and apply h1\n    ↑ Use FACT h3: pointwise_sub(seq(0), make(n')) = Dim.prec - n'\n    ↑ Show equality via recursive decomposition\n\n  CONCLUDE: All components proven; theorem holds for all n\n    ↑ Final conclusion that the equality is valid\n\n  CONCLUDE: Therefore, max(pointwise_sub(seq(0), make(n))) = max(seq(0)) - max(make(n))\n    [QED]\nEND\n```\n\n**Key Structural Observations:**\n\n1. **Scope and Structure**: The proof is organized into BEGIN/END, with clear BODY and STATEMENT blocks.\n2. **Key Keywords Used**:\n   - `PROVE` for the main goal\n   - `BEGIN` and `END` for proof boundaries\n   - `ASSUME` for introducing assumptions\n   - `SIMPLIFY` for algebraic transformations\n   - `APPLY` for invoking lemmas\n   - `INDUCTION` for inductive reasoning\n   - `FACT` for recording intermediate facts\n   - `WITNESS_AT` for evidence at specific indices\n   - `CONCLUDE` for final statement\n3. **Justification Flow**:\n   - Each step uses the required keywords.\n   - Every transformation is justified by a prior `BY` or `APPLY` clause.\n   - The proof is modular, with each subgoal clearly defined.\n4. **Compliance**:\n   - All required keywords appear exactly as specified.\n   - No Rocq or non-Angelito syntax is present.\n   - The final statement is exactly `CONCLUDE: ... [QED]`.\n\n**End of Proof**\n```",
+        "status": "invalid_format",
+        "error": "Rewrite output contains non-Angelito lines.\nExamples:\n↑ Formal proof of the theorem\n↔ Goal: Establish equality between max(pointwise_sub(seq(0), make(n))) and max(seq(0)) - max(make(n))\n↑ Algebraic simplification of the difference\n↑ Use FACT h1: seq(0)[Dim.prec] = Dim.prec\n↑ Pass by Dim.prec to apply maps_to_seq\n\nRaw output:\nPROVE max_pointwise_sub_rw: ∀n. max(pointwise_sub(seq(0), make(n))) = max(seq(0)) - max(make(n))\n  ↑ Formal proof of the theorem\n\nBEGIN\n  ASSUME n : ℕ\n  ↔ Goal: Establish equality between max(pointwise_sub(seq(0), make(n))) and max(seq(0)) - max(make(n))\n\n  SIMPLIFY RHS: max(seq(0)) - max(make(n)) = Dim.prec - n [BY max_seq_rw, max_make_rw]\n    ↑ Algebraic simplification of the difference\n\n  GOAL: Show that the left-hand side equals the right-hand side\n\n  APPLY max_iff SPLIT INTO:\n    (1) MEMBERSHIP: element exists at position 0\n    (2) UPPER_BOUND: all elements are bounded by max(seq(0))\n    (3) LOWER_BOUND: constructed via inductive hypothesis\n\n  PROVE MEMBERSHIP:\n    ↑ Use FACT h1: seq(0)[Dim.prec] = Dim.prec\n    ↑ Pass by Dim.prec to apply maps_to_seq\n\n  PROVE UPPER_BOUND:\n    ↑ Assume n' = S n', apply induction hypothesis to tail\n    ↑ Use FACT h2: make(n')[Dim.prec] = n'\n    ↑ Combine to get bound value\n\n  PROVE LOWER_BOUND:\n    ↑ Construct a smaller instance and apply h1\n    ↑ Use FACT h3: pointwise_sub(seq(0), make(n')) = Dim.prec - n'\n    ↑ Show equality via recursive decomposition\n\n  CONCLUDE: All components proven; theorem holds for all n\n    ↑ Final conclusion that the \n...[truncated]..."
+      },
+      {
+        "format_attempt": 2,
+        "model": "openrouter/free",
+        "raw_output": "PROVE ex1: ∀n : nat, n + 0 = n\nBEGIN\n  ASSUME n : nat\n  INDUCTION n\n  PROVE BASE_CASE:\n    SIMPLIFY LHS: 0 + 0 = 0 [BY add_zero]\n    CONCLUDE: 0 + 0 = 0 [QED]\n  PROVE INDUCTIVE_CASE:\n    ASSUME m : nat\n    INDUCTIVE_HYPOTHESIS ih: m + 0 = m\n    SIMPLIFY LHS: S m + 0 = S (m + 0) [BY add_S]\n    SIMPLIFY RHS: S (m + 0) = S m [BY ih]\n    CONCLUDE: S m + 0 = S m [QED]\nEND",
+        "status": "parsed",
+        "parsed_output": "PROVE ex1: ∀n : nat, n + 0 = n\nBEGIN\n  ASSUME n : nat\n  INDUCTION n\n  PROVE BASE_CASE:\n    SIMPLIFY LHS: 0 + 0 = 0 [BY add_zero]\n    CONCLUDE: 0 + 0 = 0 [QED]\n  PROVE INDUCTIVE_CASE:\n    ASSUME m : nat\n    INDUCTIVE_HYPOTHESIS ih: m + 0 = m\n    SIMPLIFY LHS: S m + 0 = S (m + 0) [BY add_S]\n    SIMPLIFY RHS: S (m + 0) = S m [BY ih]\n    CONCLUDE: S m + 0 = S m [QED]\nEND"
+      }
+    ]
+  },
+  "skeleton": {
+    "text": "intros n.\ninduction n.\n- admit.\n- admit.",
+    "rendered_text": "intros n.\ninduction n.\n- admit.\n- admit.",
+    "slot_names": [
+      "base_case",
+      "inductive_case"
+    ],
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "openrouter/free",
+        "raw_output": "induction ... .",
+        "status": "invalid_format",
+        "error": "Model did not return a valid Coq tactic block.\nRaw output:\ninduction ... ."
+      },
+      {
+        "format_attempt": 2,
+        "model": "openrouter/free",
+        "raw_output": "induction n.",
+        "status": "invalid_format",
+        "error": "Skeleton is missing introductions before opening proof structure.\nRaw output:\ninduction n."
+      },
+      {
+        "format_attempt": 3,
+        "model": "openrouter/free",
+        "raw_output": "intros n.\ninduction n.\n- admit.\n- admit.",
+        "status": "parsed",
+        "parsed_output": "intros n.\ninduction n.\n- admit.\n- admit."
+      }
+    ],
+    "compiles": true,
+    "check_stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+    "stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+    "check_stderr": "",
+    "stderr": ""
+  },
+  "fills": [
+    {
+      "slot_name": "base_case",
+      "admit_index": 2,
+      "attempt": 1,
+      "current_goal_state": "",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "openrouter/free",
+          "raw_output": "simpl.\nreflexivity.",
+          "status": "parsed",
+          "parsed_output": "simpl.\nreflexivity."
+        }
+      ],
+      "replacement": "simpl.\nreflexivity.",
+      "exit_code": 0,
+      "check_stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+      "stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+      "check_stderr": "",
+      "stderr": "",
+      "status": "success"
+    },
+    {
+      "slot_name": "inductive_case",
+      "admit_index": 4,
+      "attempt": 1,
+      "current_goal_state": "",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "openrouter/free",
+          "raw_output": "```coq\nsimpl.\nrewrite IHn.\nreflexivity.\n```",
+          "status": "parsed",
+          "parsed_output": "simpl.\nrewrite IHn.\nreflexivity."
+        }
+      ],
+      "replacement": "simpl.\nrewrite IHn.\nreflexivity.",
+      "exit_code": 0,
+      "check_stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+      "stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+      "check_stderr": "",
+      "stderr": "",
+      "status": "success"
+    }
+  ],
+  "summary": {
+    "admits_filled": 2,
+    "total_attempts": 2,
+    "slot_count": 2
+  },
+  "ended_at": "2026-04-08T12:47:01"
+}

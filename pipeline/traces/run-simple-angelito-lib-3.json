@@ -1,0 +1,66 @@
+{
+  "started_at": "2026-04-08T13:02:53",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\test_skeleton.v",
+    "target_rel": "coq/test_skeleton.v"
+  },
+  "config": {
+    "max_fill_attempts": 3,
+    "rewrite_model": [
+      "openrouter/free"
+    ],
+    "skeleton_model": [
+      "openrouter/free"
+    ],
+    "fill_model": [
+      "openrouter/free"
+    ],
+    "request_retries": 4,
+    "request_backoff_base_sec": 1.5,
+    "request_backoff_multiplier": 2.0,
+    "request_backoff_max_sec": 20.0,
+    "request_backoff_jitter_sec": 0.35
+  },
+  "model_log_path": "C:\\Users\\clark\\RocqCoSPOC\\pipeline\\traces\\run-simple-angelito-lib-3-model-log.jsonl",
+  "rewrite": {
+    "text": "PROVE proposition  \nBEGIN  \n  FACT h1: n + 0 = n [BY definition]  \n  FACT h2: 0 = 0 [BY base case]  \n  INDUCTION n  \n    SINCE n = 0  \n      THEREFORE n + 0 = n [BY base]  \n    INDUCTIVE_CASE  \n      FACT h3: n + 0 = n [BY hypothesis]  \n      SINCE n = S m + 0  \n        THEREFORE n + 0 = m + 0 = m [BY induction]  \n  CONCLUDE: n + 0 = n [QED]  \nEND",
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "openrouter/free",
+        "raw_output": "PROVE proposition  \nBEGIN  \n  FACT h1: n + 0 = n [BY definition]  \n  FACT h2: 0 = 0 [BY base case]  \n  INDUCTION n  \n    SINCE n = 0  \n      THEREFORE n + 0 = n [BY base]  \n    INDUCTIVE_CASE  \n      FACT h3: n + 0 = n [BY hypothesis]  \n      SINCE n = S m + 0  \n        THEREFORE n + 0 = m + 0 = m [BY induction]  \n  CONCLUDE: n + 0 = n [QED]  \nEND",
+        "status": "parsed",
+        "parsed_output": "PROVE proposition  \nBEGIN  \n  FACT h1: n + 0 = n [BY definition]  \n  FACT h2: 0 = 0 [BY base case]  \n  INDUCTION n  \n    SINCE n = 0  \n      THEREFORE n + 0 = n [BY base]  \n    INDUCTIVE_CASE  \n      FACT h3: n + 0 = n [BY hypothesis]  \n      SINCE n = S m + 0  \n        THEREFORE n + 0 = m + 0 = m [BY induction]  \n  CONCLUDE: n + 0 = n [QED]  \nEND"
+      }
+    ]
+  },
+  "skeleton": {
+    "text": "intros n.induction n.\nadmit.\nadmit.",
+    "rendered_text": "intros n.induction n.\nadmit.\nadmit.",
+    "slot_names": [
+      "slot_1",
+      "slot_2"
+    ],
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "openrouter/free",
+        "raw_output": "intros n.induction n.\n- admit.\n- admit.",
+        "status": "parsed",
+        "parsed_output": "intros n.induction n.\nadmit.\nadmit."
+      }
+    ],
+    "compiles": false,
+    "check_stdout": "Checking coq/test_skeleton.v ...",
+    "stdout": "Checking coq/test_skeleton.v ...",
+    "check_stderr": "File \".\\coq/test_skeleton.v\", line 6, characters 10-20:\nError:\nSyntax error: [ltac_use_default] expected after [tactic] (in [tactic_command]).\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1",
+    "stderr": "File \".\\coq/test_skeleton.v\", line 6, characters 10-20:\nError:\nSyntax error: [ltac_use_default] expected after [tactic] (in [tactic_command]).\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1"
+  },
+  "fills": [],
+  "summary": {},
+  "error": "Skeleton does not compile. Refusing to start fill retries on an invalid proof scaffold.\nFile \".\\coq/test_skeleton.v\", line 6, characters 10-20:\nError:\nSyntax error: [ltac_use_default] expected after [tactic] (in [tactic_command]).\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1\n \n",
+  "ended_at": "2026-04-08T13:04:20"
+}

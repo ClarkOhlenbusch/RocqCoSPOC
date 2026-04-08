@@ -1,0 +1,69 @@
+{
+  "started_at": "2026-04-08T13:04:59",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\test_skeleton.v",
+    "target_rel": "coq/test_skeleton.v"
+  },
+  "config": {
+    "max_fill_attempts": 3,
+    "rewrite_model": [
+      "openrouter/free"
+    ],
+    "skeleton_model": [
+      "openrouter/free"
+    ],
+    "fill_model": [
+      "openrouter/free"
+    ],
+    "request_retries": 4,
+    "request_backoff_base_sec": 1.5,
+    "request_backoff_multiplier": 2.0,
+    "request_backoff_max_sec": 20.0,
+    "request_backoff_jitter_sec": 0.35
+  },
+  "model_log_path": "C:\\Users\\clark\\RocqCoSPOC\\pipeline\\traces\\run-simple-angelito-lib-4-model-log.jsonl",
+  "rewrite": {
+    "text": "PROVE forall n : nat, n + 0 = n  \nBEGIN  \n  BEGIN INDUCTION  \n  PROVE BASE_CASE: n = 0  \n    FACT h0: 0 = 0 [BY 0_eq]  \n  PROVE INDUCTIVE_CASE: n = S k  \n    FACT hk: n + 0 = n [BY hk_eq]  \n    APPLY INDUCTION_HYP: hk : n + 0 = n [BY ih]  \n    SPLIT INTO: (n + 0) = n + 0 [BY n_eq]  \n    CONCLUDE: Result proven  \n  CONCLUDE  \nEND",
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "openrouter/free",
+        "raw_output": "PROVE forall n : nat, n + 0 = n  \nBEGIN  \n  BEGIN INDUCTION  \n  PROVE BASE_CASE: n = 0  \n    FACT h0: 0 = 0 [BY 0_eq]  \n  PROVE INDUCTIVE_CASE: n = S k  \n    FACT hk: n + 0 = n [BY hk_eq]  \n    APPLY INDUCTION_HYP: hk : n + 0 = n [BY ih]  \n    SPLIT INTO: (n + 0) = n + 0 [BY n_eq]  \n    CONCLUDE: Result proven  \n  CONCLUDE  \nEND",
+        "status": "parsed",
+        "parsed_output": "PROVE forall n : nat, n + 0 = n  \nBEGIN  \n  BEGIN INDUCTION  \n  PROVE BASE_CASE: n = 0  \n    FACT h0: 0 = 0 [BY 0_eq]  \n  PROVE INDUCTIVE_CASE: n = S k  \n    FACT hk: n + 0 = n [BY hk_eq]  \n    APPLY INDUCTION_HYP: hk : n + 0 = n [BY ih]  \n    SPLIT INTO: (n + 0) = n + 0 [BY n_eq]  \n    CONCLUDE: Result proven  \n  CONCLUDE  \nEND"
+      }
+    ]
+  },
+  "skeleton": {
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "openrouter/free",
+        "raw_output": "- intros n\ninduction n.\n  - admit.\n  - apply ih.\n  - admit.",
+        "status": "invalid_format",
+        "error": "Skeleton introduced `induction` even though the Angelito proof has no `INDUCTION` step.\nRaw output:\n- intros n\ninduction n.\n  - admit.\n  - apply ih.\n  - admit."
+      },
+      {
+        "format_attempt": 2,
+        "model": "openrouter/free",
+        "raw_output": "intros n.\ninduction n.\n- admit.\n- admit.",
+        "status": "invalid_format",
+        "error": "Skeleton introduced `induction` even though the Angelito proof has no `INDUCTION` step.\nRaw output:\nintros n.\ninduction n.\n- admit.\n- admit."
+      },
+      {
+        "format_attempt": 3,
+        "model": "openrouter/free",
+        "raw_output": "intros n.\ninduction n.\n- admit.\n- admit.",
+        "status": "invalid_format",
+        "error": "Skeleton introduced `induction` even though the Angelito proof has no `INDUCTION` step.\nRaw output:\nintros n.\ninduction n.\n- admit.\n- admit."
+      }
+    ]
+  },
+  "fills": [],
+  "summary": {},
+  "error": "Skeleton generation failed: skeleton failed format validation:\n  - Attempt 1: Skeleton introduced `induction` even though the Angelito proof has no `INDUCTION` step.\nRaw output:\n- intros n\ninduction n.\n  - admit.\n  - apply ih.\n  - admit.\n  - Attempt 2: Skeleton introduced `induction` even though the Angelito proof has no `INDUCTION` step.\nRaw output:\nintros n.\ninduction n.\n- admit.\n- admit.\n  - Attempt 3: Skeleton introduced `induction` even though the Angelito proof has no `INDUCTION` step.\nRaw output:\nintros n.\ninduction n.\n- admit.\n- admit.",
+  "ended_at": "2026-04-08T13:05:34"
+}

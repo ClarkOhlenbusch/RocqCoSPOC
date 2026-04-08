@@ -18,9 +18,9 @@ function SummaryCard({ label, value }) {
   );
 }
 
-function StateBlock({ title, content }) {
+function StateBlock({ title, content, open = false }) {
   return (
-    <details className="state-block">
+    <details className="state-block" open={open}>
       <summary>{title}</summary>
       <pre>{content || "(empty)"}</pre>
     </details>
@@ -32,10 +32,6 @@ function formatCompilerFeedback(feedback) {
     return "";
   }
   return feedback.map((entry) => `<${entry.tag}>\n${entry.content}\n</${entry.tag}>`).join("\n\n");
-}
-
-function isSkeletonTrace(trace) {
-  return trace && (trace.skeleton != null || trace.fills != null);
 }
 
 function App() {
@@ -162,39 +158,29 @@ function App() {
 
   const summary = useMemo(() => {
     if (!trace) return null;
-    if (isSkeletonTrace(trace)) {
-      const fills = trace.fills || [];
-      const totalAttempts = fills.length;
-      const succeeded = fills.filter((fill) => fill.status === "success").length;
-      const failed = fills.filter((fill) => fill.status === "compile_error" || fill.status === "model_error").length;
-      const xmlFeedbackAttempts = fills.filter((fill) => (fill.compiler_feedback || []).length > 0).length;
-      return {
-        mode: "Skeleton + Fill",
-        admitsFilled: trace.summary?.admits_filled ?? succeeded,
-        totalAttempts: trace.summary?.total_attempts ?? totalAttempts,
-        failedAttempts: failed,
-        xmlFeedbackAttempts,
-      };
-    }
-
-    const transitionCount = trace.summary?.transition_count ?? trace.transitions?.length ?? 0;
-    const etr = trace.summary?.etr_retries ?? 0;
-    const esr = trace.summary?.esr_retries ?? 0;
-    const attempts = (trace.transitions || []).flatMap((transition) => transition.attempts || []);
-    const modelAttempts = attempts.filter((attempt) => attempt.tactic_source === "model").length;
-    const fallbackAttempts = attempts.filter((attempt) => attempt.tactic_source === "heuristic_fallback").length;
+    const fills = trace.fills || [];
+    const totalAttempts = fills.length;
+    const succeeded = fills.filter((fill) => fill.status === "success").length;
+    const failed = fills.filter((fill) => fill.status === "compile_error" || fill.status === "model_error").length;
+    const xmlFeedbackAttempts = fills.filter((fill) => (fill.compiler_feedback || []).length > 0).length;
+    const formatRetries = fills.reduce(
+      (count, fill) => count + (fill.model_attempts || []).filter((attempt) => attempt.status === "invalid_format").length,
+      0,
+    );
+    const modelAttempts = fills.filter((fill) => fill.source === "model").length;
     return {
-      mode: "Legacy (transitions)",
-      transitionCount,
-      etr,
-      esr,
+      mode: "Skeleton + Fill",
+      admitsFilled: trace.summary?.admits_filled ?? succeeded,
+      totalAttempts: trace.summary?.total_attempts ?? totalAttempts,
+      failedAttempts: failed,
+      xmlFeedbackAttempts,
+      formatRetries,
       modelAttempts,
-      fallbackAttempts,
     };
   }, [trace]);
 
   const runStatus = activeRun?.status || "idle";
-  const skeleton = isSkeletonTrace(trace);
+  const supportsCurrentTrace = !trace || "skeleton" in trace || "fills" in trace;
 
   return (
     <div className="container">
@@ -293,27 +279,23 @@ function App() {
 
       {trace?.status === "failed" && trace?.error && <section className="panel error">{trace.error}</section>}
 
-      {trace && (
+      {trace && !supportsCurrentTrace && (
+        <section className="panel error">
+          This trace does not use the current skeleton-and-fill format. Start a new run to inspect it here.
+        </section>
+      )}
+
+      {trace && supportsCurrentTrace && (
         <>
           <section className="panel summary-grid">
             <SummaryCard label="Status" value={trace.status || "unknown"} />
             <SummaryCard label="Mode" value={summary?.mode || "unknown"} />
-            {skeleton ? (
-              <>
-                <SummaryCard label="Admits Filled" value={summary?.admitsFilled} />
-                <SummaryCard label="Total Attempts" value={summary?.totalAttempts} />
-                <SummaryCard label="Failed Attempts" value={summary?.failedAttempts} />
-                <SummaryCard label="XML Feedback Attempts" value={summary?.xmlFeedbackAttempts} />
-              </>
-            ) : (
-              <>
-                <SummaryCard label="Transitions" value={summary?.transitionCount} />
-                <SummaryCard label="Model Attempts" value={summary?.modelAttempts} />
-                <SummaryCard label="Fallback Attempts" value={summary?.fallbackAttempts} />
-                <SummaryCard label="ETR Retries" value={summary?.etr} />
-                <SummaryCard label="ESR Retries" value={summary?.esr} />
-              </>
-            )}
+            <SummaryCard label="Admits Filled" value={summary?.admitsFilled} />
+            <SummaryCard label="Total Attempts" value={summary?.totalAttempts} />
+            <SummaryCard label="Failed Attempts" value={summary?.failedAttempts} />
+            <SummaryCard label="XML Feedback Attempts" value={summary?.xmlFeedbackAttempts} />
+            <SummaryCard label="Format Retries" value={summary?.formatRetries} />
+            <SummaryCard label="Model Attempts" value={summary?.modelAttempts} />
           </section>
 
           <section className="panel">
@@ -321,92 +303,84 @@ function App() {
             <pre>{trace.rewrite?.text || "(missing rewrite text)"}</pre>
           </section>
 
-          {skeleton ? (
-            <section className="panel">
-              <h2>Step 2 - Skeleton</h2>
-              {trace.skeleton?.compiles != null && (
-                <p>
-                  Skeleton compiles: <strong>{trace.skeleton.compiles ? "Yes" : "No"}</strong>
-                </p>
-              )}
-              {trace.skeleton?.check_stdout && (
-                <StateBlock title="Skeleton compile stdout" content={trace.skeleton.check_stdout} />
-              )}
-              {trace.skeleton?.check_stderr && (
-                <StateBlock title="Skeleton compile stderr" content={trace.skeleton.check_stderr} />
-              )}
-              {trace.skeleton?.compiler_feedback?.length > 0 && (
-                <StateBlock
-                  title="Structured Compiler Feedback"
-                  content={formatCompilerFeedback(trace.skeleton.compiler_feedback)}
-                />
-              )}
+          <section className="panel">
+            <h2>Step 2 - Skeleton</h2>
+            {trace.skeleton?.compiles != null && (
+              <p>
+                Skeleton compiles: <strong>{trace.skeleton.compiles ? "Yes" : "No"}</strong>
+              </p>
+            )}
+            {trace.skeleton?.full_file_text && (
+              <StateBlock title="Full target file (lemma and proof)" content={trace.skeleton.full_file_text} open />
+            )}
+            {trace.skeleton?.proof_state != null && trace.skeleton.proof_state !== "" && (
+              <StateBlock title="Proof state (first admit)" content={trace.skeleton.proof_state} open />
+            )}
+            {(trace.skeleton?.slot_names || []).length > 0 && trace.skeleton?.proof_state === "" && (
+              <p className="helper-text">
+                Proof state was not captured. Check that <code>scripts/get-proof-state.ps1</code> can run{" "}
+                <code>coqtop</code> for this file.
+              </p>
+            )}
+            {trace.skeleton?.check_stdout && (
+              <StateBlock title="Skeleton compile stdout" content={trace.skeleton.check_stdout} />
+            )}
+            {trace.skeleton?.check_stderr && (
+              <StateBlock title="Skeleton compile stderr" content={trace.skeleton.check_stderr} />
+            )}
+            {trace.skeleton?.compiler_feedback?.length > 0 && (
+              <StateBlock
+                title="Structured Compiler Feedback"
+                content={formatCompilerFeedback(trace.skeleton.compiler_feedback)}
+              />
+            )}
+            <details className="state-block" open={!trace.skeleton?.full_file_text}>
+              <summary>Tactic skeleton only (proof body, no lemma)</summary>
               <pre>{trace.skeleton?.text || "(missing skeleton)"}</pre>
-            </section>
-          ) : (
-            <section className="panel">
-              <h2>Step 2 - Proof Goal</h2>
-              <p>Direct proving (initial goal -&gt; No Goals)</p>
-              {(trace.goal_sequence?.states || []).map((stateText, idx) => (
-                <StateBlock key={idx} title={idx === 0 ? "Initial Goal" : "Target"} content={stateText} />
-              ))}
-            </section>
-          )}
+            </details>
+          </section>
 
-          {skeleton ? (
-            <section className="panel">
-              <h2>Step 3 - Fill Admits</h2>
-              {(trace.fills || []).length === 0 && <p>(no fills yet)</p>}
-              {(trace.fills || []).map((fill, idx) => (
-                <details key={`${fill.admit_index ?? "unknown"}-${fill.attempt ?? idx}-${idx}`} className="transition-block">
-                  <summary>
-                    Admit #{fill.admit_index != null ? fill.admit_index + 1 : idx + 1} | Attempt {fill.attempt}
-                    {" | "}
-                    {fill.status || "pending"}
-                    {fill.exit_code != null && ` | exit ${fill.exit_code}`}
-                  </summary>
-                  {fill.replacement && <StateBlock title="Replacement tactics" content={fill.replacement} />}
-                  {fill.check_stdout && <StateBlock title="Compile stdout" content={fill.check_stdout} />}
-                  {fill.check_stderr && <StateBlock title="Compile stderr" content={fill.check_stderr} />}
-                  {fill.compiler_feedback?.length > 0 && (
+          <section className="panel">
+            <h2>Step 3 - Fill Admits</h2>
+            {(trace.fills || []).length === 0 && <p>(no fills yet)</p>}
+            {(trace.fills || []).map((fill, idx) => (
+              <details key={`${fill.admit_index ?? "unknown"}-${fill.attempt ?? idx}-${idx}`} className="transition-block">
+                <summary>
+                  Admit #{fill.admit_index != null ? fill.admit_index + 1 : idx + 1} | Attempt {fill.attempt}
+                  {fill.slot_name ? ` | ${fill.slot_name}` : ""}
+                  {" | "}
+                  {fill.status || "pending"}
+                  {fill.exit_code != null && ` | exit ${fill.exit_code}`}
+                </summary>
+                <p>Source: {fill.source || "unknown"}</p>
+                {fill.current_goal_state && <StateBlock title="Current goal state" content={fill.current_goal_state} />}
+                {(fill.model_attempts || []).map((modelAttempt) => (
+                  <div key={modelAttempt.format_attempt}>
                     <StateBlock
-                      title="Structured Compiler Feedback"
-                      content={formatCompilerFeedback(fill.compiler_feedback)}
+                      title={`Model output (format attempt ${modelAttempt.format_attempt})`}
+                      content={modelAttempt.raw_output}
                     />
-                  )}
-                  {fill.error && <StateBlock title="Error" content={fill.error} />}
-                </details>
-              ))}
-            </section>
-          ) : (
-            <section className="panel">
-              <h2>Step 3 - Transitions</h2>
-              {(trace.transitions || []).map((transition) => (
-                <details key={transition.transition_index} className="transition-block">
-                  <summary>
-                    Transition {transition.transition_index} ({transition.from_state_index} -&gt; {transition.to_state_index}) |{" "}
-                    {transition.status}
-                  </summary>
-                  <StateBlock title="Expected From State" content={transition.from_state} />
-                  <StateBlock title="Expected To State" content={transition.to_state} />
-                  {(transition.attempts || []).map((attempt) => (
-                    <details key={attempt.attempt} className="attempt-block">
-                      <summary>
-                        Attempt {attempt.attempt} | {attempt.status || "unknown"} | source: {attempt.tactic_source || "n/a"}
-                      </summary>
-                      {"tactic" in attempt && <StateBlock title="Tactic" content={attempt.tactic} />}
-                      {"etr_tactic" in attempt && <StateBlock title="ETR Tactic" content={attempt.etr_tactic} />}
-                      {"esr_tactic" in attempt && <StateBlock title="ESR Tactic" content={attempt.esr_tactic} />}
-                      {"actual_state" in attempt && <StateBlock title="Actual State" content={attempt.actual_state} />}
-                      {"check_stdout" in attempt && <StateBlock title="check-target stdout" content={attempt.check_stdout} />}
-                      {"check_stderr" in attempt && <StateBlock title="check-target stderr" content={attempt.check_stderr} />}
-                      {"error" in attempt && <StateBlock title="Error" content={attempt.error} />}
-                    </details>
-                  ))}
-                </details>
-              ))}
-            </section>
-          )}
+                    {modelAttempt.error && (
+                      <StateBlock
+                        title={`Format error (attempt ${modelAttempt.format_attempt})`}
+                        content={modelAttempt.error}
+                      />
+                    )}
+                  </div>
+                ))}
+                {fill.replacement && <StateBlock title="Replacement tactics" content={fill.replacement} />}
+                {fill.check_stdout && <StateBlock title="Compile stdout" content={fill.check_stdout} />}
+                {fill.check_stderr && <StateBlock title="Compile stderr" content={fill.check_stderr} />}
+                {fill.compiler_feedback?.length > 0 && (
+                  <StateBlock
+                    title="Structured Compiler Feedback"
+                    content={formatCompilerFeedback(fill.compiler_feedback)}
+                  />
+                )}
+                {fill.error && <StateBlock title="Error" content={fill.error} />}
+              </details>
+            ))}
+          </section>
         </>
       )}
     </div>

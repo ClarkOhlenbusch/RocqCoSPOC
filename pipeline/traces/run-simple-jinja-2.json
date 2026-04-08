@@ -1,0 +1,212 @@
+{
+  "started_at": "2026-04-08T12:07:37",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\test_skeleton.v",
+    "target_rel": "coq/test_skeleton.v"
+  },
+  "config": {
+    "max_fill_attempts": 3,
+    "rewrite_model": [
+      "openrouter/free"
+    ],
+    "skeleton_model": [
+      "openrouter/free"
+    ],
+    "fill_model": [
+      "openrouter/free"
+    ],
+    "request_retries": 4,
+    "request_backoff_base_sec": 1.5,
+    "request_backoff_multiplier": 2.0,
+    "request_backoff_max_sec": 20.0,
+    "request_backoff_jitter_sec": 0.35
+  },
+  "model_log_path": "C:\\Users\\clark\\RocqCoSPOC\\pipeline\\traces\\run-simple-jinja-2-model-log.jsonl",
+  "rewrite": {
+    "text": "PROVE ex1: ∀ n : nat, n + 0 = n\nBEGIN\n  ASSUME n : nat\n\n  INDUCTION n\n\n  PROVE BASE_CASE: n = 0\n    FACT h1: 0 + 0 = 0 [BY plus_zero_left]\n    THEREFORE 0 + 0 = 0 [BY h1]\n    CONCLUDE: base case holds [QED]\n\n  PROVE INDUCTIVE_CASE: n = S n'\n    ASSUME n' : nat\n    INDUCTIVE_HYPOTHESIS ih: n' + 0 = n' [BY induction_hypothesis]\n    FACT h2: S n' + 0 = S (n' + 0) [BY plus_succ]\n    FACT h3: S (n' + 0) = S n' [BY ih]\n    THEREFORE S n' + 0 = S n' [BY h2, h3]\n    CONCLUDE: inductive case holds [QED]\n\n  CONCLUDE: ∀ n : nat, n + 0 = n [QED]\nEND",
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "openrouter/free",
+        "raw_output": "PROVE ex1: ∀ n : nat, n + 0 = n\nBEGIN\n  ASSUME n : nat\n\n  INDUCTION n\n\n  PROVE BASE_CASE: n = 0\n    FACT h1: 0 + 0 = 0 [BY plus_zero_left]\n    THEREFORE 0 + 0 = 0 [BY h1]\n    CONCLUDE: base case holds [QED]\n\n  PROVE INDUCTIVE_CASE: n = S n'\n    ASSUME n' : nat\n    INDUCTIVE_HYPOTHESIS ih: n' + 0 = n' [BY induction_hypothesis]\n    FACT h2: S n' + 0 = S (n' + 0) [BY plus_succ]\n    FACT h3: S (n' + 0) = S n' [BY ih]\n    THEREFORE S n' + 0 = S n' [BY h2, h3]\n    CONCLUDE: inductive case holds [QED]\n\n  CONCLUDE: ∀ n : nat, n + 0 = n [QED]\nEND",
+        "status": "parsed",
+        "parsed_output": "PROVE ex1: ∀ n : nat, n + 0 = n\nBEGIN\n  ASSUME n : nat\n\n  INDUCTION n\n\n  PROVE BASE_CASE: n = 0\n    FACT h1: 0 + 0 = 0 [BY plus_zero_left]\n    THEREFORE 0 + 0 = 0 [BY h1]\n    CONCLUDE: base case holds [QED]\n\n  PROVE INDUCTIVE_CASE: n = S n'\n    ASSUME n' : nat\n    INDUCTIVE_HYPOTHESIS ih: n' + 0 = n' [BY induction_hypothesis]\n    FACT h2: S n' + 0 = S (n' + 0) [BY plus_succ]\n    FACT h3: S (n' + 0) = S n' [BY ih]\n    THEREFORE S n' + 0 = S n' [BY h2, h3]\n    CONCLUDE: inductive case holds [QED]\n\n  CONCLUDE: ∀ n : nat, n + 0 = n [QED]\nEND"
+      }
+    ]
+  },
+  "skeleton": {
+    "text": "intros n.\ninduction n.\n- admit.\n- admit.",
+    "rendered_text": "intros n.\ninduction n.\n- admit.\n- admit.",
+    "slot_names": [
+      "base_case",
+      "inductive_case"
+    ],
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "openrouter/free",
+        "raw_output": "intros n.\ninduction n.\n- admit.\n- admit.",
+        "status": "parsed",
+        "parsed_output": "intros n.\ninduction n.\n- admit.\n- admit."
+      }
+    ],
+    "compiles": true,
+    "check_stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+    "stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+    "check_stderr": "",
+    "stderr": ""
+  },
+  "fills": [
+    {
+      "slot_name": "base_case",
+      "admit_index": 2,
+      "attempt": 1,
+      "current_goal_state": "State 0:\n============================\n0 + 0 = 0",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "openrouter/free",
+          "raw_output": "lia.",
+          "status": "parsed",
+          "parsed_output": "lia."
+        }
+      ],
+      "replacement": "lia.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/test_skeleton.v ...",
+      "stdout": "Checking coq/test_skeleton.v ...",
+      "check_stderr": "File \".\\coq/test_skeleton.v\", line 5, characters 4-7:\nError: The reference lia was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1",
+      "stderr": "File \".\\coq/test_skeleton.v\", line 5, characters 4-7:\nError: The reference lia was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1",
+      "status": "compile_error"
+    },
+    {
+      "slot_name": "base_case",
+      "admit_index": 2,
+      "attempt": 2,
+      "current_goal_state": "State 0:\n============================\n0 + 0 = 0",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "openrouter/free",
+          "raw_output": "```coq\nsimplify rhs x = y using ltac:(rewrite lemma1, lemma2).\n```",
+          "status": "parsed",
+          "parsed_output": "simplify rhs x = y using ltac:(rewrite lemma1, lemma2)."
+        }
+      ],
+      "replacement": "simplify rhs x = y using ltac:(rewrite lemma1, lemma2).",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/test_skeleton.v ...",
+      "stdout": "Checking coq/test_skeleton.v ...",
+      "check_stderr": "File \".\\coq/test_skeleton.v\", line 5, characters 19-20:\nError:\nSyntax error: [ltac_use_default] expected after [tactic] (in [tactic_command]).\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1",
+      "stderr": "File \".\\coq/test_skeleton.v\", line 5, characters 19-20:\nError:\nSyntax error: [ltac_use_default] expected after [tactic] (in [tactic_command]).\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1",
+      "status": "compile_error"
+    },
+    {
+      "slot_name": "base_case",
+      "admit_index": 2,
+      "attempt": 3,
+      "current_goal_state": "State 0:\n============================\n0 + 0 = 0",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "openrouter/free",
+          "raw_output": "reflexivity.",
+          "status": "parsed",
+          "parsed_output": "reflexivity."
+        }
+      ],
+      "replacement": "reflexivity.",
+      "exit_code": 0,
+      "check_stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+      "stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+      "check_stderr": "",
+      "stderr": "",
+      "status": "success"
+    },
+    {
+      "slot_name": "inductive_case",
+      "admit_index": 3,
+      "attempt": 1,
+      "current_goal_state": "State 0:\nn : nat\nIHn : n + 0 = n\n============================\nS n + 0 = S n\nNo more goals, but there are some goals you gave up:",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "openrouter/free",
+          "raw_output": "apply plus_zero.",
+          "status": "parsed",
+          "parsed_output": "apply plus_zero."
+        }
+      ],
+      "replacement": "apply plus_zero.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/test_skeleton.v ...",
+      "stdout": "Checking coq/test_skeleton.v ...",
+      "check_stderr": "File \".\\coq/test_skeleton.v\", line 6, characters 10-19:\nError: The variable plus_zero was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1",
+      "stderr": "File \".\\coq/test_skeleton.v\", line 6, characters 10-19:\nError: The variable plus_zero was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1",
+      "status": "compile_error"
+    },
+    {
+      "slot_name": "inductive_case",
+      "admit_index": 3,
+      "attempt": 2,
+      "current_goal_state": "State 0:\nn : nat\nIHn : n + 0 = n\n============================\nS n + 0 = S n\nNo more goals, but there are some goals you gave up:",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "openrouter/free",
+          "raw_output": "apply\n\nThe single `admit.` placeholder is replaced with `apply`, leveraging the context where the goal is already assumed and requires proof completion through standard tactics like applying a lemma or simplification. This ensures the goal is discharged via structural or algebraic manipulation inherent to the proof's structure. \n\n**Final Answer**\napply\n\n\\boxed{apply}",
+          "status": "invalid_format",
+          "error": "Model did not return a valid Coq tactic block.\nRaw output:\napply\n\nThe single `admit.` placeholder is replaced with `apply`, leveraging the context where the goal is already assumed and requires proof completion through standard tactics like applying a lemma or simplification. This ensures the goal is discharged via structural or algebraic manipulation inherent to the proof's structure. \n\n**Final Answer**\napply\n\n\\boxed{apply}"
+        },
+        {
+          "format_attempt": 2,
+          "model": "openrouter/free",
+          "raw_output": "reflexivity",
+          "status": "parsed",
+          "parsed_output": "reflexivity."
+        }
+      ],
+      "replacement": "reflexivity.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/test_skeleton.v ...",
+      "stdout": "Checking coq/test_skeleton.v ...",
+      "check_stderr": "File \".\\coq/test_skeleton.v\", line 6, characters 4-15:\nError: In environment\nn : nat\nIHn : n + 0 = n\nUnable to unify \"S n\" with \"S n + 0\".\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1",
+      "stderr": "File \".\\coq/test_skeleton.v\", line 6, characters 4-15:\nError: In environment\nn : nat\nIHn : n + 0 = n\nUnable to unify \"S n\" with \"S n + 0\".\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1",
+      "status": "compile_error"
+    },
+    {
+      "slot_name": "inductive_case",
+      "admit_index": 3,
+      "attempt": 3,
+      "current_goal_state": "State 0:\nn : nat\nIHn : n + 0 = n\n============================\nS n + 0 = S n\nNo more goals, but there are some goals you gave up:",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "openrouter/free",
+          "raw_output": "rewrite IHn.\nreflexivity.",
+          "status": "parsed",
+          "parsed_output": "rewrite IHn.\nreflexivity."
+        }
+      ],
+      "replacement": "rewrite IHn.\nreflexivity.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/test_skeleton.v ...",
+      "stdout": "Checking coq/test_skeleton.v ...",
+      "check_stderr": "File \".\\coq/test_skeleton.v\", line 6, characters 4-15:\nError: Found no subterm matching \"n + 0\" in the current goal.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1",
+      "stderr": "File \".\\coq/test_skeleton.v\", line 6, characters 4-15:\nError: Found no subterm matching \"n + 0\" in the current goal.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1",
+      "status": "compile_error"
+    }
+  ],
+  "summary": {},
+  "error": "Failed to fill admit #2 after 3 attempts.",
+  "ended_at": "2026-04-08T12:08:59"
+}

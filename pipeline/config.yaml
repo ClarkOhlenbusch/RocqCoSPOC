@@ -1,15 +1,17 @@
 # Open Router model IDs for the automated proof pipeline.
-# See https://openrouter.ai/collections/free-models
+# Default: deepseek/deepseek-v3.2 for all stages.
+# The pipeline accepts either a single model string or an ordered fallback list.
 
 rewrite_model:
-  - "openrouter/free"
+  - "deepseek/deepseek-v3.2"
 skeleton_model:
-  - "openrouter/free"
+  - "deepseek/deepseek-v3.2"
 fill_model:
-  - "openrouter/free"
+  - "deepseek/deepseek-v3.2"
 
 # Max retries per sub-goal fill (compile-retry)
 max_fill_attempts: 3
+max_skeleton_attempts: 3
 
 # Generation defaults
 max_tokens: 2048
@@ -17,17 +19,8 @@ temperature: 0.0
 
 # Open Router request controls
 request_timeout_sec: 60
-request_retries: 2
-
-# Legacy models (kept for manual tactic/ETR/ESR workflows)
-tactic_model:
-  - "openrouter/free"
-etr_model:
-  - "openrouter/free"
-esr_model:
-  - "openrouter/free"
-prove_model:
-  - "openrouter/free"
-max_tactic_errors: 3
-max_state_mismatch: 2
-max_prove_attempts: 3
+request_retries: 4
+request_backoff_base_sec: 1.5
+request_backoff_multiplier: 2.0
+request_backoff_max_sec: 20.0
+request_backoff_jitter_sec: 0.35

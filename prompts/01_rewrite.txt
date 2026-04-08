@@ -8,7 +8,23 @@ You are an expert mathematician and a master of the Coq/Rocq proof assistant. Yo
 5. Use `INDUCTION` when the proof is inductive, with `PROVE BASE_CASE:` and `PROVE INDUCTIVE_CASE:` sub-blocks.
 6. Use `SIMPLIFY LHS/RHS` for algebraic rewrites, not prose descriptions.
 7. End every `PROVE` block with exactly one `CONCLUDE`.
-8. Output only the Angelito proof. No commentary, no meta-text, no markdown fences.
+8. Angelito keywords are declarative proof-language keywords, not Rocq tactics. Do not emit Rocq syntax such as `Proof.`, `Qed.`, bullets, `intros`, `rewrite`, `apply`, `reflexivity`, `lia`, or any Ltac script.
+9. Output only the Angelito proof. No commentary, no meta-text, no markdown fences.
+10. The first non-empty line must start with `PROVE ` and the last non-empty line must be exactly `END`.
+11. Each Angelito keyword must start its own line. Do not compress the proof into a single paragraph or single line.
+12. The specification contains unrelated reference examples. Never copy theorem names, identifiers, or domains from the spec unless they also appear in the target theorem below.
+13. The target theorem is authoritative. The rewritten Angelito proof must prove exactly that theorem and nothing else.
+14. Angelito keywords are declarative proof-language keywords, not Rocq tactics. Do not confuse Angelito keywords with `intros`, `rewrite`, `apply`, `lia`, `reflexivity`, or any other Rocq/Ltac command.
+
+**Required outer shape:**
+PROVE theorem_name: proposition
+BEGIN
+  ...
+  CONCLUDE: final statement [QED]
+END
+
+**Target Formal Statement (authoritative):**
+{formal_statement}
 
 **Angelito Specification Reference:**
 {angelito_spec}

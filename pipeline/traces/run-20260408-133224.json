@@ -1,0 +1,165 @@
+{
+  "started_at": "2026-04-08T13:32:24",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\test_skeleton.v",
+    "target_rel": "coq/test_skeleton.v"
+  },
+  "config": {
+    "max_fill_attempts": 3,
+    "max_skeleton_attempts": 3,
+    "rewrite_model": [
+      "deepseek/deepseek-v3.2"
+    ],
+    "skeleton_model": [
+      "deepseek/deepseek-v3.2"
+    ],
+    "fill_model": [
+      "deepseek/deepseek-v3.2"
+    ],
+    "request_retries": 4,
+    "request_backoff_base_sec": 1.5,
+    "request_backoff_multiplier": 2.0,
+    "request_backoff_max_sec": 20.0,
+    "request_backoff_jitter_sec": 0.35
+  },
+  "model_log_path": "C:\\Users\\clark\\RocqCoSPOC\\pipeline\\traces\\run-20260408-133224-model-log.jsonl",
+  "rewrite": {
+    "text": "PROVE ex1: ∀n : nat. n + 0 = n\nBEGIN\n  ASSUME n : nat\n  GOAL: n + 0 = n\n  INDUCTION n\n  PROVE BASE_CASE:\n    SIMPLIFY LHS:\n      0 + 0\n      = 0 [BY plus_O_n]\n    THEREFORE 0 + 0 = 0 [BY reflexivity]\n    CONCLUDE: Base case holds [QED]\n  PROVE INDUCTIVE_CASE:\n    ASSUME m : nat\n    INDUCTIVE_HYPOTHESIS ih: m + 0 = m\n    SIMPLIFY LHS:\n      (S m) + 0\n      = S (m + 0) [BY plus_n_Sm]\n      = S m [BY ih]\n    THEREFORE (S m) + 0 = S m [BY reflexivity]\n    CONCLUDE: Inductive case holds [QED]\n  CONCLUDE: By induction, ∀n : nat. n + 0 = n [QED]\nEND",
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "deepseek/deepseek-v3.2",
+        "raw_output": "PROVE ex1: ∀n : nat. n + 0 = n\nBEGIN\n  ASSUME n : nat\n  GOAL: n + 0 = n\n  INDUCTION n\n  PROVE BASE_CASE:\n    SIMPLIFY LHS:\n      0 + 0\n      = 0 [BY plus_O_n]\n    THEREFORE 0 + 0 = 0 [BY reflexivity]\n    CONCLUDE: Base case holds [QED]\n  PROVE INDUCTIVE_CASE:\n    ASSUME m : nat\n    INDUCTIVE_HYPOTHESIS ih: m + 0 = m\n    SIMPLIFY LHS:\n      (S m) + 0\n      = S (m + 0) [BY plus_n_Sm]\n      = S m [BY ih]\n    THEREFORE (S m) + 0 = S m [BY reflexivity]\n    CONCLUDE: Inductive case holds [QED]\n  CONCLUDE: By induction, ∀n : nat. n + 0 = n [QED]\nEND",
+        "status": "parsed",
+        "parsed_output": "PROVE ex1: ∀n : nat. n + 0 = n\nBEGIN\n  ASSUME n : nat\n  GOAL: n + 0 = n\n  INDUCTION n\n  PROVE BASE_CASE:\n    SIMPLIFY LHS:\n      0 + 0\n      = 0 [BY plus_O_n]\n    THEREFORE 0 + 0 = 0 [BY reflexivity]\n    CONCLUDE: Base case holds [QED]\n  PROVE INDUCTIVE_CASE:\n    ASSUME m : nat\n    INDUCTIVE_HYPOTHESIS ih: m + 0 = m\n    SIMPLIFY LHS:\n      (S m) + 0\n      = S (m + 0) [BY plus_n_Sm]\n      = S m [BY ih]\n    THEREFORE (S m) + 0 = S m [BY reflexivity]\n    CONCLUDE: Inductive case holds [QED]\n  CONCLUDE: By induction, ∀n : nat. n + 0 = n [QED]\nEND"
+      }
+    ]
+  },
+  "skeleton": {
+    "compile_attempts": [
+      {
+        "attempt": 1,
+        "text": "intros n.\nassert_goal (n + 0 = n).\ninduction n.\nsimplify lhs (0 + 0 = 0) by reflexivity.\nadmit.\nadmit.",
+        "rendered_text": "intros n.\nassert_goal (n + 0 = n).\ninduction n.\nsimplify lhs (0 + 0 = 0) by reflexivity.\nadmit.\nadmit.",
+        "full_file_text": "From RocqCoSPOC Require Import Angelito.\nImport Angelito.Ltac1.\n\nTheorem ex1 : forall n : nat, n + 0 = n.\nProof.\n  intros n.\n  assert_goal (n + 0 = n).\n  induction n.\n  simplify lhs (0 + 0 = 0) by reflexivity.\n  admit.\n  admit.\nAdmitted.\n",
+        "slot_names": [
+          "base_case",
+          "inductive_case"
+        ],
+        "model_attempts": [
+          {
+            "format_attempt": 1,
+            "model": "deepseek/deepseek-v3.2",
+            "raw_output": "intros n.\nassert_goal (n + 0 = n).\ninduction n.\n- simplify lhs (0 + 0 = 0) by reflexivity.\n  admit.\n- admit.",
+            "status": "parsed",
+            "parsed_output": "intros n.\nassert_goal (n + 0 = n).\ninduction n.\nsimplify lhs (0 + 0 = 0) by reflexivity.\nadmit.\nadmit."
+          }
+        ],
+        "compiles": true,
+        "check_stdout": "Checking coq/Angelito.v ...\nChecking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+        "stdout": "Checking coq/Angelito.v ...\nChecking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+        "check_stderr": "",
+        "stderr": "",
+        "proof_state": "State 0:\nn : nat\nIHn : n + 0 = n\n============================\nS n + 0 = S n"
+      }
+    ],
+    "text": "intros n.\nassert_goal (n + 0 = n).\ninduction n.\nsimplify lhs (0 + 0 = 0) by reflexivity.\nadmit.\nadmit.",
+    "rendered_text": "intros n.\nassert_goal (n + 0 = n).\ninduction n.\nsimplify lhs (0 + 0 = 0) by reflexivity.\nadmit.\nadmit.",
+    "full_file_text": "From RocqCoSPOC Require Import Angelito.\nImport Angelito.Ltac1.\n\nTheorem ex1 : forall n : nat, n + 0 = n.\nProof.\n  intros n.\n  assert_goal (n + 0 = n).\n  induction n.\n  simplify lhs (0 + 0 = 0) by reflexivity.\n  admit.\n  admit.\nAdmitted.\n",
+    "slot_names": [
+      "base_case",
+      "inductive_case"
+    ],
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "deepseek/deepseek-v3.2",
+        "raw_output": "intros n.\nassert_goal (n + 0 = n).\ninduction n.\n- simplify lhs (0 + 0 = 0) by reflexivity.\n  admit.\n- admit.",
+        "status": "parsed",
+        "parsed_output": "intros n.\nassert_goal (n + 0 = n).\ninduction n.\nsimplify lhs (0 + 0 = 0) by reflexivity.\nadmit.\nadmit."
+      }
+    ],
+    "compiles": true,
+    "check_stdout": "Checking coq/Angelito.v ...\nChecking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+    "stdout": "Checking coq/Angelito.v ...\nChecking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+    "check_stderr": "",
+    "stderr": ""
+  },
+  "fills": [
+    {
+      "slot_name": "base_case",
+      "admit_index": 4,
+      "attempt": 1,
+      "current_goal_state": "State 0:\nn : nat\nIHn : n + 0 = n\n============================\nS n + 0 = S n",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "deepseek/deepseek-v3.2",
+          "raw_output": "simplify lhs (S n + 0 = S (n + 0)) by reflexivity.\nsimplify lhs (S (n + 0) = S n) by rewrite IHn.\nreflexivity.",
+          "status": "parsed",
+          "parsed_output": "simplify lhs (S n + 0 = S (n + 0)) by reflexivity.\nsimplify lhs (S (n + 0) = S n) by rewrite IHn.\nreflexivity."
+        }
+      ],
+      "replacement": "simplify lhs (S n + 0 = S (n + 0)) by reflexivity.\nsimplify lhs (S (n + 0) = S n) by rewrite IHn.\nreflexivity.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/Angelito.v ...\nChecking coq/test_skeleton.v ...",
+      "stdout": "Checking coq/Angelito.v ...\nChecking coq/test_skeleton.v ...",
+      "check_stderr": "File \".\\coq/test_skeleton.v\", line 10, characters 18-19:\nError: The variable n was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:43 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "stderr": "File \".\\coq/test_skeleton.v\", line 10, characters 18-19:\nError: The variable n was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:43 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "status": "compile_error"
+    },
+    {
+      "slot_name": "base_case",
+      "admit_index": 4,
+      "attempt": 2,
+      "current_goal_state": "State 0:\nn : nat\nIHn : n + 0 = n\n============================\nS n + 0 = S n",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "deepseek/deepseek-v3.2",
+          "raw_output": "simplify lhs (S n + 0 = S (n + 0)) by rewrite plus_n_Sm.\nsimplify lhs (S (n + 0) = S n) by rewrite IHn.\nreflexivity.",
+          "status": "parsed",
+          "parsed_output": "simplify lhs (S n + 0 = S (n + 0)) by rewrite plus_n_Sm.\nsimplify lhs (S (n + 0) = S n) by rewrite IHn.\nreflexivity."
+        }
+      ],
+      "replacement": "simplify lhs (S n + 0 = S (n + 0)) by rewrite plus_n_Sm.\nsimplify lhs (S (n + 0) = S n) by rewrite IHn.\nreflexivity.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/Angelito.v ...\nChecking coq/test_skeleton.v ...",
+      "stdout": "Checking coq/Angelito.v ...\nChecking coq/test_skeleton.v ...",
+      "check_stderr": "File \".\\coq/test_skeleton.v\", line 10, characters 18-19:\nError: The variable n was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:43 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "stderr": "File \".\\coq/test_skeleton.v\", line 10, characters 18-19:\nError: The variable n was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:43 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "status": "compile_error"
+    },
+    {
+      "slot_name": "base_case",
+      "admit_index": 4,
+      "attempt": 3,
+      "current_goal_state": "State 0:\nn : nat\nIHn : n + 0 = n\n============================\nS n + 0 = S n",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "deepseek/deepseek-v3.2",
+          "raw_output": "simplify lhs (S n + 0 = S (n + 0)) by rewrite plus_n_Sm.\nsimplify lhs (S (n + 0) = S n) by rewrite IHn.\nreflexivity.",
+          "status": "parsed",
+          "parsed_output": "simplify lhs (S n + 0 = S (n + 0)) by rewrite plus_n_Sm.\nsimplify lhs (S (n + 0) = S n) by rewrite IHn.\nreflexivity."
+        }
+      ],
+      "replacement": "simplify lhs (S n + 0 = S (n + 0)) by rewrite plus_n_Sm.\nsimplify lhs (S (n + 0) = S n) by rewrite IHn.\nreflexivity.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/Angelito.v ...\nChecking coq/test_skeleton.v ...",
+      "stdout": "Checking coq/Angelito.v ...\nChecking coq/test_skeleton.v ...",
+      "check_stderr": "File \".\\coq/test_skeleton.v\", line 10, characters 18-19:\nError: The variable n was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:43 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "stderr": "File \".\\coq/test_skeleton.v\", line 10, characters 18-19:\nError: The variable n was not found in the current environment.\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: coq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:43 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-target-proof.ps1",
+      "status": "compile_error"
+    }
+  ],
+  "summary": {},
+  "error": "Failed to fill admit #1 after 3 attempts.",
+  "ended_at": "2026-04-08T13:33:55"
+}

@@ -1,0 +1,160 @@
+{
+  "started_at": "2026-04-08T12:11:32",
+  "status": "success",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\test_skeleton.v",
+    "target_rel": "coq/test_skeleton.v"
+  },
+  "config": {
+    "max_fill_attempts": 3,
+    "rewrite_model": [
+      "openrouter/free"
+    ],
+    "skeleton_model": [
+      "openrouter/free"
+    ],
+    "fill_model": [
+      "openrouter/free"
+    ],
+    "request_retries": 4,
+    "request_backoff_base_sec": 1.5,
+    "request_backoff_multiplier": 2.0,
+    "request_backoff_max_sec": 20.0,
+    "request_backoff_jitter_sec": 0.35
+  },
+  "model_log_path": "C:\\Users\\clark\\RocqCoSPOC\\pipeline\\traces\\run-simple-jinja-4-model-log.jsonl",
+  "rewrite": {
+    "text": "PROVE ex1: ∀n. n + 0 = n\nBEGIN\n  ASSUME n : ℕ\n\n  GOAL: n + 0 = n\n\n  INDUCTION n\n\n  PROVE BASE_CASE: n = 0\n    SIMPLIFY LHS:\n      0 + 0\n      = 0    [BY add_base]\n\n    THEREFORE 0 + 0 = 0\n\n    CONCLUDE: Base case holds [QED]\n\n  PROVE INDUCTIVE_CASE: n = S n'\n    ASSUME n' : ℕ\n    INDUCTIVE_HYPOTHESIS ih: n' + 0 = n'\n\n    SIMPLIFY LHS:\n      S n' + 0\n      = S (n' + 0)    [BY add_succ]\n\n    FACT h1: S (n' + 0) = S n' [BY ih]\n\n    THEREFORE S n' + 0 = S n'\n\n    CONCLUDE: Inductive case holds [QED]\n\n  CONCLUDE: By induction, ∀n. n + 0 = n [QED]\nEND",
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "openrouter/free",
+        "raw_output": "PROVE ex1: ∀n. n + 0 = n\nBEGIN\n  ASSUME n : ℕ\n\n  GOAL: n + 0 = n\n\n  INDUCTION n\n\n  PROVE BASE_CASE: n = 0\n    SIMPLIFY LHS:\n      0 + 0\n      = 0    [BY add_base]\n\n    THEREFORE 0 + 0 = 0\n\n    CONCLUDE: Base case holds [QED]\n\n  PROVE INDUCTIVE_CASE: n = S n'\n    ASSUME n' : ℕ\n    INDUCTIVE_HYPOTHESIS ih: n' + 0 = n'\n\n    SIMPLIFY LHS:\n      S n' + 0\n      = S (n' + 0)    [BY add_succ]\n\n    FACT h1: S (n' + 0) = S n' [BY ih]\n\n    THEREFORE S n' + 0 = S n'\n\n    CONCLUDE: Inductive case holds [QED]\n\n  CONCLUDE: By induction, ∀n. n + 0 = n [QED]\nEND",
+        "status": "parsed",
+        "parsed_output": "PROVE ex1: ∀n. n + 0 = n\nBEGIN\n  ASSUME n : ℕ\n\n  GOAL: n + 0 = n\n\n  INDUCTION n\n\n  PROVE BASE_CASE: n = 0\n    SIMPLIFY LHS:\n      0 + 0\n      = 0    [BY add_base]\n\n    THEREFORE 0 + 0 = 0\n\n    CONCLUDE: Base case holds [QED]\n\n  PROVE INDUCTIVE_CASE: n = S n'\n    ASSUME n' : ℕ\n    INDUCTIVE_HYPOTHESIS ih: n' + 0 = n'\n\n    SIMPLIFY LHS:\n      S n' + 0\n      = S (n' + 0)    [BY add_succ]\n\n    FACT h1: S (n' + 0) = S n' [BY ih]\n\n    THEREFORE S n' + 0 = S n'\n\n    CONCLUDE: Inductive case holds [QED]\n\n  CONCLUDE: By induction, ∀n. n + 0 = n [QED]\nEND"
+      }
+    ]
+  },
+  "skeleton": {
+    "text": "intros n.\ninduction n.\n- admit.\n- admit.",
+    "rendered_text": "intros n.\ninduction n.\n- admit.\n- admit.",
+    "slot_names": [
+      "base_case",
+      "inductive_case"
+    ],
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "openrouter/free",
+        "raw_output": "intros n.\ninduction n.\n- admit.\n- admit.",
+        "status": "parsed",
+        "parsed_output": "intros n.\ninduction n.\n- admit.\n- admit."
+      }
+    ],
+    "compiles": true,
+    "check_stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+    "stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+    "check_stderr": "",
+    "stderr": ""
+  },
+  "fills": [
+    {
+      "slot_name": "base_case",
+      "admit_index": 2,
+      "attempt": 1,
+      "current_goal_state": "State 0:\n============================\n0 + 0 = 0",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "openrouter/free",
+          "raw_output": "simplify lhs 0 + 0 = 0 using ltac:(rewrite add_base).\nreflexivity.",
+          "status": "parsed",
+          "parsed_output": "simplify lhs 0 + 0 = 0 using ltac:(rewrite add_base).\nreflexivity."
+        }
+      ],
+      "replacement": "simplify lhs 0 + 0 = 0 using ltac:(rewrite add_base).\nreflexivity.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/test_skeleton.v ...",
+      "stdout": "Checking coq/test_skeleton.v ...",
+      "check_stderr": "File \".\\coq/test_skeleton.v\", line 5, characters 23-24:\nError:\nSyntax error: [ltac_use_default] expected after [tactic] (in [tactic_command]).\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1",
+      "stderr": "File \".\\coq/test_skeleton.v\", line 5, characters 23-24:\nError:\nSyntax error: [ltac_use_default] expected after [tactic] (in [tactic_command]).\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1",
+      "status": "compile_error"
+    },
+    {
+      "slot_name": "base_case",
+      "admit_index": 2,
+      "attempt": 2,
+      "current_goal_state": "State 0:\n============================\n0 + 0 = 0",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "openrouter/free",
+          "raw_output": "apply lemma.\n\nThe `admit.` placeholder is replaced with `apply lemma.`, leveraging the allowed tactic `apply lemma.` to discharge the goal by invoking a pre-existing lemma. This aligns with standard Rocq practice where lemmas are applied to prove theorems. \n\n\\boxed{apply lemma.}",
+          "status": "invalid_format",
+          "error": "Model did not return a valid Coq tactic block.\nRaw output:\napply lemma.\n\nThe `admit.` placeholder is replaced with `apply lemma.`, leveraging the allowed tactic `apply lemma.` to discharge the goal by invoking a pre-existing lemma. This aligns with standard Rocq practice where lemmas are applied to prove theorems. \n\n\\boxed{apply lemma.}"
+        },
+        {
+          "format_attempt": 2,
+          "model": "openrouter/free",
+          "raw_output": "simpl.\nreflexivity.",
+          "status": "parsed",
+          "parsed_output": "simpl.\nreflexivity."
+        }
+      ],
+      "replacement": "simpl.\nreflexivity.",
+      "exit_code": 0,
+      "check_stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+      "stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+      "check_stderr": "",
+      "stderr": "",
+      "status": "success"
+    },
+    {
+      "slot_name": "inductive_case",
+      "admit_index": 4,
+      "attempt": 1,
+      "current_goal_state": "State 0:\nn : nat\nIHn : n + 0 = n\n============================\nS n + 0 = S n",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "openrouter/free",
+          "raw_output": "applyIHn. reflexivity.",
+          "status": "invalid_format",
+          "error": "Model did not return a valid Coq tactic block.\nRaw output:\napplyIHn. reflexivity."
+        },
+        {
+          "format_attempt": 2,
+          "model": "openrouter/free",
+          "raw_output": "applyIHn. reflexivity.",
+          "status": "invalid_format",
+          "error": "Model did not return a valid Coq tactic block.\nRaw output:\napplyIHn. reflexivity."
+        },
+        {
+          "format_attempt": 3,
+          "model": "openrouter/free",
+          "raw_output": "simpl.\nrewrite IHn.\nreflexivity.",
+          "status": "parsed",
+          "parsed_output": "simpl.\nrewrite IHn.\nreflexivity."
+        }
+      ],
+      "replacement": "simpl.\nrewrite IHn.\nreflexivity.",
+      "exit_code": 0,
+      "check_stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+      "stdout": "Checking coq/test_skeleton.v ...\nProof check passed: coq/test_skeleton.v",
+      "check_stderr": "",
+      "stderr": "",
+      "status": "success"
+    }
+  ],
+  "summary": {
+    "admits_filled": 2,
+    "total_attempts": 3,
+    "slot_count": 2
+  },
+  "ended_at": "2026-04-08T12:13:52"
+}

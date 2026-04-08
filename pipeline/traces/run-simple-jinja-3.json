@@ -1,0 +1,63 @@
+{
+  "started_at": "2026-04-08T12:10:20",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\01_simple_eq\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\test_skeleton.v",
+    "target_rel": "coq/test_skeleton.v"
+  },
+  "config": {
+    "max_fill_attempts": 3,
+    "rewrite_model": [
+      "openrouter/free"
+    ],
+    "skeleton_model": [
+      "openrouter/free"
+    ],
+    "fill_model": [
+      "openrouter/free"
+    ],
+    "request_retries": 4,
+    "request_backoff_base_sec": 1.5,
+    "request_backoff_multiplier": 2.0,
+    "request_backoff_max_sec": 20.0,
+    "request_backoff_jitter_sec": 0.35
+  },
+  "model_log_path": "C:\\Users\\clark\\RocqCoSPOC\\pipeline\\traces\\run-simple-jinja-3-model-log.jsonl",
+  "rewrite": {
+    "text": "PROVE ex1 : forall n : nat, n + 0 = n.\nBEGIN\n  ASSUME n : nat.\n  ASSUME 0 : nat.\n  ASSUME m : nat.\n  ASSUME m + 0 = m.\n  ASSUME n = S m.\n  SIMPLIFY n + 0\n  = n + 0 [BY n + 0 definition]\n  SIMPLIFY n + 0\n  = n [BY reflexivity]\n  THEREFORE n + 0 = n.\n  CONCLUDE: For all natural numbers n, n + 0 = n [QED]\nEND",
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "openrouter/free",
+        "raw_output": "PROVE ex1 : forall n : nat, n + 0 = n.\nBEGIN\n  ASSUME n : nat.\n  ASSUME 0 : nat.\n  ASSUME m : nat.\n  ASSUME m + 0 = m.\n  ASSUME n = S m.\n  SIMPLIFY n + 0\n  = n + 0 [BY n + 0 definition]\n  SIMPLIFY n + 0\n  = n [BY reflexivity]\n  THEREFORE n + 0 = n.\n  CONCLUDE: For all natural numbers n, n + 0 = n [QED]\nEND",
+        "status": "parsed",
+        "parsed_output": "PROVE ex1 : forall n : nat, n + 0 = n.\nBEGIN\n  ASSUME n : nat.\n  ASSUME 0 : nat.\n  ASSUME m : nat.\n  ASSUME m + 0 = m.\n  ASSUME n = S m.\n  SIMPLIFY n + 0\n  = n + 0 [BY n + 0 definition]\n  SIMPLIFY n + 0\n  = n [BY reflexivity]\n  THEREFORE n + 0 = n.\n  CONCLUDE: For all natural numbers n, n + 0 = n [QED]\nEND"
+      }
+    ]
+  },
+  "skeleton": {
+    "text": "induction n.",
+    "rendered_text": "induction n.",
+    "slot_names": [],
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "openrouter/free",
+        "raw_output": "induction n.",
+        "status": "parsed",
+        "parsed_output": "induction n."
+      }
+    ],
+    "compiles": false,
+    "check_stdout": "Checking coq/test_skeleton.v ...",
+    "stdout": "Checking coq/test_skeleton.v ...",
+    "check_stderr": "File \".\\coq/test_skeleton.v\", line 4, characters 0-4:\nError:  (in proof ex1): Attempt to save an incomplete proof\n(there are remaining open goals).\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1",
+    "stderr": "File \".\\coq/test_skeleton.v\", line 4, characters 0-4:\nError:  (in proof ex1): Attempt to save an incomplete proof\n(there are remaining open goals).\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1"
+  },
+  "fills": [],
+  "summary": {},
+  "error": "Skeleton does not compile. Refusing to start fill retries on an invalid proof scaffold.\nFile \".\\coq/test_skeleton.v\", line 4, characters 0-4:\nError:  (in proof ex1): Attempt to save an incomplete proof\n(there are remaining open goals).\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/test_skeleton.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1\n \n",
+  "ended_at": "2026-04-08T12:10:30"
+}

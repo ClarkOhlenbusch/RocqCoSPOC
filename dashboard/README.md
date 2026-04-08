@@ -7,10 +7,10 @@ React dashboard for launching proof-pipeline runs and visualizing intermediate p
 - A form to launch a new pipeline run from the browser
 - Live run status plus pipeline stdout/stderr
 - Rewrite output text
-- Goal-sequence blocks for direct proving
-- Per-transition attempts
-- ETR / ESR retries and errors
-- Final summary metrics
+- Skeleton compile results
+- Per-admit fill attempts
+- Raw model outputs, parse retries, and compiler feedback
+- Final summary metrics for the current skeleton-and-fill pipeline
 
 ## Run
 
@@ -43,3 +43,5 @@ You can still open any saved trace manually:
 1. Click **Refresh Trace List**.
 2. Select a trace.
 3. Click **Open Trace**.
+
+The dashboard now targets the current skeleton-and-fill trace format. Older transition-style traces are unsupported historical artifacts.

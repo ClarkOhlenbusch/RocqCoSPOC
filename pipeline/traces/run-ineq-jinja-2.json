@@ -1,0 +1,69 @@
+{
+  "started_at": "2026-04-08T12:15:57",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\02_inequality\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\02_inequality\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\MulN0.v",
+    "target_rel": "coq/MulN0.v"
+  },
+  "config": {
+    "max_fill_attempts": 3,
+    "rewrite_model": [
+      "openrouter/free"
+    ],
+    "skeleton_model": [
+      "openrouter/free"
+    ],
+    "fill_model": [
+      "openrouter/free"
+    ],
+    "request_retries": 4,
+    "request_backoff_base_sec": 1.5,
+    "request_backoff_multiplier": 2.0,
+    "request_backoff_max_sec": 20.0,
+    "request_backoff_jitter_sec": 0.35
+  },
+  "model_log_path": "C:\\Users\\clark\\RocqCoSPOC\\pipeline\\traces\\run-ineq-jinja-2-model-log.jsonl",
+  "rewrite": {
+    "text": "PROVE ex2: forall a b : nat, a <= b -> a <= S b\nBEGIN\n  ASSUME a : nat\n  ASSUME b : nat\n  ASSUME H : a <= b\n  GOAL: a <= S b\n  APPLY le_S [BY le_S]\n  CONCLUDE: a <= S b [QED]\nEND",
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "openrouter/free",
+        "raw_output": "PROVE ex2: forall a b : nat, a <= b -> a <= S b\nBEGIN\n  ASSUME a : nat\n  ASSUME b : nat\n  ASSUME H : a <= b\n  GOAL: a <= S b\n  APPLY le_S [BY le_S]\n  CONCLUDE: a <= S b [QED]\nEND",
+        "status": "parsed",
+        "parsed_output": "PROVE ex2: forall a b : nat, a <= b -> a <= S b\nBEGIN\n  ASSUME a : nat\n  ASSUME b : nat\n  ASSUME H : a <= b\n  GOAL: a <= S b\n  APPLY le_S [BY le_S]\n  CONCLUDE: a <= S b [QED]\nEND"
+      }
+    ]
+  },
+  "skeleton": {
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "openrouter/free",
+        "raw_output": "intros a b H.\napply le_S.",
+        "status": "invalid_format",
+        "error": "Skeleton introduced `apply ...` structure even though the Angelito proof has no `APPLY ... SPLIT INTO` step.\nRaw output:\nintros a b H.\napply le_S."
+      },
+      {
+        "format_attempt": 2,
+        "model": "openrouter/free",
+        "raw_output": "intros a b H.\napply le_S.\nadmit.",
+        "status": "invalid_format",
+        "error": "Skeleton introduced `apply ...` structure even though the Angelito proof has no `APPLY ... SPLIT INTO` step.\nRaw output:\nintros a b H.\napply le_S.\nadmit."
+      },
+      {
+        "format_attempt": 3,
+        "model": "openrouter/free",
+        "raw_output": "intros a b H.\napply le_S.\nadmit.",
+        "status": "invalid_format",
+        "error": "Skeleton introduced `apply ...` structure even though the Angelito proof has no `APPLY ... SPLIT INTO` step.\nRaw output:\nintros a b H.\napply le_S.\nadmit."
+      }
+    ]
+  },
+  "fills": [],
+  "summary": {},
+  "error": "Skeleton generation failed: skeleton failed format validation:\n  - Attempt 1: Skeleton introduced `apply ...` structure even though the Angelito proof has no `APPLY ... SPLIT INTO` step.\nRaw output:\nintros a b H.\napply le_S.\n  - Attempt 2: Skeleton introduced `apply ...` structure even though the Angelito proof has no `APPLY ... SPLIT INTO` step.\nRaw output:\nintros a b H.\napply le_S.\nadmit.\n  - Attempt 3: Skeleton introduced `apply ...` structure even though the Angelito proof has no `APPLY ... SPLIT INTO` step.\nRaw output:\nintros a b H.\napply le_S.\nadmit.",
+  "ended_at": "2026-04-08T12:19:08"
+}

@@ -4,22 +4,31 @@ You are an expert in Coq/Rocq theorem proving. You are given a partial Rocq proo
 - The full proof so far (with remaining `admit.` placeholders elsewhere) is shown below.
 - The specific `admit.` to fill is marked with `(* FILL THIS *)`.
 - The Angelito proof provides the intended reasoning for this goal.
+- The current goal state is authoritative. Only use identifiers, hypotheses, and induction hypotheses that literally appear there or in the visible proof context.
+- Generated proof files import `Angelito` and `Import Angelito.Ltac1.`. Use the Ltac1 layer when you need a high-level Angelito tactic.
 
-**Available custom tactics** (from Angelito Tactics library):
+**Allowed tactics for this proof**:
 {tactics_reference}
 
+**Angelito-to-Rocq translation guide:**
+{translation_guide}
+
 **Translation rules for Angelito -> Rocq:**
+- The only high-level Angelito tactics you should emit directly are `assert_goal (...)`, `simplify lhs (...)`, `simplify rhs (...)`, and `pick ...`.
+- Standard Rocq tactics like `rewrite`, `reflexivity`, `lia`, and `exact` are still allowed as low-level support tactics, especially inside `by ...` or `{ ... }` justifications and for finishing a goal.
+- Prefer the canonical Ltac1 syntax from the examples in the tactics reference. Do not use the old `using ltac:(...)` syntax.
 - `FACT h: stmt [BY lemma]` -> `assert (h : stmt). { apply lemma. }` or `{ exact lemma. }`
-- `SIMPLIFY RHS x = y [BY lemma1, lemma2]` -> `simplify rhs x = y using ltac:(rewrite lemma1, lemma2).`
-- `SIMPLIFY LHS x = y [BY lemma1, lemma2]` -> `simplify lhs x = y using ltac:(rewrite lemma1, lemma2).`
+- `SIMPLIFY RHS x = y [BY lemma1, lemma2]` -> `simplify rhs (x = y). { rewrite lemma1, lemma2. }`
+- `SIMPLIFY LHS x = y [BY lemma1, lemma2]` -> `simplify lhs (x = y). { rewrite lemma1, lemma2. }`
+- `GOAL: formula` -> `assert_goal (formula).`
+- `ASSUME x : T` -> `pick x : T.` when the current goal still begins with binders that need to be introduced
 - `THEREFORE conclusion [BY h1, h2]` -> `exact ...` or `apply ...` using h1, h2
 - `SINCE condition` -> `assert (h : condition). { ... }`
 - `INDUCTIVE_HYPOTHESIS ih: stmt` -> reference the `IH...` hypothesis already in context
-- For basic arithmetic / linear inequalities -> use `lia`
+- For basic arithmetic / linear inequalities over `nat` or `Z` -> use `lia.` only if the current proof source imports `Lia`
 - For ring equalities -> use `ring`
-
-**Standard tactic whitelist:**
-`intros`, `assert`, `apply`, `exact`, `rewrite`, `rewrite <-`, `replace ... with ... by ring`, `destruct`, `exists`, `lia`, `nia`, `ring`, `auto`, `split`, `left`, `right`, `unfold`, `simpl`, `induction`
+- Never use `rewrite` with a non-equality hypothesis such as `H : a <= b`. `rewrite` is only for equalities or registered setoid rewrites.
+- If the goal still contains reducible recursive definitions such as `S n + 0`, `pred (S n)`, or match-like computation, start with `simpl.` or `cbn.` before trying `rewrite`, `apply`, or `reflexivity.`
 
 **Requirements:**
 1. Output ONLY the replacement tactics for the marked `admit.` - no `Proof.`, no `Qed.`, no surrounding code.
@@ -27,6 +36,15 @@ You are an expert in Coq/Rocq theorem proving. You are given a partial Rocq proo
 3. Do not modify any other part of the proof.
 4. No prose, comments, or explanation.
 5. If structured compiler feedback is present, use it as the primary source of truth for the current proof mismatch. Use raw Coq errors only as supporting context.
+6. Angelito keywords are not Rocq tactics. Never output uppercase Angelito tokens like `ASSUME`, `FACT`, `SIMPLIFY`, `THEREFORE`, or `CONCLUDE`.
+7. Only use tactics from the allowed list above. Any prose or unlisted tactic will be rejected automatically.
+8. Do not invent names like `IHn`, `m`, or `h1`. If a name is not present in the current goal state or visible proof context, do not use it.
+9. Do not introduce variables with `pick` or `intros` unless the current goal state still begins with a product, implication, or quantifier that has not been introduced yet.
+10. If the current goal state is a plain linear arithmetic fact such as `a <= S b`, `x + y = z`, `x < y`, or similar facts over `nat`/`Z`, use `lia.` only when `Lia` is imported. Otherwise prefer concrete tactics like `simpl.`, `cbn.`, `rewrite`, and `reflexivity.`
+11. If `Lia` is imported and the current goal state is a single linear arithmetic obligation over `nat`/`Z` with hypotheses of the same form, prefer returning exactly `lia.` as the whole answer.
+12. For definitional equalities like `0 + 0 = 0` or `S n + 0 = S n`, prefer `simpl.` or `cbn.` followed by `reflexivity.` if needed.
+13. If you use `simplify lhs` or `simplify rhs`, the argument must be a parenthesized equality like `simplify lhs (1 + 1 = 2) by reflexivity.` exactly as in the tactics reference examples.
+14. Use `assert_goal (...)` when the Angelito proof states an expected intermediate goal shape and that check would help catch mismatches early.
 
 **Formal Statement:**
 {formal_statement}

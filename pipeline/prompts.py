@@ -1,6 +1,4 @@
-"""
-Load prompts from prompts/ and substitute placeholders.
-"""
+"""Load prompt templates and substitute placeholders."""
 
 from pathlib import Path
 
@@ -11,14 +9,10 @@ PROMPT_FILES = {
     "rewrite": "01_rewrite.txt",
     "skeleton": "02a_skeleton.txt",
     "fill_goal": "02b_fill_goal.txt",
-    # legacy
-    "direct_prove": "02_direct_prove.txt",
-    "tactic": "03_tactic_generator.txt",
-    "etr": "04_etr.txt",
-    "esr": "05_esr.txt",
 }
 
 TACTICS_REF_PATH = PROMPTS_DIR / "tactics_reference.md"
+TRANSLATION_GUIDE_PATH = REPO_ROOT / "angelito-to-rocq.md"
 
 
 def _load_raw(name: str) -> str:
@@ -31,10 +25,64 @@ def _load_raw(name: str) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def _load_tactics_reference() -> str:
+def _load_tactics_reference(*, custom_tactics_enabled: bool, lia_available: bool) -> str:
     if TACTICS_REF_PATH.exists():
-        return TACTICS_REF_PATH.read_text(encoding="utf-8").strip()
-    return "(no tactics reference available)"
+        reference = TACTICS_REF_PATH.read_text(encoding="utf-8").strip()
+    else:
+        reference = "(no tactics reference available)"
+
+    if custom_tactics_enabled:
+        availability_note = (
+            "Custom Angelito Ltac1 tactics are available because the current proof source imports "
+            "an Angelito module together with `Import Angelito.Ltac1.`."
+        )
+    else:
+        availability_note = (
+            "Custom Angelito tactics are part of the project design vocabulary, but the current proof "
+            "source does not import an Angelito module together with `Import Angelito.Ltac1.`. "
+            "Do not emit `simplify lhs/rhs`, `assert_goal`, or `pick` unless those imports are present "
+            "in the current proof source."
+        )
+
+    if lia_available:
+        lia_note = "The current proof source imports `Lia`, so the `lia.` tactic is available."
+    else:
+        lia_note = (
+            "The current proof source does not import `Lia`. Do not emit `lia.` unless the imports "
+            "visible in the formal statement explicitly make it available."
+        )
+
+    return f"{availability_note}\n\n{lia_note}\n\n{reference}".strip()
+
+
+def _load_translation_guide() -> str:
+    if TRANSLATION_GUIDE_PATH.exists():
+        return TRANSLATION_GUIDE_PATH.read_text(encoding="utf-8").strip()
+    return "(no Angelito-to-Rocq translation guide available)"
+
+
+def _custom_tactics_enabled(*sources: str) -> bool:
+    require_markers = (
+        "Require Import Angelito.",
+        "Require Import RocqCoSPOC.Angelito.",
+        "From RocqCoSPOC Require Import Angelito.",
+    )
+    saw_require = any(
+        any(marker in source for marker in require_markers)
+        for source in sources
+        if source
+    )
+    saw_import = any("Import Angelito.Ltac1." in source for source in sources if source)
+    return saw_require and saw_import
+
+
+def _lia_available(*sources: str) -> bool:
+    markers = (
+        "Require Import Lia.",
+        "From Coq Require Import Lia.",
+        "Require Import Omega.",
+    )
+    return any(any(marker in source for marker in markers) for source in sources if source)
 
 
 def fill(template: str, **kwargs) -> str:
@@ -50,26 +98,35 @@ def get_prompt(name: str, **kwargs) -> str:
     return fill(template, **kwargs)
 
 
-def get_rewrite(informal_proof: str, angelito_spec: str) -> str:
+def get_rewrite(informal_proof: str, formal_statement: str, angelito_spec: str) -> str:
     return get_prompt(
         "rewrite",
         informal_proof=informal_proof,
+        formal_statement=formal_statement,
         angelito_spec=angelito_spec,
     )
 
 
 def get_skeleton(formal_statement: str, angelito_proof: str) -> str:
+    custom_tactics_enabled = _custom_tactics_enabled(formal_statement, angelito_proof)
+    lia_available = _lia_available(formal_statement, angelito_proof)
     return get_prompt(
         "skeleton",
         formal_statement=formal_statement,
         angelito_proof=angelito_proof,
-        tactics_reference=_load_tactics_reference(),
+        tactics_reference=_load_tactics_reference(
+            custom_tactics_enabled=custom_tactics_enabled,
+            lia_available=lia_available,
+        ),
+        translation_guide=_load_translation_guide(),
     )
 
 
 def get_fill_goal(formal_statement: str, angelito_proof: str,
                   current_proof: str, current_goal_state: str = "", error_context: str = "",
                   structured_feedback: str = "") -> str:
+    custom_tactics_enabled = _custom_tactics_enabled(formal_statement, current_proof)
+    lia_available = _lia_available(formal_statement, current_proof)
     structured_feedback_context = ""
     if structured_feedback.strip():
         structured_feedback_context = (
@@ -86,47 +143,9 @@ def get_fill_goal(formal_statement: str, angelito_proof: str,
         current_goal_state=current_goal_state,
         error_context=error_context,
         structured_feedback_context=structured_feedback_context,
-        tactics_reference=_load_tactics_reference(),
-    )
-
-
-# -- legacy helpers (kept for manual workflows) --
-
-def get_direct_prove(formal_statement: str, coq_friendly_proof: str, error_context: str = "") -> str:
-    return get_prompt(
-        "direct_prove",
-        formal_statement=formal_statement,
-        coq_friendly_proof=coq_friendly_proof,
-        error_context=error_context,
-    )
-
-
-def get_tactic(state_p: str, state_n: str, coq_friendly_proof: str) -> str:
-    return get_prompt(
-        "tactic",
-        state_p=state_p,
-        state_n=state_n,
-        coq_friendly_proof=coq_friendly_proof,
-    )
-
-
-def get_etr(state_p: str, state_n: str, failed_tactics: str,
-            error_message: str, coq_friendly_proof: str) -> str:
-    return get_prompt(
-        "etr",
-        state_p=state_p,
-        state_n=state_n,
-        failed_tactics=failed_tactics,
-        error_message=error_message,
-        coq_friendly_proof=coq_friendly_proof,
-    )
-
-
-def get_esr(state_a: str, state_b: str, state_c: str, coq_friendly_proof: str) -> str:
-    return get_prompt(
-        "esr",
-        state_a=state_a,
-        state_b=state_b,
-        state_c=state_c,
-        coq_friendly_proof=coq_friendly_proof,
+        tactics_reference=_load_tactics_reference(
+            custom_tactics_enabled=custom_tactics_enabled,
+            lia_available=lia_available,
+        ),
+        translation_guide=_load_translation_guide(),
     )

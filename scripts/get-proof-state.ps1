@@ -15,7 +15,10 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 function Resolve-CoqTopPath {
-  param([string]$ExplicitPath)
+  param(
+    [string]$ExplicitPath,
+    [string]$ProjectRoot
+  )
 
   if ($ExplicitPath) {
     if (Test-Path $ExplicitPath) {
@@ -24,8 +27,7 @@ function Resolve-CoqTopPath {
     throw "The supplied -CoqTop path was not found: $ExplicitPath"
   }
 
-  $repoRoot = Split-Path -Parent (Resolve-Path $FilePath).Path
-  $settingsPath = Join-Path $repoRoot ".vscode\settings.json"
+  $settingsPath = Join-Path $ProjectRoot ".vscode\settings.json"
   if (Test-Path $settingsPath) {
     try {
       $settings = Get-Content -LiteralPath $settingsPath -Raw | ConvertFrom-Json
@@ -50,7 +52,7 @@ function Resolve-CoqTopPath {
     }
   }
 
-  $fromCheck = Join-Path $repoRoot "scripts\check-proofs.ps1"
+  $fromCheck = Join-Path $ProjectRoot "scripts\check-proofs.ps1"
   if (Test-Path $fromCheck) {
     $line = Get-Content -LiteralPath $fromCheck | Where-Object { $_ -match '^\s*\$coqBin' } | Select-Object -First 1
     if ($line -and $line -match '["]([^"]+)[\\/]coqc\.exe["]') {
@@ -68,6 +70,31 @@ function Resolve-CoqTopPath {
   if ($coqTopExe) { return $coqTopExe.Source }
 
   throw "Could not find coqtop. Set -CoqTop to an explicit executable path."
+}
+
+function Find-ProjectRoot {
+  param([string]$StartPath)
+
+  $current = Resolve-Path $StartPath
+  if (-not $current) {
+    throw "Could not resolve path: $StartPath"
+  }
+  $dir = Get-Item -LiteralPath $current.Path
+  if (-not $dir.PSIsContainer) {
+    $dir = $dir.Directory
+  }
+
+  while ($dir) {
+    if (Test-Path (Join-Path $dir.FullName "_CoqProject")) {
+      return $dir.FullName
+    }
+    if (Test-Path (Join-Path $dir.FullName ".git")) {
+      return $dir.FullName
+    }
+    $dir = $dir.Parent
+  }
+
+  throw "Could not find project root for $StartPath"
 }
 
 function Get-CoqProjectArgs {
@@ -161,7 +188,7 @@ function Parse-ProofState {
 }
 
 $resolvedFile = Resolve-Path $FilePath
-$repoRoot = Split-Path -Parent $resolvedFile.Path
+$repoRoot = Find-ProjectRoot -StartPath $resolvedFile.Path
 $allLines = Get-Content -LiteralPath $resolvedFile.Path
 $lineCount = $allLines.Length
 
@@ -195,7 +222,7 @@ if ($depth -le 0) {
   return
 }
 
-$coqTop = Resolve-CoqTopPath -ExplicitPath $CoqTop
+$coqTop = Resolve-CoqTopPath -ExplicitPath $CoqTop -ProjectRoot $repoRoot
 $coqArgs = @("-q")
 $coqArgs += Get-CoqProjectArgs -ProjectRoot $repoRoot
 

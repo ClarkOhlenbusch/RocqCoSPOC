@@ -1,549 +1,134 @@
 # Angelito to Rocq Translation Guide
 
-This document specifies how to translate Angelito pseudo-proofs into executable Rocq (Ltac) proof scripts. Each section corresponds to a syntactic category from the Angelito specification.
+This guide is the prompt-time reference for translating Angelito proof steps into executable Rocq tactics in this repository.
 
----
+The generated proof files under `coq/` should import:
 
-## Structural Keywords
-
-### PROVE / BEGIN / END
-
-**Angelito:**
-```angelito
-PROVE theorem_name: ∀n. PROPOSITION
-BEGIN
-  ...
-END
-```
-
-**Rocq Translation:**
 ```coq
-Lemma theorem_name : ∀n, PROPOSITION.
-Proof.
-  ...
-Qed.
+From RocqCoSPOC Require Import Angelito.
+Import Angelito.Ltac1.
 ```
 
-**Notes:**
-- The `Proof.` keyword opens the proof mode
-- `Qed.` closes it (alternatively `Defined.` for computational definitions)
-- Top-level PROVE becomes a `Lemma` (or `Theorem`, `Proposition` - synonymous)
-- Nested PROVE blocks stay within the proof (see Proof Section Keywords)
+Those imports expose the Ltac1 wrapper layer for the Angelito tactics library.
 
-**Wishlist:**
-- Support for `Theorem`, `Lemma`, `Proposition` keywords in Angelito syntax
-- Support for `Definition` for computational proofs
-- Metadata annotations (e.g., for proof complexity estimates)
+## Core Rule
 
----
+Angelito keywords are not Rocq tactics.
 
-## Introduction and Binding Keywords
+The rewrite stage may emit Angelito anchors like `ASSUME`, `GOAL`, or `SIMPLIFY`, but the skeleton and fill stages must emit valid Rocq code.
+
+## Main Mappings
+
+| Angelito form | Rocq translation |
+|---|---|
+| `ASSUME x : T` | Usually `pick x : T.` (or `intros x.`). **Exception:** inside an `INDUCTION` branch, `ASSUME m : T` often only renames the predecessor variable and must not emit a new binder introduction unless that branch goal actually starts with `forall`/`->`. |
+| `ASSUME x : T, y : U` | `pick x : T, y : U.` |
+| `GOAL: expr` | `assert_goal (expr).` |
+| `SIMPLIFY RHS a = b [BY proof]` | `simplify rhs (a = b) by proof.` or `simplify rhs (a = b). { proof. }` |
+| `SIMPLIFY LHS a = b [BY proof]` | `simplify lhs (a = b) by proof.` or `simplify lhs (a = b). { proof. }` |
+| `INDUCTION n` | `induction n.` |
+| `APPLY theorem SPLIT INTO:` | `apply theorem.` followed by bullets or braces |
+| `FACT h: stmt [BY lemma]` | `assert (h : stmt). { apply lemma. }` |
+| `THEREFORE stmt [BY proof]` | Usually `assert`, `exact`, or a short tactic block that proves `stmt` |
+| `CONCLUDE: ... [QED]` | Close the current goal with real Rocq tactics, then eventually `Qed.` |
+
+## Angelito Tactics Available Here
+
+Use these high-level tactics exactly as defined in `coq/Angelito.v`:
+
+```coq
+assert_goal (expr).
+pick x : nat, y : bool.
+simplify rhs (a = b) by reflexivity.
+simplify rhs (a = b). { rewrite lemma1, lemma2. }
+simplify lhs (a = b) by reflexivity.
+simplify lhs (a = b). { rewrite lemma1, lemma2. }
+```
+
+These tactics produce structured compiler feedback on failure.
+
+## Examples
 
 ### ASSUME
 
-**Angelito (single variable):**
+Angelito:
+
 ```angelito
-ASSUME n : T
+ASSUME x : nat, y : bool
 ```
 
-**Rocq Translation:**
+Rocq:
+
 ```coq
-assume n : T.
+pick x : nat, y : bool.
 ```
-
-**Angelito (multiple variables):**
-```angelito
-ASSUME n : ℕ, m : ℕ, h : P
-```
-
-**Rocq Translation:**
-```coq
-assume n : ℕ.
-assume m : ℕ.
-assume h : P.
-```
-
-**Notes:**
-- Variables are bound in the order specified
-- Types can be partially specified, say `ASSUME n : _ × ℕ` becomes `assume n : ( _ * ℕ).`
-
----
-
-## Transformation Keywords
-
-### SIMPLIFY
-
-**Angelito (with justification):**
-```angelito
-SIMPLIFY RHS x = y [BY lemma1, lemma2]
-```
-
-**Rocq Translation:**
-```coq
-simplify rhs x = y using ltac:(rewrite lemma1, lemma2).
-```
-
-**Angelito (without justification):**
-```angelito
-SIMPLIFY RHS x = y.
-```
-
-**Rocq Translation:**
-```coq
-simplify rhs x = y using ltac:(reflexivity).
-```
-
-**Similarly for LHS:**
-
-**Angelito:**
-```angelito
-SIMPLIFY LHS x = y [BY lemma1, lemma2]
-```
-
-**Rocq Translation:**
-```coq
-simplify lhs x = y using ltac:(rewrite lemma1, lemma2).
-```
-
-**Notes:**
-- The `simplify` tactic is a built-in Rocq tactic for simplifying subexpressions
-- Direction can be `rhs` (right-hand side) or `lhs` (left-hand side)
-- The `using ltac:(...)` clause specifies the simplification tactic
-- When no lemmas are provided, `reflexivity` is used as the default
-- Multiple lemmas are separated by commas in the `rewrite` tactic
-
-**Wishlist:**
-- Support for other directions beyond LHS/RHS (e.g., inside a subexpression)
-- Support for multiple simplification chains in sequence
-- Support domain-specific simplifiers (e.g., `ring_nf` for algebraic simplification, `omega` for arithmetic)
-- Option to annotate which rewrite direction is used (left-to-right vs. right-to-left)
-- Support for conditional simplifications
-
----
-
-## Goal and Decomposition Keywords
 
 ### GOAL
 
-**Angelito:**
+Angelito:
+
 ```angelito
-GOAL: formula
+GOAL: 2 = 1
 ```
 
-**Rocq Translation:**
+Rocq:
+
 ```coq
-(* GOAL: formula *)
+assert_goal (2 = 1).
 ```
 
-**Notes:**
-- GOAL statements are primarily documentation in Rocq
-- They clarify what the proof obligation is after simplifications
-- Could optionally generate a `show formula` statement in Rocq if needed
+### SIMPLIFY RHS
 
-**Wishlist:**
-- Automated goal verification: Check that the current goal in Rocq matches the stated GOAL
-- Option to generate explicit `show` statements instead of comments
-- Support for partial goals (intermediate states)
+Angelito:
 
----
-
-### APPLY
-
-**Angelito:**
 ```angelito
-APPLY max_iff SPLIT INTO:
-  (1) MEMBERSHIP: formula1
-  (2) UPPER_BOUND: formula2
+SIMPLIFY RHS 1 = 0 + 1 [BY reflexivity]
 ```
 
-**Rocq Translation:**
+Rocq:
+
 ```coq
-apply max_iff.
+simplify rhs (1 = 0 + 1) by reflexivity.
 ```
 
-**Notes:**
-- `apply` tactic applies the theorem and generates subgoals
-- The SPLIT INTO clause lists what subgoals are expected
-- Structural organization (bullets, braces) comes next (see below)
+or
 
-**Wishlist:**
-- Automated verification that the number of SPLIT INTO subgoals matches actual subgoals generated by `apply`
-- Support for different application strategies (`eapply`, `rapply`, etc.)
-- Support for `apply with (x := value)` for explicit argument instantiation
-- Syntax to specify which arguments to instantiate
+```coq
+simplify rhs (1 = 0 + 1). { reflexivity. }
+```
 
----
+### SIMPLIFY LHS
 
-### SPLIT INTO
+Angelito:
 
-**Angelito:**
 ```angelito
-APPLY theorem SPLIT INTO:
-  (1) SUBGOAL1: formula1
-  (2) SUBGOAL2: formula2
+SIMPLIFY LHS 1 + 1 = 2 [BY reflexivity]
 ```
 
-**Rocq Translation (with bullet points):**
+Rocq:
+
 ```coq
-apply theorem.
-- (* SUBGOAL1: formula1 *)
-  ...proof for subgoal 1...
-- (* SUBGOAL2: formula2 *)
-  ...proof for subgoal 2...
+simplify lhs (1 + 1 = 2) by reflexivity.
 ```
 
-or **(with braces):**
+## Fill-Stage Guidance
+
+When filling a single slot:
+
+1. Treat the current Rocq goal state as authoritative.
+2. Use `assert_goal (...)` only when the Angelito proof names an expected intermediate goal shape.
+3. Use `pick ...` only when you are actually introducing binders.
+4. Keep `simplify lhs/rhs` arguments parenthesized as equalities.
+5. Use ordinary Rocq tactics like `intros`, `rewrite`, `apply`, `exact`, `reflexivity`, `simpl`, `cbn`, and `lia` when they are the most direct low-level step.
+
+## Do Not Emit
+
+Do not use these stale forms:
+
 ```coq
-apply theorem.
-{ (* SUBGOAL1: formula1 *)
-  ...proof for subgoal 1...
-}
-{ (* SUBGOAL2: formula2 *)
-  ...proof for subgoal 2...
-}
+assume x : T.
+simplify rhs a = b using ltac:(rewrite lemma).
+simplify lhs a = b using ltac:(rewrite lemma).
 ```
 
-**Notes:**
-- Bullet points (`-`, `+`, `*`) are standard for structuring subgoals
-- Braces `{ ... }` are an alternative, especially for nested subgoals
-- Subgoal names are included as comments for clarity
-- The translation requires a Rocq structural tactic after `apply`
-
-**Wishlist:**
-- Automatic choice between bullet vs. braces based on nesting depth
-- Support for explicit focus tactics (`focus { ... }`)
-- Preference specification in Angelito (e.g., `SPLIT INTO [BULLETS | BRACES]`)
-- Verification that all subgoals are addressed before moving forward
-
----
-
-## Proof Section Keywords
-
-### PROVE (nested for subgoals)
-
-**Angelito:**
-```angelito
-PROVE MEMBERSHIP:
-  ...reasoning...
-  THEREFORE conclusion
-```
-
-**Rocq Translation:**
-```coq
-- (* MEMBERSHIP *)
-  ...reasoning...
-  exact conclusion.
-```
-
-or **(with braces):**
-```coq
-{ (* MEMBERSHIP *)
-  ...reasoning...
-  exact conclusion.
-}
-```
-
-**Notes:**
-- Nested PROVE blocks correspond to individual subgoals
-- They are coupled with the SPLIT INTO structure
-- The proof of each subgoal terminates with the conclusion
-
-**Wishlist:**
-- Named focuses: `focus MEMBERSHIP { ... }` syntax
-- Automatic tracking of subgoal closure
-- Warnings if a PROVE block doesn't fully discharge its subgoal
-
----
-
-## Reasoning Keywords
-
-### AT_POSITION
-
-**Angelito:**
-```angelito
-AT_POSITION Dim.prec:
-  seq(0)[Dim.prec] = Dim.prec        [BY maps_to_seq]
-  ...
-```
-
-**Status:** ⚠️ **PENDING CLARIFICATION**
-
-**Open Question:**
-What is the semantic purpose of AT_POSITION? Is it:
-- Just documentation that we're focusing on this index?
-- A constraint that subsequent properties only apply at this position?
-- Something that generates `Vector.MapsTo` goals automatically?
-
-**Preliminary Rocq Translation (as documentation):**
-```coq
-(* AT_POSITION Dim.prec *)
-assert (h1 : seq(0)[Dim.prec] = Dim.prec).
-{ apply maps_to_seq. }
-...
-```
-
-**Wishlist:**
-- Clarify semantic intent of AT_POSITION
-- Support for index variable introduction (e.g., `AT_POSITION i:` where `i` is bound)
-- Domain-specific support for vector indexing patterns
-- Automatic generation of bounds checking (`i < Dim.size`)
-
----
-
-### FOR_ALL
-
-**Angelito:**
-```angelito
-FOR_ALL x ∈ set:
-  ...reasoning about x...
-  THEREFORE property(x)
-```
-
-**Status:** ⚠️ **PENDING CLARIFICATION**
-
-**Preliminary Rocq Translation:**
-```coq
-intros x hx.
-(* hx : x ∈ set *)
-...reasoning...
-exact property_proof.
-```
-
-**Notes:**
-- FOR_ALL introduces universal quantification
-- The variable `x` is bound and the proof must work for arbitrary `x`
-- The condition `x ∈ set` becomes a hypothesis
-
-**Wishlist:**
-- Support for multiple quantified variables: `FOR_ALL x ∈ set1, y ∈ set2:`
-- Support for untyped universal quantification: `FOR_ALL x:`
-- Syntax for exhaustive case analysis vs. generic reasoning
-- Support for existential introduction within FOR_ALL blocks
-
----
-
-### EXTRACT
-
-**Angelito:**
-```angelito
-EXTRACT source elements at position i:
-  seq(0)[i] = i                    [BY maps_to_inv_seq]
-  make(n)[i] = n                   [BY maps_to_inv_make]
-THEREFORE x = i - n
-```
-
-**Status:** ⚠️ **PENDING CLARIFICATION**
-
-**Preliminary Rocq Translation:**
-```coq
-(* Extract source elements at position i *)
-assert (h1 : seq(0)[i] = i).
-{ apply maps_to_inv_seq. }
-assert (h2 : make(n)[i] = n).
-{ apply maps_to_inv_make. }
-(* THEREFORE *)
-assert (h3 : x = i - n).
-{ ...proof using h1, h2... }
-```
-
-or **(with obtain):**
-```coq
-obtain ⟨i, a, b, h_seq, h_make, h_sub⟩ := maps_to_inv_pointwise hx.
-...
-```
-
-**Notes:**
-- EXTRACT is often used for destructuring compound values
-- Can correspond to `assert`, `have`, or `obtain` depending on context
-- Should support both explicit extraction and destructuring patterns
-
-**Wishlist:**
-- Clarify whether EXTRACT always produces `assert` or can use `obtain` for pattern matching
-- Support for nested EXTRACT blocks
-- Automatic generation of intermediate lemmas from multiple extraction claims
-- Support for existential witness introduction
-
----
-
-### SINCE
-
-**Angelito:**
-```angelito
-SINCE i < Dim.size:
-  i ≤ Dim.prec                     [BY Dim.size = S Dim.prec]
-  i - n ≤ Dim.prec - n             [BY nat_sub_monotone]
-THEREFORE x ≤ Dim.prec - n
-```
-
-**Status:** ⚠️ **PENDING CLARIFICATION**
-
-**Preliminary Rocq Translation:**
-```coq
-assert (h_cond : i < Dim.size). { ...proof... }
-(* Reasoning within this constraint *)
-assert (h1 : i ≤ Dim.prec).
-{ apply ... using h_cond. }
-assert (h2 : i - n ≤ Dim.prec - n).
-{ apply nat_sub_monotone; exact h1. }
-(* THEREFORE *)
-assert (h3 : x ≤ Dim.prec - n).
-{ ...final reasoning... }
-```
-
-**Notes:**
-- SINCE introduces a constraint or fact that justifies subsequent reasoning
-- The constraint becomes available in the context
-- Could be implemented via `assert` or by direct manipulation
-
-**Wishlist:**
-- Clarify semantic relationship between SINCE and ASSUME
-- Support for conditional reasoning blocks
-- Automatic constraint propagation and simplification
-- Support for multiple SINCE conditions
-
----
-
-## Conclusion Keywords
-
-### THEREFORE
-
-**Angelito:**
-```angelito
-THEREFORE (Dim.prec - n) ∈ result  [BY maps_to_to_in]
-```
-
-**Rocq Translation (as intermediate assertion):**
-```coq
-assert (h : (Dim.prec - n) ∈ result).
-{ exact maps_to_to_in h_pointwise. }
-```
-
-or **(if concluding a subgoal):**
-```coq
-exact maps_to_to_in h_pointwise.
-```
-
-**Notes:**
-- THEREFORE can appear multiple times (intermediate conclusions)
-- When it concludes a proof section, it may translate to `exact` or direct tactic application
-- When it records an intermediate result, it becomes an `assert`
-- The [BY ...] clause provides the justification
-
-**Wishlist:**
-- Automatic inference of whether THEREFORE is intermediate or final
-- Support for implicit justification (infer from context)
-- Support for multiple THEREFORE conclusions in parallel
-- Structured display of intermediate results in generated code
-
----
-
-### CONCLUDE
-
-**Angelito:**
-```angelito
-CONCLUDE: Both conditions hold, so max = Dim.prec - n    [QED]
-```
-
-**Rocq Translation:**
-```coq
-(* All subgoals discharged *)
-Qed.
-```
-
-or **(explicit):**
-```coq
-reflexivity. (* or other closing tactic *)
-Qed.
-```
-
-**Notes:**
-- CONCLUDE appears exactly once per PROVE block
-- It signals that all open goals are closed
-- The justification may be implicit (goals automatically closed) or explicit
-- Rocq syntax ends proofs with `Qed.` or `Defined.`
-
-**Wishlist:**
-- Automated verification that all goals are actually closed at CONCLUDE
-- Support for explicit final tactic specification
-- Support for different proof termination methods (Qed vs. Defined)
-- Ability to attach proof metadata or certificates
-
----
-
-## Justification Keywords
-
-### BY
-
-**General Pattern:**
-```angelito
-<statement> [BY lemma1, lemma2, ...]
-```
-
-**Rocq Translation:**
-```coq
-<statement_with_proof>
-{ exact lemma1. }
-(* or *)
-{ apply lemma1; apply lemma2. }
-(* or *)
-{ rewrite lemma1, lemma2. }
-```
-
-**Notes:**
-- BY provides the justification for any proof step
-- The translation depends on the context and statement type
-- May involve `exact`, `apply`, `rewrite`, or other tactics
-- Multiple lemmas are combined based on context
-
-**Wishlist:**
-- Specify whether lemmas are applied, rewritten, or used as exact proof terms
-- Support for lemma arguments: `[BY lemma (arg1, arg2)]`
-- Support for tactic specifications: `[BY simp [lemmas]]` or `[BY omega]`
-- Automatic inference of tactic from lemma names and patterns
-- Support for named hypotheses: `[BY h1, using h2]`
-
----
-
-## Cross-Cutting Concerns
-
-### Proof Termination
-
-All complete proofs must end with:
-- `Qed.` (for propositions, creates irreducible proof)
-- `Defined.` (for definitions, allows unfolding)
-
-### Comments and Documentation
-
-Generated Rocq code should preserve Angelito structure as comments:
-```coq
-(* PROVE theorem_name *)
-(* ASSUME n : ℕ *)
-(* GOAL: ... *)
-(* APPLY ... *)
-(* THEREFORE ... *)
-```
-
-### Structural Tactics
-
-For organizing subgoals, prefer this hierarchy:
-1. Bullet points (`-`, `+`, `*`) for simple sequential subgoals
-2. Braces `{ ... }` for nested or independent subgoals
-3. Named focuses for complex structures
-
-**Wishlist:**
-- Preference specification in Angelito for structural style
-- Automatic balancing of nesting levels
-- Support for custom structural tactics
-
----
-
-## Overall Translation Wishlist
-
-- **Parser**: Full parser for Angelito that produces an AST
-- **Type Checking**: Verify that propositions are well-typed before translation
-- **Automation**: Tactics to handle common patterns (e.g., `angelito_membership` for membership proofs)
-- **Error Recovery**: Generate partial proofs with `sorry` where translation is uncertain
-- **Optimization**: Combine adjacent tactic applications, remove redundant assertions
-- **Documentation**: Generated Rocq code with inline comments explaining Angelito constructs
-- **Interactivity**: Live feedback as Angelito proofs are written/modified
-- **Validation**: Compile generated Rocq and report success/failure back to Angelito editor
+Do not output Angelito keywords directly inside the generated Rocq proof body.

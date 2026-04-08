@@ -2,9 +2,15 @@ You are an expert in Coq/Rocq theorem proving. You are given an Angelito proof a
 
 Return only Rocq tactic lines. The first non-empty line of your answer must be a valid Rocq tactic such as `intros ... .`, `induction ... .`, `destruct ... .`, or a bullet line like `- admit.`. Do not restate the task. Do not restate the theorem. Do not explain your reasoning. Do not use markdown fences. Do not include comments.
 
-**Translation rules** (from the Angelito-to-Rocq guide):
+**Current tactics reference:**
+{tactics_reference}
+
+**Angelito-to-Rocq translation guide:**
+{translation_guide}
+
+**Translation rules** (follow the guide above):
 - `PROVE name: signature` -> do not emit the lemma header; only emit the tactic body that would go between `Proof.` and `Qed.`
-- `ASSUME x : T` -> `intros x.` or `assume x : T.` if the custom tactic is available
+- `ASSUME x : T` -> `intros x.` unless the current proof source already imports the Angelito tactics library
 - `INDUCTION n` -> `induction n.` with bullet or brace blocks for the cases
 - `APPLY theorem SPLIT INTO: (1)... (2)...` -> `apply theorem.` followed by one `admit.` leaf per subgoal
 - `PROVE BASE_CASE:` / `PROVE INDUCTIVE_CASE:` -> bullet or brace blocks
@@ -16,14 +22,17 @@ Return only Rocq tactic lines. The first non-empty line of your answer must be a
 3. The skeleton must compile when wrapped in `Proof. ... Admitted.`
 4. Use bullets (`-`, `+`, `*`) or braces (`{ }`) to structure subgoals.
 5. Every non-empty line must be valid Rocq syntax.
-6. If the proof uses induction on `n`, the output should normally look like:
+6. Angelito keywords are not valid Rocq syntax. Never emit uppercase Angelito keywords such as `ASSUME`, `FACT`, `SIMPLIFY`, `THEREFORE`, or `CONCLUDE`.
+7. If the proof uses induction on `n`, the output should normally look like:
    `intros ... .`
    `induction n.`
    `- admit.`
    `- admit.`
-
-**Available custom tactics** (from Angelito Tactics library):
-{tactics_reference}
+8. Do not invent proof structure that is not present in the Angelito proof. If the Angelito proof has no `INDUCTION`, `DESTRUCT`, or `APPLY ... SPLIT INTO`, then the skeleton should usually just be introductions followed by a single `admit.`
+9. Do not partially solve goals. Once a branch reaches `admit.`, stop writing tactics for that branch.
+10. If the formal statement begins with `forall` binders or implications, the skeleton must introduce them first with `intros ... .` before using `induction`, `destruct`, or other goal-opening tactics.
+11. After `intros n` and `induction n`, the inductive subgoal is usually `S n + 0 = S n` (or similar) with `IHn : n + 0 = n` already in context. It is **not** a top-level `forall m : nat, ...` that needs `pick m : nat.` or an extra `ASSUME` line. Do not emit `pick` or `intros` for a second parameter name that induction already scoped; use `admit.` for the leaf and let the fill step work on the real goal.
+12. If the Angelito text contains `PROVE INDUCTIVE_CASE:` followed by `ASSUME m : ...`, treat that `ASSUME` as naming the predecessor variable already introduced by `induction`. Do not translate it into `pick m : ...` or `intros m.` unless the actual Rocq goal in that branch visibly starts with a `forall` or implication binder.
 
 **Formal Statement:**
 {formal_statement}

@@ -1,0 +1,149 @@
+{
+  "started_at": "2026-04-08T12:46:13",
+  "status": "failed",
+  "inputs": {
+    "informal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\02_inequality\\informal.txt",
+    "formal": "C:\\Users\\clark\\RocqCoSPOC\\data\\examples\\02_inequality\\formal.v",
+    "target": "C:\\Users\\clark\\RocqCoSPOC\\coq\\MulN0.v",
+    "target_rel": "coq/MulN0.v"
+  },
+  "config": {
+    "max_fill_attempts": 3,
+    "rewrite_model": [
+      "openrouter/free"
+    ],
+    "skeleton_model": [
+      "openrouter/free"
+    ],
+    "fill_model": [
+      "openrouter/free"
+    ],
+    "request_retries": 4,
+    "request_backoff_base_sec": 1.5,
+    "request_backoff_multiplier": 2.0,
+    "request_backoff_max_sec": 20.0,
+    "request_backoff_jitter_sec": 0.35
+  },
+  "model_log_path": "C:\\Users\\clark\\RocqCoSPOC\\pipeline\\traces\\run-ineq-angelito-lib-model-log.jsonl",
+  "rewrite": {
+    "text": "PROVE ex2: ∀a b : nat, a <= b → a <= S b\nBEGIN\n  ASSUME a : nat\n  ASSUME b : nat\n  ASSUME H: a <= b\n  GOAL: a <= S b\n  FACT h1: a <= b → a <= S b [BY Nat.le_succ_r]\n  THEREFORE a <= S b [BY h1 H]\n  CONCLUDE: a <= S b [QED]\nEND",
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "openrouter/free",
+        "raw_output": "Okay, let's tackle this. The user wants me to rewrite an informal mathematical proof into strict Angelito syntax following all the specified rules. The target theorem is \"Require Import Lia.\" but the user provided the target formal statement as \"forall a b : nat, a <= b -> a <= S b.\" Wait, actually looking back, the user says the target formal statement is \"forall a b : nat, a <= b -> a <= S b.\" So the theorem is ∀a b ∈ ℕ, a ≤ b → a ≤ S b.\n\nThe requirements are quite detailed. Let me parse them again. The key points are:\n\n1. Use specific Angelito keywords: PROVE, BEGIN, END, etc., each on their own line.\n2. Every proof step must use correct keywords, no loose language.\n3. Each transformation has [BY ...] justification.\n4. Intermediate facts named FACT h1 etc.\n5. Use INDUCTION for inductive proofs, with PROVE BASE_CASE and PROVE INDUCTIVE_CASE sub-blocks.\n6. Use SIMPLIFY, APPLY, etc., but the user said to use SIMPLIFY LHS/RHS, but in the required keywords, maybe not. Wait, the user said to use SIMPLIFY LHS/RHS for algebraic rewrites, but the keywords must be Angelito's. Wait, the user says \"Use SIMPLIFY LHS/RHS...\" but the instruction says to use Angelito keywords only. Hmm, maybe I need to follow the user's instruction strictly. Wait the user says \"Use the provided specification\" which includes the keywords list. Since the user says \"Angelito keywords are declarative proof-language keywords...\", so I have to stick to those.\n\nThe main task is to take the given theorem and convert it into Angelito proof structure. The user also says the first line must start with PROVE and last with END, each line a single keyword. Also, every proof step must use correct keywords, with each transformation having [BY...]. Also, the proof must be structured with BEGIN, END, etc., and each keyword on its own line.\n\nThe target proof is about proving a ≤ S b given a ≤ b. Since the theorem is ∀a b ∈ ℕ, a ≤ b → a ≤ S b. Let's see how to structure this.\n\nFirst, the structure would be:\n\nPROVE theorem : \"forall a b : nat, a <= b -> a <= S b.\"\n\nBEGIN ... END.\n\nBut need to follow all the rules. Since the user says the first non-empty line is PROVE, last is END. Each Angelito keyword per line. Since the required outer shape is PROVE theorem_name: proposition, BEGIN ... END.\n\nThe intermediate facts: perhaps FACT h1: a <= b, etc. But need to ensure that each step has [BY ...].\n\nThe proof steps must be broken down into subproofs using INDUCTION. Since the theorem is straightforward, maybe it's an induction proof. Let's see:\n\nAssume the theorem is about a ≤ S b when a ≤ b. To prove it, perhaps induction on a? Or on b? Let's see:\n\nSuppose we use induction on a. Let's say:\n\nBase case: a=0 (if natural numbers start at 0?), but maybe a starts at 1. Alternatively, induction on b. Alternatively, since the theorem is for all a and b, perhaps induction on b. Let's pick induction on b.\n\nWait, the theorem is ∀a b, a ≤ b → a ≤ S b. Let's see:\n\nSuppose we do induction on b. Let's say:\n\nInductive hypothesis: For all c < b, ∀a ≤ c → a ≤ S c.\n\nThen for b, assume that for all a ≤ b-1, a ≤ S a. Then need to show a ≤ S b.\n\nWait, but S b is S applied to b. Hmm. Alternatively, maybe induction on a. Let's see:\n\nAlternatively, since the implication is a ≤ S b whenever a ≤ b, perhaps induction on b. Let's proceed.\n\nThe proof would start with BEGIN, then use INDUCTION on b. So:\n\nPROVE ∀a b ∈ ℕ, a ≤ b → a ≤ S b.\n\nBEGIN\n  INDUCTION b\n  INDUCIVE_CASE b\n    PROVE A: a ≤ S b\n      INDUCTIVE_HYPOTHESIS: ∀c < b, a ≤ S c\n      SPLIT INTO\n        (1) a ≤ S a\n        (2) a ≤ S (a + 1)\n      APPLY A: a ≤ S a\n      SPLIT INTO\n        (3) a ≤ S (a + 1)\n        (4) a ≤ S (a + 1) + S b - S a\n      CONCLUDE\n    END\n  CONCLUDE\nEND\n\nWait but need to ensure all keywords are used properly. Also, need to name intermediate facts. Let's see:\n\nThe intermediate facts could be FACT h1: a ≤ b, FACT h2: S b.\n\nBut the user requires FACT h1: a <= b, FACT h2: S b.\n\nAlso, the steps must have [BY ...] justification. For example, when applying A: a ≤ S a, the [BY SIGNAGE]?\n\nWait, the user said every transformation or claim must have [BY ...]. So in the INDUCTION_CASE step, when applying A, perhaps [BY SIGNAGE h1].\n\nAlso, the proof steps must be structured with each step having a BY clause.\n\nAdditionally, the first line is PROVE, last is END. Each keyword on its own line. Since the user said the first non-empty line is PROVE, and last is END. Since the user says output only the Angelito proof, starting with PROVE and ending with END, each line a single keyword.\n\nWait, but the user said \"Each Angelito keyword must start its own line. Do not compress...\" So the structure would be:\n\nPROVE\n[FACT h1: a <= b]\nBEGIN\n  INDUCTION b\n  INDUCTION_CASE b\n    PROVE A: a <= S b\n      [BY h1]\n      INDUCIVE_HYPOTHESIS: ∀c < b, a <= S c\n      SPLIT INTO\n        (1) a <= S a\n        (2) a <= S (a+1)\n      APPLY A: a <= S a\n      SPLIT INTO\n        (3) a <= S (a+1)\n        (4) a <= S (a+1) + S b - S a\n      CONCLUDE\n    END\n  CONCLUDE\nEND\n\nWait but need to ensure all required keywords are present. Also, the user said every proof step must use correct keywords, no loose language. Also, the first line is PROVE, last is END. The first line is \"PROVE\", but according to the user's instruction, the first non-empty line must start with PROVE. Since the user said the first line is PROVE, but the user said the first line must start with PROVE. The last line must be END.\n\nWait the user says \"The first non-empty line must start with PROVE and the last non-empty line must be exactly END.\" So the first line is \"PROVE\", then the rest follow. The last line is \"END\".\n\nAlso, the user requires that every transformation or claim has [BY ...]. For example, in the INDUCTION_CASE step, when applying A, perhaps [BY h1].\n\nAlso, the intermediate facts: FACT h1: a <= b, FACT h2: S b.\n\nAlso, the proof must be structured with BEGIN and END, but the user said the outer shape is PROVE theorem_name: proposition BEGIN ... END. Since the user says the first line is PROVE, and last is END.\n\nPutting it all together, ensuring all the user's constraints are met. Let me check the 14th point: \"Use `INDUCTION` when the proof is inductive...\", so the INDUCTION keyword is used. Also, the required keywords are all present. The final proof should be just the Angelito proof, no other text.\n\nSo the final answer would be:\n\nPROVE\n[FACT h1: a <= b]\nBEGIN\n  INDUCTION b\n  INDUCTION_CASE b\n    PROVE A: a <= S b\n      [BY h1]\n      INDUCIVE_HYPOTHESIS: ∀c < b, a <= S c\n      SPLIT INTO\n        (1) a <= S a\n        (2) a <= S (a+1)\n      APPLY A: a <= S a\n      SPLIT INTO\n        (3) a <= S (a+1)\n        (4) a <= S (a+1) + S b - S a\n      CONCLUDE\n    END\n  CONCLUDE\nEND\n\nWait but the user said the first line must start with PROVE, which it does. The last line is END. Each keyword is on its own line. The [BY ...]",
+        "status": "invalid_format",
+        "error": "Rewrite output contains non-Angelito lines.\nExamples:\nBut need to follow all the rules. Since the user says the first non-empty line is PROVE, last is END. Each Angelito keyword per line. Since the required outer shape is PROVE theorem_name: proposition, BEGIN ... END.\nThe intermediate facts: perhaps FACT h1: a <= b, etc. But need to ensure that each step has [BY ...].\nThe proof steps must be broken down into subproofs using INDUCTION. Since the theorem is straightforward, maybe it's an induction proof. Let's see:\nAssume the theorem is about a ≤ S b when a ≤ b. To prove it, perhaps induction on a? Or on b? Let's see:\nSuppose we use induction on a. Let's say:\n\nRaw output:\nPROVE theorem : \"forall a b : nat, a <= b -> a <= S b.\"\n\nBEGIN ... END.\n\nBut need to follow all the rules. Since the user says the first non-empty line is PROVE, last is END. Each Angelito keyword per line. Since the required outer shape is PROVE theorem_name: proposition, BEGIN ... END.\n\nThe intermediate facts: perhaps FACT h1: a <= b, etc. But need to ensure that each step has [BY ...].\n\nThe proof steps must be broken down into subproofs using INDUCTION. Since the theorem is straightforward, maybe it's an induction proof. Let's see:\n\nAssume the theorem is about a ≤ S b when a ≤ b. To prove it, perhaps induction on a? Or on b? Let's see:\n\nSuppose we use induction on a. Let's say:\n\nBase case: a=0 (if natural numbers start at 0?), but maybe a starts at 1. Alternatively, induction on b. Alternatively, since the theorem is for all a and b, perhaps induction on b. Let's pick induction on b.\n\nWait, the theorem is ∀a b, a ≤ b → a ≤ S b. Let's see:\n\nSuppose we do induction on b. Let's say:\n\nInductive hypothesis: For all c < b, ∀a ≤ c → a ≤ S c.\n\nThen for b, assume that for all a ≤ b-1, a ≤ S a. Then need to show a ≤ S b.\n\nWait, but S b is S applied to b. Hmm. Alternatively, maybe inductio\n...[truncated]..."
+      },
+      {
+        "format_attempt": 2,
+        "model": "openrouter/free",
+        "raw_output": "Okay, let's tackle this problem. The user wants a strict Angelito proof for the theorem: forall a b : nat, a <= b -> a <= S b. \n\nFirst, I need to structure the proof using the Angelito keywords as specified. The first line must be PROVE with the theorem name and signature. Then BEGIN, followed by the proof steps, and ending with END.\n\nThe theorem is straightforward. The informal proof uses linear arithmetic, but in Angelito, we need to break it down step by step with the correct keywords.\n\nStart with PROVE ex2: forall a b : nat, a <= b -> a <= S b. BEGIN.\n\nThen, ASSUME a and b as natural numbers, and the hypothesis H: a <= b. \n\nNext, the goal is to show a <= S b. Since we have a <= b, we can use the successor property. Maybe apply a lemma that allows adding 1 to both sides. But in Angelito, we need to use the keywords properly.\n\nWait, the user's example uses SIMPLIFY, APPLY, etc. So perhaps we can use SIMPLIFY on the RHS or LHS. Alternatively, since a <= b implies a <= S b by the definition of <=, maybe we can use a known fact or apply a lemma.\n\nBut in Angelito, we need to use the keywords. Let's think: the goal is a <= S b. We have a <= b. How to get from a <= b to a <= S b? \n\nIn Coq, this would be done by reflexivity or using the successor property. But in Angelito, we need to use the keywords. Maybe we can use SIMPLIFY on the RHS, but I'm not sure. Alternatively, apply a lemma that states that if a <= b, then a <= S b. \n\nBut since the user's example uses FACT and BY, perhaps we can create a fact that a <= b implies a <= S b. However, since the theorem is exactly that, maybe we can use the hypothesis directly.\n\nWait, the hypothesis is H: a <= b. The goal is a <= S b. So, from a <= b, we can add 1 to both sides. But in Angelito, how to express that? Maybe using SIMPLIFY or APPLY.\n\nAlternatively, since S is the successor function, and a <= b implies a <= S b by the definition of <=. So perhaps we can use a fact that a <= b implies a <= S b. But since that's the theorem itself, maybe we need to use the hypothesis.\n\nAlternatively, maybe we can use the fact that a <= b and then use the successor to get a <= S b. \n\nIn Angelito, perhaps we can do:\n\nSIMPLIFY LHS: a <= b [BY H]\n\nBut that might not be sufficient. Alternatively, we can use the fact that a <= b and then apply a lemma that allows adding 1. \n\nAlternatively, since the goal is a <= S b, and we have a <= b, we can use the fact that S is a function that increases the value. So, if a <= b, then a <= S b. \n\nBut how to formalize this in Angelito? Maybe using a fact that a <= b implies a <= S b. But since that's the theorem, perhaps we need to use the hypothesis.\n\nWait, the hypothesis is a <= b. The goal is a <= S b. So, from a <= b, we can derive a <= S b by the property of the successor. \n\nIn Angelito, perhaps we can use the FACT keyword to state that a <= b implies a <= S b, but that's the theorem itself. Alternatively, maybe we can use the fact that S is a function that preserves order. \n\nAlternatively, maybe we can use the fact that a <= b and then use the successor to get a <= S b. \n\nBut in Angelito, the steps need to be explicit. Let's try to structure it:\n\nPROVE ex2: forall a b : nat, a <= b -> a <= S b.\nBEGIN\n  ASSUME a : nat\n  ASSUME b : nat\n  ASSUME H: a <= b\n  GOAL: a <= S b\n  SIMPLIFY LHS: a <= b [BY H]\n  THEREFORE a <= S b [BY ...]\n  CONCLUDE: a <= S b [QED]\nEND\n\nBut the problem is that SIMPLIFY LHS: a <= b [BY H] might not be enough. Because the goal is a <= S b. So after simplifying the LHS, we still need to get to S b. \n\nAlternatively, maybe we can use the fact that a <= b and then apply a lemma that allows adding 1. For example, if we have a lemma that says a <= b implies a <= S b, then we can apply that. \n\nBut since the theorem is exactly that, maybe we can use the hypothesis directly. \n\nAlternatively, maybe we can use the fact that S is a function that increases the value. So, if a <= b, then a <= S b. \n\nIn Angelito, perhaps we can use the FACT keyword to state that a <= b implies a <= S b. But that's the theorem itself. \n\nAlternatively, maybe we can use the fact that a <= b and then use the successor to get a <= S b. \n\nBut how to express that in Angelito? Maybe using the FACT with a justification. \n\nWait, the user's example uses FACT h1: ... [BY ...]. So perhaps we can create a fact that a <= b implies a <= S b. \n\nBut since that's the theorem, maybe we need to use the hypothesis. \n\nAlternatively, maybe we can use the fact that a <= b and then use the successor to get a <= S b. \n\nIn Angelito, perhaps:\n\nFACT h1: a <= b [BY H]\nTHEREFORE a <= S b [BY ...]\n\nBut what lemma can we use here? Maybe there's a lemma that says a <= b implies a <= S b. \n\nAlternatively, since the theorem is exactly that, maybe we can use the hypothesis directly. \n\nAlternatively, maybe we can use the fact that S is a function that preserves the order. \n\nBut in Angelito, the steps need to be explicit. \n\nAlternatively, maybe we can use the fact that a <= b and then apply the successor to both sides. \n\nBut in Angelito, how to express that? \n\nPerhaps:\n\nSIMPLIFY RHS: S b [BY ...]\n\nBut I'm not sure. \n\nAlternatively, maybe we can use the fact that a <= b and then use the successor to get a <= S b. \n\nIn Angelito, perhaps:\n\nFACT h2: a <= S b [BY H, ...]\n\nBut what's the justification? \n\nAlternatively, since the hypothesis is a <= b, and we need to show a <= S b, we can use the fact that S is a function that increases the value. \n\nBut in Angelito, we need to use the keywords. \n\nMaybe the correct approach is to use the fact that a <= b and then apply a lemma that allows adding 1. \n\nBut since the user's example uses FACT and BY, perhaps we can do:\n\nFACT h1: a <= b [BY H]\nTHEREFORE a <= S b [BY ...]\n\nBut what lemma can we use here? Maybe there's a lemma that says a <= b implies a <= S b. \n\nAlternatively, since the theorem is exactly that, maybe we can use the hypothesis directly. \n\nAlternatively, maybe we can use the fact that a <= b and then use the successor to get a <= S b. \n\nIn Angelito, perhaps:\n\nSIMPLIFY LHS: a <= b [BY H]\nTHEREFORE a <= S b [BY ...]\n\nBut what's the justification? Maybe there's a lemma that says a <= b implies a <= S b. \n\nAlternatively, maybe we can use the fact that S is a function that preserves the order. \n\nBut without knowing specific lemmas, it's hard to say. \n\nAlternatively, maybe the proof is straightforward and can be done with a single step. \n\nIn Angelito, perhaps:\n\nPROVE ex2: forall a b : nat, a <= b -> a <= S b.\nBEGIN\n  ASSUME a : nat\n  ASSUME b : nat\n  ASSUME H: a <= b\n  GOAL: a <= S b\n  THEREFORE a <= S b [BY H, ...]\n  CONCLUDE: a <= S b [QED]\nEND\n\nBut the problem is that the justification for THEREFORE needs to be valid. \n\nAlternatively, maybe we can use the fact that a <= b and then use the successor to get a <= S b. \n\nIn Angelito, perhaps:\n\nFACT h1: a <= b [BY H]\nFACT h2: a <= S b [BY h1, ...]\n\nBut what's the ...? Maybe a lemma that says a <= b implies a <= S b. \n\nBut since that's the theorem, maybe we can't use it. \n\nAlternatively, maybe we can use the fact that S is a function that increases the value. \n\nBut in Angelito, we need to use the keywords. \n\nAlternatively, maybe the proof is too simple and can be done with a single step. \n\nIn that case, perhaps:\n\nPROVE ex2: forall a b : nat, a <=",
+        "status": "invalid_format",
+        "error": "Rewrite output contains non-Angelito lines.\nExamples:\nBut the problem is that SIMPLIFY LHS: a <= b [BY H] might not be enough. Because the goal is a <= S b. So after simplifying the LHS, we still need to get to S b.\nAlternatively, maybe we can use the fact that a <= b and then apply a lemma that allows adding 1. For example, if we have a lemma that says a <= b implies a <= S b, then we can apply that.\nBut since the theorem is exactly that, maybe we can use the hypothesis directly.\nAlternatively, maybe we can use the fact that S is a function that increases the value. So, if a <= b, then a <= S b.\nIn Angelito, perhaps we can use the FACT keyword to state that a <= b implies a <= S b. But that's the theorem itself.\n\nRaw output:\nPROVE ex2: forall a b : nat, a <= b -> a <= S b.\nBEGIN\n  ASSUME a : nat\n  ASSUME b : nat\n  ASSUME H: a <= b\n  GOAL: a <= S b\n  SIMPLIFY LHS: a <= b [BY H]\n  THEREFORE a <= S b [BY ...]\n  CONCLUDE: a <= S b [QED]\nEND\n\nBut the problem is that SIMPLIFY LHS: a <= b [BY H] might not be enough. Because the goal is a <= S b. So after simplifying the LHS, we still need to get to S b. \n\nAlternatively, maybe we can use the fact that a <= b and then apply a lemma that allows adding 1. For example, if we have a lemma that says a <= b implies a <= S b, then we can apply that. \n\nBut since the theorem is exactly that, maybe we can use the hypothesis directly. \n\nAlternatively, maybe we can use the fact that S is a function that increases the value. So, if a <= b, then a <= S b. \n\nIn Angelito, perhaps we can use the FACT keyword to state that a <= b implies a <= S b. But that's the theorem itself. \n\nAlternatively, maybe we can use the fact that a <= b and then use the successor to get a <= S b. \n\nBut how to express that in Angelito? Maybe using the FACT with a justification. \n\nWait, the user's example uses FACT h1: ... [BY ...]. So perhaps we can create a fact that a <= b implies a <= S b. \n\nBut si\n...[truncated]..."
+      },
+      {
+        "format_attempt": 3,
+        "model": "openrouter/free",
+        "raw_output": "PROVE ex2: ∀a b : nat, a <= b → a <= S b\nBEGIN\n  ASSUME a : nat\n  ASSUME b : nat\n  ASSUME H: a <= b\n  GOAL: a <= S b\n  FACT h1: a <= b → a <= S b [BY Nat.le_succ_r]\n  THEREFORE a <= S b [BY h1 H]\n  CONCLUDE: a <= S b [QED]\nEND",
+        "status": "parsed",
+        "parsed_output": "PROVE ex2: ∀a b : nat, a <= b → a <= S b\nBEGIN\n  ASSUME a : nat\n  ASSUME b : nat\n  ASSUME H: a <= b\n  GOAL: a <= S b\n  FACT h1: a <= b → a <= S b [BY Nat.le_succ_r]\n  THEREFORE a <= S b [BY h1 H]\n  CONCLUDE: a <= S b [QED]\nEND"
+      }
+    ]
+  },
+  "skeleton": {
+    "text": "intros.\nadmit.",
+    "rendered_text": "intros.\nadmit.",
+    "slot_names": [
+      "slot_1"
+    ],
+    "model_attempts": [
+      {
+        "format_attempt": 0,
+        "model": "deterministic",
+        "raw_output": "intros.\nadmit.",
+        "status": "derived",
+        "parsed_output": "intros.\nadmit."
+      }
+    ],
+    "compiles": true,
+    "check_stdout": "Checking coq/MulN0.v ...\nProof check passed: coq/MulN0.v",
+    "stdout": "Checking coq/MulN0.v ...\nProof check passed: coq/MulN0.v",
+    "check_stderr": "",
+    "stderr": ""
+  },
+  "fills": [
+    {
+      "slot_name": "slot_1",
+      "admit_index": 1,
+      "attempt": 1,
+      "current_goal_state": "",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "openrouter/free",
+          "raw_output": "coq apply Nat.le_succ_r.",
+          "status": "invalid_format",
+          "error": "Model did not return a valid Coq tactic block.\nRaw output:\ncoq apply Nat.le_succ_r."
+        },
+        {
+          "format_attempt": 2,
+          "model": "openrouter/free",
+          "raw_output": "```coq\n(* Replace the placeholder with a valid Rocq tactic sequence *)\nadmit (a <= b).\n```",
+          "status": "invalid_format",
+          "error": "Model did not return a valid Coq tactic block.\nRaw output:\n```coq\n(* Replace the placeholder with a valid Rocq tactic sequence *)\nadmit (a <= b).\n```"
+        },
+        {
+          "format_attempt": 3,
+          "model": "openrouter/free",
+          "raw_output": "```coq\nsimplify rhs (a <= b) by reflexivity.\nassert_goal (a <= S b).\n```",
+          "status": "parsed",
+          "parsed_output": "simplify rhs (a <= b) by reflexivity.\nassert_goal (a <= S b)."
+        }
+      ],
+      "replacement": "simplify rhs (a <= b) by reflexivity.\nassert_goal (a <= S b).",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/MulN0.v ...",
+      "stdout": "Checking coq/MulN0.v ...",
+      "check_stderr": "File \".\\coq/MulN0.v\", line 8, characters 2-38:\nError:\nUncaught Ltac2 exception:\nAPI.Fail_with message:(ltac1_simplify_rhs_by: expected equation)\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/MulN0.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1",
+      "stderr": "File \".\\coq/MulN0.v\", line 8, characters 2-38:\nError:\nUncaught Ltac2 exception:\nAPI.Fail_with message:(ltac1_simplify_rhs_by: expected equation)\n\nC:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1 : Proof check failed: \ncoq/MulN0.v\nAt C:\\Users\\clark\\RocqCoSPOC\\scripts\\check-target-proof.ps1:31 char:3\n+   Write-Error \"Proof check failed: $FilePath\"\n+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException\n    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,check-t \n   arget-proof.ps1",
+      "status": "compile_error"
+    },
+    {
+      "slot_name": "slot_1",
+      "admit_index": 1,
+      "attempt": 2,
+      "current_goal_state": "",
+      "status": "model_error",
+      "error": "fill_goal failed format validation:\n  - Attempt 1: Model did not return a valid Coq tactic block.\nRaw output:\n```coq\napply Nat.le_succ_r with H.\n```\n  - Attempt 2: Model did not return a valid Coq tactic block.\nRaw output:\n```coq\napply Nat.le_succ_r with H.\n```\n  - Attempt 3: Model did not return a valid Coq tactic block.\nRaw output:\napply Nat.le_succ_r with H.",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "openrouter/free",
+          "raw_output": "```coq\napply Nat.le_succ_r with H.\n```",
+          "status": "invalid_format",
+          "error": "Model did not return a valid Coq tactic block.\nRaw output:\n```coq\napply Nat.le_succ_r with H.\n```"
+        },
+        {
+          "format_attempt": 2,
+          "model": "openrouter/free",
+          "raw_output": "```coq\napply Nat.le_succ_r with H.\n```",
+          "status": "invalid_format",
+          "error": "Model did not return a valid Coq tactic block.\nRaw output:\n```coq\napply Nat.le_succ_r with H.\n```"
+        },
+        {
+          "format_attempt": 3,
+          "model": "openrouter/free",
+          "raw_output": "apply Nat.le_succ_r with H.",
+          "status": "invalid_format",
+          "error": "Model did not return a valid Coq tactic block.\nRaw output:\napply Nat.le_succ_r with H."
+        }
+      ]
+    }
+  ],
+  "summary": {},
+  "error": "  Fill model error: fill_goal failed format validation:\n  - Attempt 1: Model did not return a valid Coq tactic block.\nRaw output:\n```coq\napply Nat.le_succ_r with H.\n```\n  - Attempt 2: Model did not return a valid Coq tactic block.\nRaw output:\n```coq\napply Nat.le_succ_r with H.\n```\n  - Attempt 3: Model did not return a valid Coq tactic block.\nRaw output:\napply Nat.le_succ_r with H.",
+  "ended_at": "2026-04-08T12:53:26"
+}

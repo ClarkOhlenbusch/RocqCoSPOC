@@ -25,6 +25,18 @@ Get-Content _CoqProject | ForEach-Object {
   if ($line -match '^-Q\s+(.+)\s+(.+)$') { $coqArgs += "-Q", $Matches[1].Trim(), $Matches[2].Trim(); return }
 }
 
+# Ensure Angelito is compiled under the active load-path mapping first.
+# This prevents stale .vo files from older namespaces from breaking imports.
+$angelitoPath = "coq/Angelito.v"
+if ((Test-Path $angelitoPath) -and ($FilePath -ne $angelitoPath)) {
+  Write-Host "Checking $angelitoPath ..."
+  & $coqBin @coqArgs $angelitoPath
+  if ($LASTEXITCODE -ne 0) {
+    Write-Error "Proof check failed: $angelitoPath"
+    exit $LASTEXITCODE
+  }
+}
+
 Write-Host "Checking $FilePath ..."
 & $coqBin @coqArgs $FilePath
 if ($LASTEXITCODE -ne 0) {
