@@ -131,7 +131,7 @@ After this, you can run the current proof workflow: rewrite the informal proof, 
 
 The coding agent in this repo can apply tactics to `.v` files and **run the proof checker** to confirm proofs are valid. From the project root it runs:
 
-- **PowerShell:** `.\scripts\check-proofs.ps1` — compiles all `.v` files listed in `_CoqProject` using `coqc`. Add new `.v` files to `_CoqProject` and they will be checked automatically.
+- **Python:** `python .\scripts\check-proofs.py` — compiles all `.v` files listed in `_CoqProject` using `coqc`. Add new `.v` files to `_CoqProject` and they will be checked automatically.
 - **Direct:** `coqc -R coq RocqCoSPOC coq/Example.v` (and similarly for other files).
 
 So the agent can edit tactics, run the script (or `coqc`), read success or error output, and fix proofs until they pass.

@@ -318,7 +318,7 @@ function App() {
             )}
             {(trace.skeleton?.slot_names || []).length > 0 && trace.skeleton?.proof_state === "" && (
               <p className="helper-text">
-                Proof state was not captured. Check that <code>scripts/get-proof-state.ps1</code> can run{" "}
+                Proof state was not captured. Check that <code>scripts/get-proof-state.py</code> can run{" "}
                 <code>coqtop</code> for this file.
               </p>
             )}

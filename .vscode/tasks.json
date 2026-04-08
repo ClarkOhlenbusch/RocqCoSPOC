@@ -4,16 +4,12 @@
     {
       "label": "CosProver: Emit proof state at cursor",
       "type": "shell",
-      "command": "pwsh",
+      "command": "python",
       "args": [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "${workspaceFolder}\\scripts\\get-proof-state.ps1",
-        "-FilePath",
+        "${workspaceFolder}\\scripts\\get-proof-state.py",
+        "--file-path",
         "${file}",
-        "-CursorLine",
+        "--cursor-line",
         "${lineNumber}"
       ],
       "problemMatcher": []

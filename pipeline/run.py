@@ -11,7 +11,6 @@ Uses Open Router API. Run from repo root.
 import argparse
 import json
 import re
-import shutil
 import subprocess
 import sys
 from datetime import datetime
@@ -147,26 +146,28 @@ def run_fill_goal(formal_statement: str, angelito_proof: str,
 # ---------------------------------------------------------------------------
 
 def run_check_target(repo_root: Path, file_path_rel: str) -> tuple[int, str, str]:
-    """Run check-target-proof.ps1. Returns (exit_code, stdout, stderr)."""
-    script = repo_root / "scripts" / "check-target-proof.ps1"
-    shell_exe = _get_powershell_executable()
+    """Run check-target-proof.py. Returns (exit_code, stdout, stderr)."""
+    script = repo_root / "scripts" / "check-target-proof.py"
     cmd = [
-        shell_exe, "-NoProfile", "-ExecutionPolicy", "Bypass",
-        "-File", str(script), "-FilePath", file_path_rel,
+        sys.executable,
+        str(script),
+        "--file-path",
+        file_path_rel,
     ]
     proc = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=60)
     return proc.returncode, proc.stdout or "", proc.stderr or ""
 
 
 def run_get_proof_state(repo_root: Path, file_path_rel: str, cursor_line: int) -> str:
-    """Run get-proof-state.ps1 and return parsed proof state text, or empty string."""
-    script = repo_root / "scripts" / "get-proof-state.ps1"
-    shell_exe = _get_powershell_executable()
+    """Run get-proof-state.py and return parsed proof state text, or empty string."""
+    script = repo_root / "scripts" / "get-proof-state.py"
     cmd = [
-        shell_exe, "-NoProfile", "-ExecutionPolicy", "Bypass",
-        "-File", str(script),
-        "-FilePath", file_path_rel,
-        "-CursorLine", str(cursor_line),
+        sys.executable,
+        str(script),
+        "--file-path",
+        file_path_rel,
+        "--cursor-line",
+        str(cursor_line),
     ]
     proc = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=60)
     if proc.returncode != 0:
@@ -621,14 +622,6 @@ def _chat_with_model_fallback(
                 break
             print(f"  Warning: {stage} failed with '{model}', trying fallback...", flush=True)
     raise RuntimeError(f"{stage} failed:\n  - " + "\n  - ".join(errors))
-
-
-def _get_powershell_executable() -> str:
-    if shutil.which("pwsh"):
-        return "pwsh"
-    if shutil.which("powershell"):
-        return "powershell"
-    raise RuntimeError("Neither 'pwsh' nor 'powershell' is available on PATH.")
 
 
 def _default_trace_path() -> Path:

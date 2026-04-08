@@ -51,7 +51,7 @@ cascading syntax errors that are hard to diagnose.
 Before choosing any tactic, obtain the current proof state:
 
 ```powershell
-.\scripts\get-proof-state.ps1 -FilePath <file> -CursorLine <line>
+python .\scripts\get-proof-state.py --file-path <file> --cursor-line <line>
 ```
 
 - If the output is `No Goals` → the proof is finished or the cursor is outside
@@ -62,7 +62,7 @@ Before choosing any tactic, obtain the current proof state:
 If `coqtop` cannot be found, pass an explicit path:
 
 ```powershell
-.\scripts\get-proof-state.ps1 -FilePath ... -CursorLine ... -CoqTop <path\to\coqtop.exe>
+python .\scripts\get-proof-state.py --file-path ... --cursor-line ... --coqtop <path\to\coqtop.exe>
 ```
 
 ## 3. Tactic whitelist for this project
@@ -228,8 +228,8 @@ destruct (Z.eq_dec t 0) as [Ht0|Ht0].
 
 ## 8. References
 
-- `scripts/get-proof-state.ps1` — proof state snapshot tool
-- `scripts/check-proofs.ps1` — batch compilation checker
+- `scripts/get-proof-state.py` — proof state snapshot tool
+- `scripts/check-proofs.py` — batch compilation checker
 - `prompts/03_tactic_generator.txt` — normal tactic generation prompt
 - `prompts/04_etr.txt` — error tactic regeneration prompt
 - `prompts/05_esr.txt` — error state renewal prompt

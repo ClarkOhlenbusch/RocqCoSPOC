@@ -24,10 +24,10 @@ goal
 From the repo root:
 
 ```powershell
-.\scripts\get-proof-state.ps1 -FilePath .\coq\CongModEq.v -CursorLine 18
+python .\scripts\get-proof-state.py --file-path .\coq\CongModEq.v --cursor-line 18
 ```
 
-`-CursorLine` is the current editor line number (for example, where the cursor currently sits).
+`--cursor-line` is the current editor line number (for example, where the cursor currently sits).
 
 ## Optional: Run Via VS Code/Cursor Task
 
@@ -38,7 +38,7 @@ in one step.
 ## Required Tools
 
 - `coqtop` available on PATH or discoverable from project config.
-- Rocq/Coq installation with `.vscode/settings.json` or `scripts/check-proofs.ps1` pointing to valid binaries.
+- Rocq/Coq installation with `.vscode/settings.json` or `scripts/check-proofs.py` pointing to valid binaries.
 
 ## Known Limitations
 

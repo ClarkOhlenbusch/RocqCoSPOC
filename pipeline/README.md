@@ -22,7 +22,7 @@ It uses the OpenRouter API for model calls.
    pip install -r requirements.txt
    ```
 
-3. Ensure `coqc` is on PATH. The pipeline calls `scripts/check-target-proof.ps1`.
+3. Ensure `coqc` is on PATH. The pipeline calls `scripts/check-target-proof.py`.
 
 ## Configuration
 

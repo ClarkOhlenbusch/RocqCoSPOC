@@ -30,6 +30,6 @@ python pipeline/run.py --informal data/examples/02_inequality/informal.txt --for
 
 - `.env` in the repo root with `OPENROUTER_API_KEY` set
 - `pip install -r requirements.txt`
-- Coq on PATH or configured in `scripts/check-proofs.ps1` / `.vscode/settings.json`
+- Coq on PATH or configured in `scripts/check-proofs.py` / `.vscode/settings.json`
 
 The target `.v` files (`coq/Example.v`, `coq/MulN0.v`) already contain the theorem statement and `Proof.`; the pipeline rewrites the proof body during each run.

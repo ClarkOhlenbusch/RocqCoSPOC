@@ -74,7 +74,7 @@ class CoqEditor:
         """
         Append tactic block to the proof body (before Qed. if present).
         tactic_text can be multiple lines. Each line is indented with 2 spaces.
-        Returns the 1-based line number of the last line added (for get-proof-state -CursorLine).
+        Returns the 1-based line number of the last line added (for get-proof-state.py --cursor-line).
         """
         if self._proof_start is None:
             raise ValueError("No Proof. block in file; add theorem statement and Proof. first")
@@ -130,7 +130,7 @@ class CoqEditor:
         return self._proof_end
 
     def get_cursor_line_for_state(self) -> int:
-        """1-based line number suitable for get-proof-state.ps1 -CursorLine (last line of proof body)."""
+        """1-based line number suitable for get-proof-state.py --cursor-line (last line of proof body)."""
         if self._last_block_end is not None:
             return self._last_block_end + 1
         if self._proof_end is not None and self._proof_end > 0:
