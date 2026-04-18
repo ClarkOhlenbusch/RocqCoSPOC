@@ -1,0 +1,13 @@
+Take a1 > a2 > a3 > a4. Subtracting the equation for i=2 from that for i=1 and dividing by (a1 - a2) we get:
+
+$- x1 + x2 + x3 + x4 = 0.$
+
+Subtracting the equation for i=4 from that for i=3 and dividing by (a3 - a4) we get:
+
+$- x1 - x2 - x3 + x4 = 0.$
+
+Hence x1 = x4. Subtracting the equation for i=3 from that for i=2 and dividing by (a2 - a3) we get:
+
+$- x1 - x2 + x3 + x4 = 0.$
+
+Hence $x2 = x3 = 0$, and $x1 = x4 = 1/(a1 - a4)$.
