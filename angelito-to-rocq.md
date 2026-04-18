@@ -121,6 +121,28 @@ When filling a single slot:
 4. Keep `simplify lhs/rhs` arguments parenthesized as equalities.
 5. Use ordinary Rocq tactics like `intros`, `rewrite`, `apply`, `exact`, `reflexivity`, `simpl`, `cbn`, and `lia` when they are the most direct low-level step.
 
+## Skeleton-Stage Guidance
+
+When building the Rocq skeleton:
+
+1. Preserve the proof plan, not just the outermost branching.
+2. Translate important Angelito `FACT` steps into Rocq `assert (...) .` checkpoints.
+3. When a later Angelito `ASSUME` depends on an existential fact, preserve that as `assert (hex : exists ...).` followed by `destruct hex as [...] .`
+4. For direct proofs with no induction or case split, do not collapse everything to one final `admit.` if the Angelito proof contains several decisive intermediate facts.
+5. The skeleton should leave the proof obligations open with `admit.` inside brace blocks, for example:
+
+```coq
+intros n hpos hsum.
+assert (h1 : some_intermediate_statement).
+{ admit. }
+assert (hex : exists k, some_bound k).
+{ admit. }
+destruct hex as [k hk].
+assert (h2 : another_intermediate_statement k).
+{ admit. }
+admit.
+```
+
 ## Do Not Emit
 
 Do not use these stale forms:

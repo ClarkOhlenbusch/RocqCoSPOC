@@ -37,6 +37,7 @@ def run_rewrite(
     formal_statement: str,
     config: dict,
     debug_attempts: Optional[list[dict]] = None,
+    log_metadata: Optional[dict] = None,
 ) -> str:
     from pipeline.prompts import get_rewrite
 
@@ -51,8 +52,9 @@ def run_rewrite(
         prompt,
         config,
         stage="rewrite",
-        parser=_parse_rewrite_output,
+        parser=lambda raw: _parse_rewrite_output(raw, informal_proof=text, formal_statement=formal_statement),
         debug_attempts=debug_attempts,
+        log_metadata=log_metadata,
     )
 
 
@@ -67,22 +69,9 @@ def run_skeleton(
     error_context: str = "",
     structured_feedback: str = "",
     debug_attempts: Optional[list[dict]] = None,
+    log_metadata: Optional[dict] = None,
 ) -> str:
     from pipeline.prompts import get_skeleton
-
-    if not _angelito_has_outer_structure(angelito_proof):
-        skeleton = _build_direct_skeleton(formal_statement)
-        if debug_attempts is not None:
-            debug_attempts.append(
-                {
-                    "format_attempt": 0,
-                    "model": "deterministic",
-                    "raw_output": skeleton,
-                    "status": "derived",
-                    "parsed_output": skeleton,
-                }
-            )
-        return skeleton
 
     prompt = get_skeleton(formal_statement, angelito_proof)
     if structured_feedback.strip():
@@ -109,6 +98,8 @@ def run_skeleton(
             angelito_proof=angelito_proof,
         ),
         debug_attempts=debug_attempts,
+        log_metadata=log_metadata,
+        formal_statement=formal_statement,
     )
     return _normalize_skeleton_structure(skeleton)
 
@@ -119,8 +110,23 @@ def run_skeleton(
 
 def run_fill_goal(formal_statement: str, angelito_proof: str,
                   current_proof: str, current_goal_state: str, config: dict, error_context: str = "",
-                  structured_feedback: str = "", debug_attempts: Optional[list[dict]] = None) -> str:
+                  structured_feedback: str = "", debug_attempts: Optional[list[dict]] = None,
+                  log_metadata: Optional[dict] = None) -> str:
     from pipeline.prompts import get_fill_goal
+
+    deterministic = _derive_deterministic_fill(current_goal_state)
+    if deterministic is not None:
+        if debug_attempts is not None:
+            debug_attempts.append(
+                {
+                    "format_attempt": 0,
+                    "model": "deterministic",
+                    "raw_output": deterministic,
+                    "status": "derived",
+                    "parsed_output": deterministic,
+                }
+            )
+        return deterministic
 
     prompt = get_fill_goal(
         formal_statement,
@@ -135,8 +141,15 @@ def run_fill_goal(formal_statement: str, angelito_proof: str,
         prompt,
         config,
         stage="fill_goal",
-        parser=_parse_tactic_output,
+        parser=lambda raw: _parse_fill_output(
+            raw,
+            formal_statement=formal_statement,
+            current_proof=current_proof,
+            current_goal_state=current_goal_state,
+        ),
         debug_attempts=debug_attempts,
+        log_metadata=log_metadata,
+        formal_statement=formal_statement,
     )
     return _trim_terminal_tactic_suffix(replacement)
 
@@ -145,7 +158,7 @@ def run_fill_goal(formal_statement: str, angelito_proof: str,
 # Compilation
 # ---------------------------------------------------------------------------
 
-def run_check_target(repo_root: Path, file_path_rel: str) -> tuple[int, str, str]:
+def run_check_target(repo_root: Path, file_path_rel: str, *, timeout_sec: int = 60) -> tuple[int, str, str]:
     """Run check-target-proof.py. Returns (exit_code, stdout, stderr)."""
     script = repo_root / "scripts" / "check-target-proof.py"
     cmd = [
@@ -154,11 +167,19 @@ def run_check_target(repo_root: Path, file_path_rel: str) -> tuple[int, str, str
         "--file-path",
         file_path_rel,
     ]
-    proc = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=60)
+    try:
+        proc = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=timeout_sec)
+    except subprocess.TimeoutExpired as e:
+        stdout = (e.stdout or "") if isinstance(e.stdout, str) else ""
+        stderr = (e.stderr or "") if isinstance(e.stderr, str) else ""
+        stderr = (
+            (stderr + "\n") if stderr else ""
+        ) + f"Proof check timed out after {timeout_sec} seconds for {file_path_rel}"
+        return 124, stdout, stderr
     return proc.returncode, proc.stdout or "", proc.stderr or ""
 
 
-def run_get_proof_state(repo_root: Path, file_path_rel: str, cursor_line: int) -> str:
+def run_get_proof_state(repo_root: Path, file_path_rel: str, cursor_line: int, *, timeout_sec: int = 60) -> str:
     """Run get-proof-state.py and return parsed proof state text, or empty string."""
     script = repo_root / "scripts" / "get-proof-state.py"
     cmd = [
@@ -169,7 +190,10 @@ def run_get_proof_state(repo_root: Path, file_path_rel: str, cursor_line: int) -
         "--cursor-line",
         str(cursor_line),
     ]
-    proc = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=60)
+    try:
+        proc = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=timeout_sec)
+    except subprocess.TimeoutExpired:
+        return ""
     if proc.returncode != 0:
         return ""
     return (proc.stdout or "").strip()
@@ -210,9 +234,41 @@ def _truncate_for_error(text: str, limit: int = 1200) -> str:
     return cleaned[:limit] + "\n...[truncated]..."
 
 
-def _parse_rewrite_output(raw_output: str) -> str:
+def _preview_text(text: str, limit: int = 500) -> str:
+    cleaned = (text or "").strip()
+    if not cleaned:
+        return "(empty)"
+    if len(cleaned) <= limit:
+        return _console_safe(cleaned)
+    return _console_safe(cleaned[:limit] + "... [truncated]")
+
+
+def _console_safe(text: str) -> str:
+    encoding = getattr(sys.stdout, "encoding", None) or "utf-8"
+    return str(text).encode(encoding, errors="replace").decode(encoding, errors="replace")
+
+
+def _split_goal_state(state_text: str) -> tuple[list[str], str]:
+    lines = [line.strip() for line in state_text.splitlines() if line.strip()]
+    if not lines:
+        return [], ""
+    try:
+        separator_idx = lines.index("============================")
+    except ValueError:
+        return [], "\n".join(lines)
+    hypotheses = lines[1:separator_idx]
+    goal = "\n".join(lines[separator_idx + 1 :]).strip()
+    return hypotheses, goal
+
+
+def _derive_deterministic_fill(current_goal_state: str) -> Optional[str]:
+    # Deterministic fills disabled — let the agent handle all goals.
+    return None
+
+
+def _parse_rewrite_output(raw_output: str, *, informal_proof: str = "", formal_statement: str = "") -> str:
     rewrite = _extract_angelito_block(_strip_fences(raw_output))
-    _validate_angelito_rewrite(rewrite)
+    _validate_angelito_rewrite(rewrite, informal_proof=informal_proof, formal_statement=formal_statement)
     return rewrite
 
 
@@ -228,8 +284,145 @@ def _parse_tactic_output(raw_output: str) -> str:
     return tactics
 
 
+def _source_contains_any_marker(*sources: str, markers: tuple[str, ...]) -> bool:
+    return any(any(marker in source for marker in markers) for source in sources if source)
+
+
+def _custom_tactics_available_in_proof(*sources: str) -> bool:
+    require_markers = (
+        "Require Import Angelito.",
+        "Require Import RocqCoSPOC.Angelito.",
+        "From RocqCoSPOC Require Import Angelito.",
+    )
+    return _source_contains_any_marker(*sources, markers=require_markers) and any(
+        "Import Angelito.Ltac1." in source for source in sources if source
+    )
+
+
+def _lra_tactic_available(*sources: str) -> bool:
+    markers = (
+        "Require Import Lra.",
+        "From Coq Require Import Lra.",
+        "Require Import Psatz.",
+        "From Coq Require Import Psatz.",
+        "Require Import Fourier.",
+        "From Coq Require Import Fourier.",
+    )
+    return _source_contains_any_marker(*sources, markers=markers)
+
+
+def _field_tactic_available(*sources: str) -> bool:
+    markers = (
+        "Require Import Field.",
+        "From Coq Require Import Field.",
+        "Require Import Ring.",
+        "From Coq Require Import Ring.",
+        "Require Import SetoidRing.Field.",
+        "From Coq Require Import SetoidRing.Field.",
+    )
+    return _source_contains_any_marker(*sources, markers=markers)
+
+
+def _parse_fill_output(
+    raw_output: str,
+    *,
+    formal_statement: str,
+    current_proof: str,
+    current_goal_state: str,
+) -> str:
+    tactics = _parse_tactic_output(raw_output)
+    _validate_fill_tactics(
+        tactics,
+        formal_statement=formal_statement,
+        current_proof=current_proof,
+        current_goal_state=current_goal_state,
+    )
+    return tactics
+
+
+def _validate_fill_tactics(
+    tactics: str,
+    *,
+    formal_statement: str,
+    current_proof: str,
+    current_goal_state: str,
+) -> None:
+    lines = [line.strip() for line in tactics.splitlines() if line.strip()]
+    bare_lines = [re.sub(r"^(?:[-+*]\s+)?(?:(?:\d+|all)\s*:\s*)?", "", line).strip() for line in lines]
+    custom_tactics_available = _custom_tactics_available_in_proof(formal_statement, current_proof)
+    lra_available = _lra_tactic_available(formal_statement, current_proof)
+    field_available = _field_tactic_available(formal_statement, current_proof)
+
+    if not custom_tactics_available:
+        forbidden = [
+            line for line in bare_lines if re.match(r"^(?:simplify|assert_goal|pick)\b", line, re.IGNORECASE)
+        ]
+        if forbidden:
+            examples = "\n".join(forbidden[:3])
+            raise ValueError(
+                "Current proof does not import Angelito Ltac1 tactics, but the fill used high-level Angelito tactics.\n"
+                "Do not emit `simplify ...`, `assert_goal`, or `pick` unless the proof source imports "
+                "`From RocqCoSPOC Require Import Angelito.` together with `Import Angelito.Ltac1.`.\n"
+                f"Examples:\n{examples}"
+            )
+
+    invalid_simplify = [
+        line for line in bare_lines if re.match(r"^simplify\b", line, re.IGNORECASE)
+        and not re.match(r"^simplify\s+(?:lhs|rhs)\s*\(", line, re.IGNORECASE)
+    ]
+    if invalid_simplify:
+        examples = "\n".join(invalid_simplify[:3])
+        raise ValueError(
+            "Fill used invalid `simplify` syntax.\n"
+            "Use `simplify lhs (a = b) ...` or `simplify rhs (a = b) ...` exactly, or use standard Rocq tactics instead.\n"
+            f"Examples:\n{examples}"
+        )
+
+    if not lra_available:
+        forbidden = [line for line in bare_lines if re.match(r"^(?:lra|nra)\b", line, re.IGNORECASE)]
+        if forbidden:
+            examples = "\n".join(forbidden[:3])
+            raise ValueError(
+                "Current proof does not import `Lra`/`Psatz`, but the fill used `lra.` or `nra.`.\n"
+                f"Examples:\n{examples}"
+            )
+
+    if not field_available:
+        forbidden = [line for line in bare_lines if re.match(r"^(?:field|field_simplify)\b", line, re.IGNORECASE)]
+        if forbidden:
+            examples = "\n".join(forbidden[:3])
+            raise ValueError(
+                "Current proof does not visibly import field support, but the fill used `field.` or `field_simplify`.\n"
+                f"Examples:\n{examples}"
+            )
+
+    _, goal_text = _split_goal_state(current_goal_state)
+    if re.search(r"\bforall\b|->", goal_text):
+        if bare_lines and all(re.match(r"^(?:intro|intros|pick)\b", line, re.IGNORECASE) for line in bare_lines):
+            raise ValueError(
+                "Fill only introduces binders and does not solve the residual goal.\n"
+                "Continue after `intros` until the marked subgoal is fully discharged."
+            )
+
+
 def _parse_skeleton_output(raw_output: str, *, formal_statement: str, angelito_proof: str) -> str:
-    skeleton = _normalize_skeleton_structure(_parse_tactic_output(raw_output))
+    from pipeline.tactic_parser import extract_tactics
+
+    skeleton = extract_tactics(raw_output, preserve_bullets=True)
+    if not skeleton:
+        raise ValueError(
+            "Skeleton model did not return a valid Coq tactic block.\n"
+            f"Raw output:\n{_truncate_for_error(raw_output)}"
+        )
+    # Auto-fix: replace `simplify lhs/rhs ... by admit.` or bare `simplify ...`
+    # with `admit.` — the model is trying to use Angelito custom tactics as placeholders.
+    skeleton = re.sub(
+        r"^(\s*(?:[-+*]\s+)?)simplify\s+(?:lhs|rhs)\b.*$",
+        r"\1admit.",
+        skeleton,
+        flags=re.MULTILINE | re.IGNORECASE,
+    )
+    skeleton = _normalize_skeleton_structure(skeleton)
     nonempty_lines = [line.strip() for line in skeleton.splitlines() if line.strip()]
     if not nonempty_lines:
         raise ValueError("Skeleton model returned an empty proof body.")
@@ -250,21 +443,49 @@ def _parse_skeleton_output(raw_output: str, *, formal_statement: str, angelito_p
             f"Raw output:\n{_truncate_for_error(raw_output)}"
         )
 
+    inline_admit_lines = [
+        line.strip()
+        for line in skeleton.splitlines()
+        if "admit." in line and not _ADMIT_LINE_RE.match(line)
+    ]
+    if inline_admit_lines:
+        examples = "\n".join(inline_admit_lines[:3])
+        raise ValueError(
+            "Skeleton must use standalone `admit.` placeholder lines only.\n"
+            "Do not place `admit.` inside another tactic line (for example, `simplify lhs ... by admit.`).\n"
+            "Replace inner proof work such as `simpl`, `rewrite`, `exact`, `reflexivity`, or `simplify ...` with `admit.`.\n"
+            f"Examples:\n{examples}\n\n"
+            f"Raw output:\n{_truncate_for_error(raw_output)}"
+        )
+
     angelito_lines = [line.strip() for line in angelito_proof.splitlines() if line.strip()]
     allows_induction = any(line.startswith("INDUCTION ") for line in angelito_lines)
     allows_split_apply = any(line.startswith("APPLY ") and "SPLIT INTO:" in line for line in angelito_lines)
 
-    if not allows_induction and any(line.lower().startswith("induction ") for line in nonempty_lines):
+    if not allows_induction and any(re.sub(r"^[-+*]\s+", "", line).lower().startswith("induction ") for line in nonempty_lines):
         raise ValueError(
             "Skeleton introduced `induction` even though the Angelito proof has no `INDUCTION` step.\n"
             f"Raw output:\n{_truncate_for_error(raw_output)}"
         )
 
-    if not allows_split_apply and any(line.lower().startswith("apply ") for line in nonempty_lines):
+    invalid_lines = [
+        line.strip()
+        for line in skeleton.splitlines()
+        if line.strip() and not _is_structural_skeleton_line(line, allows_split_apply=allows_split_apply)
+    ]
+    if invalid_lines:
+        examples = "\n".join(invalid_lines[:3])
         raise ValueError(
-            "Skeleton introduced `apply ...` structure even though the Angelito proof has no `APPLY ... SPLIT INTO` step.\n"
+            "Skeleton must contain only outer proof structure and standalone `admit.` leaves.\n"
+            "Replace inner proof work such as `simpl`, `rewrite`, `exact`, `reflexivity`, or `simplify ...` with `admit.`.\n"
+            f"Examples:\n{examples}\n\n"
             f"Raw output:\n{_truncate_for_error(raw_output)}"
         )
+
+    _validate_skeleton_tactics(
+        skeleton,
+        formal_statement=formal_statement,
+    )
 
     return skeleton
 
@@ -314,12 +535,82 @@ def _normalize_skeleton_structure(skeleton: str) -> str:
         (idx for idx in range(len(normalized) - 1, -1, -1) if _ADMIT_LINE_RE.match(normalized[idx])),
         -1,
     )
+    # Only strip trailing lines that are clearly not part of the proof
+    # (e.g. model commentary). Keep structural lines like `}`, `exact`, `Qed.`.
     if last_admit_idx >= 0:
         trailing_nonempty = [line for line in normalized[last_admit_idx + 1 :] if line.strip()]
-        if trailing_nonempty:
+        structural_re = re.compile(
+            r"^\s*(?:[-+*{}]+\s*$|}\s*$|exact\b|assumption\b|trivial\b|auto\b|Qed\b|Defined\b)",
+            re.IGNORECASE,
+        )
+        if trailing_nonempty and not any(structural_re.match(l) for l in trailing_nonempty):
             normalized = normalized[: last_admit_idx + 1]
 
     return "\n".join(normalized)
+
+
+def _is_structural_skeleton_line(line: str, *, allows_split_apply: bool) -> bool:
+    stripped = line.strip()
+    if stripped in {"{", "}"}:
+        return True
+
+    bare = re.sub(r"^[-+*]\s+", "", stripped)
+    if bare == "admit.":
+        return True
+
+    if re.match(r"^(?:intro|intros|pick|assert_goal|induction|destruct)\b.*\.\s*$", bare, re.IGNORECASE):
+        return True
+
+    if re.match(r"^(?:assert|enough)\b.*\.\s*$", bare, re.IGNORECASE):
+        return True
+
+    if re.match(r"^(?:pose proof|specialize)\b.*\.\s*$", bare, re.IGNORECASE):
+        return True
+
+    if re.match(r"^(?:split|left|right)\.\s*$", bare, re.IGNORECASE):
+        return True
+
+    if re.match(r"^(?:apply|eapply)\b.*\.\s*$", bare, re.IGNORECASE):
+        return True
+
+    return False
+
+
+def _validate_skeleton_tactics(
+    skeleton: str,
+    *,
+    formal_statement: str,
+) -> None:
+    lines = [line.strip() for line in skeleton.splitlines() if line.strip()]
+    bare_lines = [re.sub(r"^[-+*]\s+", "", line).strip() for line in lines]
+
+    custom_tactics_available = _custom_tactics_available_in_proof(formal_statement)
+    if not custom_tactics_available:
+        forbidden = [
+            line for line in bare_lines if re.match(r"^(?:assert_goal|pick|simplify)\b", line, re.IGNORECASE)
+        ]
+        if forbidden:
+            examples = "\n".join(forbidden[:3])
+            raise ValueError(
+                "Skeleton used Angelito Ltac1 tactics, but the current proof source does not import them.\n"
+                "Do not emit `assert_goal`, `pick`, or `simplify ...` unless the formal statement visibly imports "
+                "`Angelito` together with `Import Angelito.Ltac1.`.\n"
+                f"Examples:\n{examples}"
+            )
+
+    pseudo_math_lines = [
+        line for line in bare_lines
+        if any(token in line for token in ("∑", "sum_{", "card {"))
+        or re.search(r"\{[^{}\n]*\|", line)
+    ]
+    if pseudo_math_lines:
+        examples = "\n".join(pseudo_math_lines[:3])
+        raise ValueError(
+            "Skeleton contains pseudo-mathematical notation that is not valid Rocq syntax.\n"
+            "Do not emit set-builder notation like `card {a | ...}` or sigma notation like `sum_{...}`. "
+            "Translate the checkpoint into valid Rocq syntax or use a coarser valid intermediate assertion instead.\n"
+            f"Examples:\n{examples}"
+        )
 
 
 def _focused_proof_state(state_text: str) -> str:
@@ -362,42 +653,82 @@ def _generate_with_format_retries(
     stage: str,
     parser,
     debug_attempts: Optional[list[dict]] = None,
+    log_metadata: Optional[dict] = None,
+    formal_statement: str = "",
 ) -> str:
     max_attempts = int(config.get("format_retries", 3))
     current_prompt = prompt
     errors: list[str] = []
+    debug_enabled = bool(config.get("debug"))
+    debug_limit = int(config.get("debug_char_limit", 500))
+    if debug_enabled:
+        print(
+            f"[DEBUG:{stage}] format retries enabled, max_attempts={max_attempts}, "
+            f"prompt_chars={len(prompt)}",
+            flush=True,
+        )
+        print(f"[DEBUG:{stage}] prompt preview:\n{_preview_text(prompt, limit=debug_limit)}", flush=True)
     for attempt in range(1, max_attempts + 1):
+        if debug_enabled:
+            print(f"[DEBUG:{stage}] model-format attempt {attempt}/{max_attempts}", flush=True)
+        # Use higher temperature on retries to avoid repeating the same output
+        attempt_config = config
+        if attempt > 1:
+            attempt_config = dict(config)
+            attempt_config["temperature"] = max(config.get("temperature", 0.0), 0.4)
         out, resolved_model = _chat_with_model_fallback(
             model_value,
             current_prompt,
-            config,
+            attempt_config,
             stage=stage,
-            metadata={"format_attempt": attempt},
+            metadata={**(log_metadata or {}), "format_attempt": attempt},
         )
         attempt_info = {
             "format_attempt": attempt,
             "model": resolved_model,
             "raw_output": out,
         }
+        if debug_enabled:
+            print(
+                f"[DEBUG:{stage}] model={resolved_model}, raw_chars={len(out)}",
+                flush=True,
+            )
+            print(
+                f"[DEBUG:{stage}] raw output preview:\n{_preview_text(out, limit=debug_limit)}",
+                flush=True,
+            )
         try:
             parsed = parser(out)
             attempt_info["status"] = "parsed"
             attempt_info["parsed_output"] = parsed
+            if debug_enabled:
+                print(
+                    f"[DEBUG:{stage}] parser success, parsed_chars={len(parsed)}",
+                    flush=True,
+                )
+                print(
+                    f"[DEBUG:{stage}] parsed preview:\n{_preview_text(parsed, limit=debug_limit)}",
+                    flush=True,
+                )
             if debug_attempts is not None:
                 debug_attempts.append(attempt_info)
             return parsed
         except Exception as e:
             attempt_info["status"] = "invalid_format"
             attempt_info["error"] = str(e)
+            if debug_enabled:
+                print(f"[DEBUG:{stage}] parser failure: {e}", flush=True)
             if debug_attempts is not None:
                 debug_attempts.append(attempt_info)
             errors.append(f"Attempt {attempt}: {e}")
             if attempt == max_attempts:
                 break
+            retry_guidance = _retry_guidance_for_stage(stage, str(e), formal_statement=formal_statement)
             current_prompt = (
                 prompt
                 + "\n\nYour previous output was invalid.\n"
                 + f"Reason: {e}\n"
+                + (retry_guidance + "\n" if retry_guidance else "")
                 + "Return a corrected answer from scratch that follows the required output format exactly.\n"
                 + "Do not explain. Do not analyze. Output only the required final artifact.\n"
             )
@@ -426,7 +757,27 @@ _ANGELITO_KEYWORDS = {
 }
 
 
-def _validate_angelito_rewrite(text: str) -> None:
+_FORBIDDEN_ANGELITO_CONTINUATION_RE = re.compile(
+    r"^(?:```|~~~|#{1,6}\s|/\*|\*/|//)"
+    r"|^(?:Proof|Qed|Admitted)\.\s*$"
+    r"|^(?:intro|intros|rewrite|apply|eapply|exact|reflexivity|lia|nia|ring|"
+    r"simpl|cbn|destruct|induction|split|left|right)\b",
+    re.IGNORECASE,
+)
+
+
+def _is_angelito_continuation_line(line: str, *, continuation_mode: Optional[str], split_into_re) -> bool:
+    stripped = line.strip()
+    if not stripped:
+        return False
+    if continuation_mode == "split_into":
+        return bool(split_into_re.match(stripped))
+    if _FORBIDDEN_ANGELITO_CONTINUATION_RE.match(stripped):
+        return False
+    return True
+
+
+def _validate_angelito_rewrite(text: str, *, informal_proof: str = "", formal_statement: str = "") -> None:
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     if not lines:
         raise ValueError("Rewrite model returned empty output.")
@@ -435,9 +786,16 @@ def _validate_angelito_rewrite(text: str) -> None:
             "Rewrite output is not strict Angelito: first non-empty line must start with 'PROVE '.\n"
             f"Raw output:\n{_truncate_for_error(text)}"
         )
-    if "BEGIN" not in lines or "END" not in lines:
+    if "BEGIN" not in lines:
         raise ValueError(
-            "Rewrite output is not strict Angelito: expected BEGIN/END block.\n"
+            "Rewrite output is not strict Angelito: expected BEGIN line after PROVE.\n"
+            f"Raw output:\n{_truncate_for_error(text)}"
+        )
+    if lines[-1] != "END":
+        raise ValueError(
+            "Rewrite output is not strict Angelito: missing final END line.\n"
+            "The proof was likely cut off or continued past the required outer block. "
+            "Return a shorter proof that ends with END.\n"
             f"Raw output:\n{_truncate_for_error(text)}"
         )
     if not any(line.startswith("CONCLUDE") for line in lines):
@@ -448,13 +806,6 @@ def _validate_angelito_rewrite(text: str) -> None:
 
     bad_lines: list[str] = []
     continuation_mode: Optional[str] = None
-    default_continuation_re = re.compile(
-        r"^(?:"
-        r"=\s*.+"
-        r"|[A-Za-z0-9_()\[\]{}:+\-*/<>=,.' ]+\[BY .+\]"
-        r"|[A-Za-z0-9_()\[\]{}:+\-*/<>=,.' ]+"
-        r")$"
-    )
     split_into_re = re.compile(r"^\(\d+\)\s+[A-Za-z0-9_]+:\s+.+$")
     for line in lines:
         keyword = line.split()[0].rstrip(":")
@@ -465,9 +816,11 @@ def _validate_angelito_rewrite(text: str) -> None:
             elif keyword == "APPLY" and "SPLIT INTO:" in line:
                 continuation_mode = "split_into"
             continue
-        if continuation_mode == "default" and default_continuation_re.match(line):
-            continue
-        if continuation_mode == "split_into" and split_into_re.match(line):
+        if _is_angelito_continuation_line(
+            line,
+            continuation_mode=continuation_mode,
+            split_into_re=split_into_re,
+        ):
             continue
         continuation_mode = None
         bad_lines.append(line)
@@ -478,6 +831,224 @@ def _validate_angelito_rewrite(text: str) -> None:
             f"Examples:\n{joined}\n\n"
             f"Raw output:\n{_truncate_for_error(text)}"
         )
+
+    # Reject pseudo-mathematical notation that cannot become valid Rocq.
+    _PSEUDO_MATH_TOKENS = ("\u2211", "sum_{", "card {", "card{")
+    _SET_BUILDER_RE = re.compile(r"\{[^{}\n]*\|[^{}\n]*\}")
+    pseudo_math_lines = [
+        line for line in lines
+        if any(tok in line for tok in _PSEUDO_MATH_TOKENS)
+        or _SET_BUILDER_RE.search(line)
+    ]
+    if pseudo_math_lines:
+        examples = "\n".join(pseudo_math_lines[:3])
+        raise ValueError(
+            "Rewrite contains pseudo-mathematical notation that cannot be translated to valid Rocq.\n"
+            "Do not use set-builder notation like `card {a | ...}`, sigma notation like `sum_{...}` or `\u2211`, "
+            "or set comprehensions like `{x | P x}`. "
+            "Express counting and summation arguments in words or with named helper facts instead.\n"
+            f"Examples:\n{examples}"
+        )
+
+    # Reject natural-language prose in FACT/THEREFORE content that cannot be
+    # translated into a Rocq proposition.  The skeleton model needs each FACT
+    # body to be a symbolic statement (equation, inequality, quantified
+    # formula) — not an English sentence.
+    _NL_PROSE_RE = re.compile(
+        r"\b(?:for each|for all|for every|there (?:are|is|exist[s]?)"
+        r"|the (?:number|sum|total|count|product) of"
+        r"|over all|sum over|summing)\b",
+        re.IGNORECASE,
+    )
+    def _fact_body(line: str) -> str:
+        """Return the proposition part of a FACT/THEREFORE line, stripping [BY ...] justification."""
+        by_idx = line.find("[BY ")
+        return line[:by_idx] if by_idx != -1 else line
+
+    prose_fact_lines = [
+        line for line in lines
+        if line.split()[0].rstrip(":") in {"FACT", "THEREFORE"}
+        and _NL_PROSE_RE.search(_fact_body(line))
+    ]
+    if prose_fact_lines:
+        examples = "\n".join(prose_fact_lines[:3])
+        raise ValueError(
+            "Rewrite contains natural-language prose inside FACT or THEREFORE lines.\n"
+            "Each FACT must state a symbolic proposition that can become a Rocq `assert`, "
+            "not an English sentence. Use quantifiers like `\u2200` and symbolic expressions "
+            "instead of phrases like 'for each', 'there are', or 'the number of'.\n"
+            "Example fix: replace `FACT h: for each integer a, P(a) [BY ...]` "
+            "with `FACT h: \u2200 a : nat, P a [BY ...]`.\n"
+            f"Examples:\n{examples}"
+        )
+
+    if informal_proof.strip():
+        informal_lower = informal_proof.lower()
+        informal_tokens = re.findall(r"\S+", informal_proof)
+        answer_only = len(informal_tokens) <= 8 and len(informal_proof.strip().splitlines()) <= 2
+        mentions_induction = any(token in informal_lower for token in ("induction", "inductive", "base case"))
+        has_induction = any(line.startswith("INDUCTION ") for line in lines)
+        has_split_apply = any(line.startswith("APPLY ") and "SPLIT INTO:" in line for line in lines)
+        nested_proves = [line for line in lines[1:] if line.startswith("PROVE ")]
+
+        if has_induction and not mentions_induction:
+            raise ValueError(
+                "Rewrite introduced INDUCTION even though the informal proof does not indicate an inductive proof shape.\n"
+                "Keep the Angelito proof faithful to the given proof strategy.\n"
+                f"Raw output:\n{_truncate_for_error(text)}"
+            )
+
+        if answer_only:
+            if has_split_apply or has_induction or nested_proves:
+                raise ValueError(
+                    "Informal proof is answer-only, but rewrite invented branching structure or nested subproofs.\n"
+                    "Use a compact direct Angelito proof instead of introducing new cases or induction.\n"
+                    f"Raw output:\n{_truncate_for_error(text)}"
+                )
+            assume_lines = sum(1 for l in lines if l.startswith("ASSUME "))
+            if len(lines) - assume_lines > 24:
+                raise ValueError(
+                    "Informal proof is answer-only, but rewrite is overexpanded.\n"
+                    "Use a short direct Angelito proof with only the decisive steps.\n"
+                    f"Raw output:\n{_truncate_for_error(text)}"
+                )
+
+
+def _extract_prebound_names(formal_statement: str) -> list[str]:
+    """Extract variable/hypothesis names already bound in the theorem signature.
+
+    For ``Theorem foo (x a : nat -> R) (H0 : ...) : goal`` returns ['x', 'a', 'H0'].
+    """
+    m = re.search(
+        r"(?:Theorem|Lemma|Proposition|Corollary|Fact|Example)\s+\S+\s*",
+        formal_statement,
+    )
+    if not m:
+        return []
+    rest = formal_statement[m.end():]
+    # Walk rest, tracking paren depth, to find the ':' that starts the return type
+    depth = 0
+    param_end = len(rest)
+    for i, ch in enumerate(rest):
+        if ch == '(':
+            depth += 1
+        elif ch == ')':
+            depth -= 1
+        elif ch == ':' and depth == 0:
+            param_end = i
+            break
+    param_text = rest[:param_end]
+    names: list[str] = []
+    for binder_match in re.finditer(r"\(([^)]+)\)", param_text):
+        binder = binder_match.group(1)
+        colon_idx = binder.find(":")
+        if colon_idx == -1:
+            continue
+        name_part = binder[:colon_idx].strip()
+        for name in name_part.split():
+            if re.match(r"^[A-Za-z_][A-Za-z0-9_\']*$", name):
+                names.append(name)
+    return names
+
+def _retry_guidance_for_stage(stage: str, error: str, *, formal_statement: str = "") -> str:
+    lowered = error.lower()
+    if stage == "rewrite":
+        hints = [
+            "Rewrite repair rules:",
+            "- Keep the Angelito proof short and structure-first.",
+            "- Only preserve outer proof structure needed by later stages.",
+            "- Collapse routine algebra or computation into one FACT or THEREFORE line instead of long equality chains.",
+            "- Avoid nested APPLY ... SPLIT INTO or INDUCTION unless the informal proof genuinely uses them.",
+            "- Output only the Angelito proof, starting with PROVE and ending with END.",
+        ]
+
+        if "missing final end line" in lowered or "expected begin line" in lowered:
+            hints.append("- Your previous answer was likely cut off. Return a shorter proof with fewer lines.")
+        if "non-angelito lines" in lowered:
+            hints.append("- Put continuation text directly under the preceding Angelito keyword; do not add commentary outside that structure.")
+        if "answer-only" in lowered:
+            hints.append("- The informal proof is only an answer, so do not invent induction, cases, or nested subproofs.")
+        if "introduced induction" in lowered:
+            hints.append("- Do not use INDUCTION unless the informal proof explicitly says to argue by induction.")
+        if "pseudo-mathematical notation" in lowered:
+            hints.append("- Do not use set-builder notation like `card {a | ...}`, sigma notation like `sum_{...}` or \u2211, or set comprehensions like `{x | P x}`.")
+            hints.append("- Express counting and summation using symbolic Rocq-like notation instead.")
+        if "natural-language prose" in lowered:
+            hints.append("- Every FACT and THEREFORE must be a symbolic proposition, not an English sentence.")
+            hints.append("- Replace `for each integer a, P(a)` with `\u2200 a : nat, P a`.")
+            hints.append("- Replace `there are N things with property P` with a direct equation or inequality.")
+            hints.append("- If a fact cannot be stated as a symbolic Rocq-like proposition, collapse it into a coarser step or drop it.")
+        return "\n".join(hints)
+
+    if stage == "fill_goal":
+        hints = [
+            "Fill repair rules:",
+            "- Output only valid Rocq tactics; no prose, no markdown, no Angelito keywords.",
+            "- Fully discharge the marked goal in one replacement.",
+            "- Use only tactics that are actually available from the current imports.",
+        ]
+        if "angelito ltac1 tactics" in lowered:
+            hints.append("- Do not use `simplify ...`, `assert_goal`, or `pick` because this proof does not import Angelito Ltac1.")
+            hints.append("- Use standard Rocq tactics instead: `rewrite`, `apply`, `exact`, `simpl`, `ring`, `lra`, `lia`, `field`, `reflexivity`.")
+        if "`lra`" in lowered or "`nra`" in lowered or "lra" in lowered and "psatz" in lowered:
+            hints.append("- Do not use `lra.` or `nra.` because the current proof does not import `Lra`/`Psatz`.")
+        if "`field.`" in lowered or "field_simplify" in lowered:
+            hints.append("- Do not use `field.` or `field_simplify` unless the current proof visibly imports field support.")
+        if "introduces binders" in lowered:
+            hints.append("- `intros` may be the first step, but it cannot be the whole answer; continue until the goal is solved.")
+        if "invalid `simplify` syntax" in lowered:
+            hints.append("- Either use standard Rocq tactics, or use exact Angelito Ltac1 syntax like `simplify lhs (a = b) by ...`.")
+        return "\n".join(hints)
+
+    if stage == "skeleton":
+        hints = [
+            "Skeleton repair rules:",
+            "- Preserve the proof scaffold and intermediate checkpoints, but output only valid Rocq syntax.",
+            "- Use `assert (...) . { admit. }`, `destruct ... as ... .`, `intros`, and occasional `apply` when they match the Angelito proof plan.",
+            "- Every leaf must still be a standalone `admit.` line.",
+        ]
+        if "angelito ltac1 tactics" in lowered:
+            hints.append("- Do not use `assert_goal`, `pick`, or `simplify ...` because this proof source does not import Angelito Ltac1.")
+        if "pseudo-mathematical notation" in lowered:
+            hints.append("- Do not emit set-builder notation like `card {a | ...}` or sigma notation like `sum_{...}` / \u2211; use only valid Rocq terms.")
+        if "standalone `admit.`" in lowered:
+            hints.append("- Put `admit.` on its own line inside braces, not inline with another tactic.")
+            hints.append("- For a simple computation goal, the entire skeleton can just be `admit.` on its own line.")
+
+        # Compile-error-specific guidance
+        if "already used" in lowered:
+            prebound = _extract_prebound_names(formal_statement)
+            hints.append(
+                "- The Coq error `x is already used` means you tried to `intros` a name that is already "
+                "bound in the theorem signature. Do NOT re-introduce names that appear as theorem parameters."
+            )
+            if prebound:
+                names_str = ", ".join(prebound)
+                hints.append(f"- These names are already in scope from the theorem statement: {names_str}")
+                hints.append("- Your `intros` line must use FRESH names that do not collide with these.")
+
+        if re.search(r"has type.*while.*expected", lowered):
+            hints.append(
+                "- There is a type mismatch in an assertion. Check that the types in your `assert` "
+                "statements match the Coq functions involved. For example, `Int_part` returns `Z` not `nat`; "
+                "`INR` takes `nat` and returns `R`. Ensure quantified variables have the correct type."
+            )
+
+        if "not a type" in lowered or "not a product" in lowered:
+            hints.append(
+                "- A term you used is not the right kind. Check that `assert` propositions are valid Prop-typed "
+                "expressions and that function applications have the right number of arguments."
+            )
+
+        if "unable to unify" in lowered:
+            hints.append(
+                "- Coq could not unify two terms. The assertion or tactic argument does not match the actual goal shape. "
+                "Simplify the skeleton \u2014 use fewer intermediate assertions if the types are hard to get right."
+            )
+
+        return "\n".join(hints)
+
+    return ""
 
 
 def _normalize_formal_statement(text: str) -> str:
@@ -512,17 +1083,40 @@ def _ensure_generated_imports(formal_statement: str, target_path: Path) -> str:
         body_start = len(lines)
 
     normalized_imports = [line.strip() for line in leading_imports if line.strip()]
-    angelito_require_markers = {
-        "Require Import Angelito.",
-        "Require Import RocqCoSPOC.Angelito.",
-        "From RocqCoSPOC Require Import Angelito.",
-    }
+    joined_imports = " ".join(normalized_imports)
+
     generated_imports: list[str] = []
-    if target_path.parent.name.lower() == "coq":
-        if not any(marker in normalized_imports for marker in angelito_require_markers):
-            generated_imports.append("From RocqCoSPOC Require Import Angelito.")
-        if "Import Angelito.Ltac1." not in normalized_imports:
-            generated_imports.append("Import Angelito.Ltac1.")
+
+    # Auto-add Lia when Arith or ZArith is imported
+    _has_lia = any(m in joined_imports for m in ("Require Import Lia.", "From Coq Require Import Lia."))
+    _has_arith_or_z = any(m in joined_imports for m in (
+        "Require Import Arith.", "From Coq Require Import Arith.",
+        "Require Import ZArith.", "From Coq Require Import ZArith.",
+    ))
+    if _has_arith_or_z and not _has_lia:
+        generated_imports.append("Require Import Lia.")
+
+    # Auto-add Lra and Psatz when Reals or Coquelicot is imported
+    _has_reals = any(m in joined_imports for m in (
+        "Require Import Reals.", "From Coq Require Import Reals.",
+        "Require Import Coquelicot.", "From Coq Require Import Coquelicot.",
+        "Coquelicot.Coquelicot",
+    ))
+    _has_lra = any(m in joined_imports for m in (
+        "Require Import Lra.", "From Coq Require Import Lra.",
+        "Require Import Psatz.", "From Coq Require Import Psatz.",
+    ))
+    if _has_reals and not _has_lra:
+        generated_imports.append("Require Import Lra.")
+        generated_imports.append("Require Import Psatz.")
+
+    # Auto-add Field when Reals is imported but Field is missing
+    _has_field = any(m in joined_imports for m in (
+        "Require Import Field.", "From Coq Require Import Field.",
+        "Require Import Ring.", "From Coq Require Import Ring.",
+    ))
+    if _has_reals and not _has_field:
+        generated_imports.append("Require Import Field.")
 
     prefix = [line for line in leading_imports if line.strip()]
     if generated_imports:
@@ -534,29 +1128,6 @@ def _ensure_generated_imports(formal_statement: str, target_path: Path) -> str:
     if body:
         sections.append("\n".join(body).strip())
     return "\n\n".join(section for section in sections if section).strip()
-
-
-def _angelito_has_outer_structure(angelito_proof: str) -> bool:
-    for raw_line in angelito_proof.splitlines():
-        line = raw_line.strip()
-        if line.startswith("INDUCTION "):
-            return True
-        if line.startswith("APPLY ") and "SPLIT INTO:" in line:
-            return True
-        if line.startswith("PROVE BASE_CASE:") or line.startswith("PROVE INDUCTIVE_CASE:"):
-            return True
-    return False
-
-
-def _build_direct_skeleton(formal_statement: str) -> str:
-    theorem_lines = [line.strip() for line in formal_statement.splitlines() if line.strip()]
-    theorem_text = theorem_lines[-1] if theorem_lines else formal_statement
-    needs_intros = "forall " in theorem_text or "->" in theorem_text
-    if needs_intros:
-        return "intros.\nadmit."
-    return "admit."
-
-
 def _as_model_list(model_value: Union[str, list]) -> list[str]:
     if isinstance(model_value, list):
         models = [str(m).strip() for m in model_value if str(m).strip()]
@@ -593,8 +1164,20 @@ def _chat_with_model_fallback(
 
     models = _as_model_list(model_value)
     errors = []
+    debug_enabled = bool(config.get("debug"))
+    debug_limit = int(config.get("debug_char_limit", 500))
+    if debug_enabled:
+        print(
+            f"[DEBUG:{stage}] trying models in order: {models}",
+            flush=True,
+        )
     for i, model in enumerate(models):
         try:
+            if debug_enabled:
+                print(
+                    f"[DEBUG:{stage}] invoking model {i + 1}/{len(models)}: {model}",
+                    flush=True,
+                )
             response = chat(
                 model,
                 prompt,
@@ -614,10 +1197,21 @@ def _chat_with_model_fallback(
                     **(metadata or {}),
                 },
             )
+            if debug_enabled:
+                print(
+                    f"[DEBUG:{stage}] model succeeded: {model}, response_chars={len(response)}",
+                    flush=True,
+                )
+                print(
+                    f"[DEBUG:{stage}] response preview:\n{_preview_text(response, limit=debug_limit)}",
+                    flush=True,
+                )
             return response, model
         except Exception as e:
             msg = str(e)
             errors.append(f"{model}: {msg}")
+            if debug_enabled:
+                print(f"[DEBUG:{stage}] model failure from {model}: {msg}", flush=True)
             if i == len(models) - 1 or not _is_retryable_model_error(msg):
                 break
             print(f"  Warning: {stage} failed with '{model}', trying fallback...", flush=True)
@@ -660,8 +1254,67 @@ def _write_proof_to_file(target_path: Path, formal_statement: str, proof_body: s
     target_path.write_text(content, encoding="utf-8")
 
 
-def _proof_body_line_to_file_cursor(formal_statement: str, proof_body_line_index: int) -> int:
-    return len(formal_statement.splitlines()) + 2 + proof_body_line_index
+def _proof_body_line_to_file_cursor(
+    formal_statement: str,
+    proof_body_line_index: int,
+    *,
+    target_path: Optional[Path] = None,
+    before_line: bool = False,
+) -> int:
+    """
+    Convert a 0-based proof-body line index to a 1-based file cursor line.
+
+    When `before_line=True`, the cursor points to the previous body line so Coq
+    snapshots show the goal *before* executing the target tactic/admit line.
+    """
+    line_index = proof_body_line_index - 1 if before_line else proof_body_line_index
+    if line_index < 0:
+        line_index = 0
+
+    # Prefer anchoring to the generated file because imports/header shaping can
+    # shift the theorem body away from a pure formal_statement-based offset.
+    if target_path is not None and target_path.exists():
+        file_lines = target_path.read_text(encoding="utf-8").splitlines()
+        for i, line in enumerate(file_lines):
+            if line.strip() == "Proof.":
+                return i + 2 + line_index
+
+    return len(formal_statement.splitlines()) + 2 + line_index
+
+
+def _should_snapshot_before_line(proof_body: str, proof_body_line_index: int) -> bool:
+    if proof_body_line_index < 0:
+        return True
+
+    lines = proof_body.splitlines()
+    if proof_body_line_index >= len(lines):
+        return True
+
+    target = lines[proof_body_line_index].lstrip()
+    # Bullet-prefixed admits focus a new branch at the admit line itself, so
+    # sampling the previous line can leave us stuck in the earlier branch.
+    return not target.startswith(("-", "+", "*"))
+
+
+def _capture_goal_state_after_replacement(
+    *,
+    repo_root: Path,
+    target_rel: str,
+    target_path: Path,
+    formal_statement: str,
+    admit_idx: int,
+    replacement: str,
+) -> str:
+    replacement_line_count = max(1, len(replacement.splitlines()))
+    cursor_line = _proof_body_line_to_file_cursor(
+        formal_statement,
+        admit_idx + replacement_line_count - 1,
+        target_path=target_path,
+        before_line=False,
+    )
+    return _focused_proof_state(
+        run_get_proof_state(repo_root, target_rel, cursor_line)
+    )
 
 
 def _parse_structured_error(stderr: str, stdout: str) -> str:
@@ -669,15 +1322,24 @@ def _parse_structured_error(stderr: str, stdout: str) -> str:
     raw = (stderr or stdout).strip()
     if not raw:
         return ""
-    # Look for "Error:" lines and surrounding context
+    # Look for "Error:" lines and grab everything until the next blank line
+    # or end of output — this captures the full error including environment.
     lines = raw.splitlines()
     error_lines = []
+    in_error = False
     for i, line in enumerate(lines):
         if "Error:" in line or "error:" in line.lower():
             start = max(0, i - 2)
-            end = min(len(lines), i + 5)
-            error_lines.extend(lines[start:end])
-            error_lines.append("---")
+            error_lines.extend(lines[start:i])
+            in_error = True
+        if in_error:
+            error_lines.append(line)
+            # Stop at "Proof check failed" or end of meaningful content
+            if line.strip() == "" or "Proof check failed" in line:
+                error_lines.append("---")
+                in_error = False
+    if in_error:
+        error_lines.append("---")
     if error_lines:
         return "\n".join(error_lines)
     return raw
@@ -688,6 +1350,62 @@ def _build_structured_feedback_context(stdout: str, stderr: str) -> tuple[list[d
 
     feedback = extract_compiler_feedback(stdout or "", stderr or "")
     return feedback, format_compiler_feedback(feedback)
+
+
+# ---------------------------------------------------------------------------
+# Import verification
+# ---------------------------------------------------------------------------
+
+def _extract_imports(formal_statement: str) -> list[str]:
+    """Extract Require Import / From ... Require Import lines from the formal statement."""
+    imports = []
+    for line in formal_statement.splitlines():
+        stripped = line.strip()
+        if re.match(r"^(?:Require\s+Import|From\s+\S+\s+Require\s+Import)\b", stripped):
+            imports.append(stripped)
+    return imports
+
+
+def _verify_imports(
+    imports: list[str],
+    repo_root: Path,
+    *,
+    timeout_sec: int = 30,
+) -> list[dict]:
+    """Test each import line by writing a temp .v file and compiling with coqc."""
+    from scripts.coq_script_utils import resolve_coqc, parse_coqproject
+
+    coqc = resolve_coqc()
+    coq_args, _ = parse_coqproject(repo_root)
+    results = []
+    # Use a relative path in repo root so Windows coqc can resolve it
+    tmp_name = "_import_check_tmp.v"
+    tmp_path = repo_root / tmp_name
+    try:
+        for imp in imports:
+            try:
+                tmp_path.write_text(imp + "\n", encoding="utf-8")
+                proc = subprocess.run(
+                    [coqc, *coq_args, tmp_name],
+                    cwd=str(repo_root),
+                    capture_output=True,
+                    text=True,
+                    timeout=timeout_sec,
+                )
+                ok = proc.returncode == 0
+                error = (proc.stderr or "").strip() if not ok else ""
+            except subprocess.TimeoutExpired:
+                ok = False
+                error = f"Timed out after {timeout_sec}s"
+            except Exception as e:
+                ok = False
+                error = str(e)
+            results.append({"import": imp, "ok": ok, "error": error})
+    finally:
+        tmp_path.unlink(missing_ok=True)
+        for ext in (".vo", ".vok", ".vos", ".glob"):
+            (repo_root / f"_import_check_tmp{ext}").unlink(missing_ok=True)
+    return results
 
 
 # ---------------------------------------------------------------------------
@@ -709,9 +1427,18 @@ def main():
     parser.add_argument("--target", type=Path, default=Path("coq/CongModEq.v"), help="Target .v file")
     parser.add_argument("--max-fill-attempts", type=int, default=None, help="Max retries per admit fill")
     parser.add_argument("--trace-out", type=Path, default=None, help="JSON trace output path")
+    parser.add_argument("--debug", action="store_true", help="Emit verbose debugging logs")
+    parser.add_argument(
+        "--debug-char-limit",
+        type=int,
+        default=500,
+        help="Max chars per debug preview log",
+    )
     args = parser.parse_args()
 
     config = load_config()
+    config["debug"] = args.debug
+    config["debug_char_limit"] = args.debug_char_limit
     max_fill = args.max_fill_attempts or config.get("max_fill_attempts", 3)
     max_skeleton_attempts = int(config.get("max_skeleton_attempts", 3))
 
@@ -755,6 +1482,8 @@ def main():
         "fills": [],
         "summary": {},
     }
+    if args.debug:
+        trace["debug"] = {"enabled": True, "char_limit": args.debug_char_limit}
 
     def persist():
         _write_trace(trace_path, trace)
@@ -772,12 +1501,58 @@ def main():
         fail(f"Error: informal proof not found: {informal_path}")
     if not formal_path.exists():
         fail(f"Error: formal statement not found: {formal_path}")
+    if args.debug:
+        print("[DEBUG] pipeline inputs", flush=True)
+        print(f"[DEBUG] informal path: {informal_path}", flush=True)
+        print(f"[DEBUG] formal path:   {formal_path}", flush=True)
+        print(f"[DEBUG] target path:   {target_path}", flush=True)
+        print(f"[DEBUG] trace path:    {trace_path}", flush=True)
+        print(f"[DEBUG] model log:     {model_log_path}", flush=True)
 
     try:
         formal_statement = _normalize_formal_statement(formal_path.read_text(encoding="utf-8"))
         formal_statement = _ensure_generated_imports(formal_statement, target_path)
     except Exception as e:
         fail(f"Formal statement normalization failed: {e}")
+    persist()
+    if args.debug:
+        print(
+            f"[DEBUG] normalized formal statement chars={len(formal_statement)}",
+            flush=True,
+        )
+        print(
+            f"[DEBUG] formal statement preview:\n{_preview_text(formal_statement, limit=args.debug_char_limit)}",
+            flush=True,
+        )
+
+    # ------------------------------------------------------------------
+    # Pre-flight: verify all imports resolve
+    # ------------------------------------------------------------------
+    import_lines = _extract_imports(formal_statement)
+    if import_lines:
+        print("Verifying imports...", flush=True)
+        try:
+            import_results = _verify_imports(import_lines, repo_root)
+        except Exception as e:
+            print(f"  Warning: import verification skipped ({e})", flush=True)
+            import_results = None
+        if import_results is not None:
+            trace["import_check"] = import_results
+            failed_imports = [r for r in import_results if not r["ok"]]
+            if failed_imports:
+                msgs = []
+                for r in failed_imports:
+                    msgs.append(f"  {r['import']}")
+                    if r["error"]:
+                        msgs.append(f"    -> {r['error']}")
+                fail(
+                    "Import verification failed. The following imports are not available:\n"
+                    + "\n".join(msgs)
+                    + "\n\nInstall the missing libraries before running the pipeline."
+                )
+        if args.debug:
+            print(f"[DEBUG] all {len(import_lines)} imports verified OK", flush=True)
+        print(f"  All {len(import_lines)} imports OK.", flush=True)
     persist()
 
     # ------------------------------------------------------------------
@@ -791,6 +1566,7 @@ def main():
             formal_statement,
             config,
             debug_attempts=rewrite_attempts,
+            log_metadata={"pipeline_call": "rewrite"},
         )
     except Exception as e:
         trace["rewrite"] = {"model_attempts": rewrite_attempts}
@@ -799,6 +1575,13 @@ def main():
     trace["rewrite"] = {"text": angelito_proof, "model_attempts": rewrite_attempts}
     persist()
     print("  Done.", flush=True)
+    if args.debug:
+        print(f"[DEBUG] rewrite model attempts={len(rewrite_attempts)}", flush=True)
+        print(
+            f"[DEBUG] angelito chars={len(angelito_proof)} preview:\n"
+            f"{_preview_text(angelito_proof, limit=args.debug_char_limit)}",
+            flush=True,
+        )
 
     # ------------------------------------------------------------------
     # Step 2: Skeleton (Angelito -> Rocq with admit. placeholders)
@@ -823,15 +1606,21 @@ def main():
                 f"  Skeleton compile retry {skeleton_attempt}/{max_skeleton_attempts}...",
                 flush=True,
             )
+        # Bump temperature on skeleton compile retries to avoid identical output
+        skeleton_config = config
+        if skeleton_attempt > 1:
+            skeleton_config = dict(config)
+            skeleton_config["temperature"] = max(config.get("temperature", 0.0), 0.4)
         skeleton_model_attempts: list[dict] = []
         try:
             skeleton = run_skeleton(
                 formal_statement,
                 angelito_proof,
-                config,
+                skeleton_config,
                 error_context=skeleton_error_context,
                 structured_feedback=skeleton_structured_feedback,
                 debug_attempts=skeleton_model_attempts,
+                log_metadata={"skeleton_compile_attempt": skeleton_attempt},
             )
         except Exception as e:
             trace["skeleton"]["compile_attempts"].append(
@@ -843,17 +1632,51 @@ def main():
                 }
             )
             persist()
-            fail(f"Skeleton generation failed: {e}")
+            # Don't abort — continue to next compile attempt with higher temperature
+            skeleton_error_context = (
+                f"The previous skeleton attempt failed format validation: {e}\n\n"
+                "Generate a corrected skeleton that uses only valid Rocq syntax."
+            )
+            continue
 
         proof_template = build_proof_template(skeleton, angelito_proof)
         slot_values = {slot.name: None for slot in proof_template.slots}
         rendered_skeleton = proof_template.render(slot_values)
         has_admits = proof_template.has_unfilled_slots(slot_values)
         _write_proof_to_file(target_path, formal_statement, rendered_skeleton, use_admitted=has_admits)
+        if args.debug:
+            print(
+                f"[DEBUG] skeleton attempt {skeleton_attempt}: slots={len(proof_template.slots)}, "
+                f"has_admits={has_admits}, rendered_chars={len(rendered_skeleton)}",
+                flush=True,
+            )
+            print(
+                f"[DEBUG] rendered skeleton preview:\n"
+                f"{_preview_text(rendered_skeleton, limit=args.debug_char_limit)}",
+                flush=True,
+            )
 
         exit_code, stdout, stderr = run_check_target(repo_root, target_rel)
         last_skeleton_output = (stderr or stdout).strip()
         feedback, formatted_feedback = _build_structured_feedback_context(stdout, stderr)
+        if args.debug:
+            print(
+                f"[DEBUG] skeleton check exit_code={exit_code}, stdout_chars={len(stdout)}, "
+                f"stderr_chars={len(stderr)}, feedback_items={len(feedback)}",
+                flush=True,
+            )
+            if stdout.strip():
+                print(
+                    f"[DEBUG] skeleton stdout preview:\n"
+                    f"{_preview_text(stdout, limit=args.debug_char_limit)}",
+                    flush=True,
+                )
+            if stderr.strip():
+                print(
+                    f"[DEBUG] skeleton stderr preview:\n"
+                    f"{_preview_text(stderr, limit=args.debug_char_limit)}",
+                    flush=True,
+                )
 
         attempt_trace: dict = {
             "attempt": skeleton_attempt,
@@ -864,6 +1687,7 @@ def main():
             ),
             "slot_names": [slot.name for slot in proof_template.slots],
             "model_attempts": skeleton_model_attempts,
+            "status": "compiled" if exit_code == 0 else "compile_error",
             "compiles": exit_code == 0,
             "check_stdout": stdout.strip(),
             "stdout": stdout.strip(),
@@ -875,10 +1699,27 @@ def main():
         if exit_code == 0 and has_admits:
             admit_lines = _find_admits(rendered_skeleton)
             if admit_lines:
-                cursor_line = _proof_body_line_to_file_cursor(formal_statement, admit_lines[0])
+                snapshot_before_line = _should_snapshot_before_line(rendered_skeleton, admit_lines[0])
+                cursor_line = _proof_body_line_to_file_cursor(
+                    formal_statement,
+                    admit_lines[0],
+                    target_path=target_path,
+                    before_line=snapshot_before_line,
+                )
                 attempt_trace["proof_state"] = _focused_proof_state(
                     run_get_proof_state(repo_root, target_rel, cursor_line)
                 )
+                if args.debug:
+                    print(
+                        f"[DEBUG] skeleton proof-state cursor_line={cursor_line}, "
+                        f"snapshot_before_line={snapshot_before_line}",
+                        flush=True,
+                    )
+                    print(
+                        f"[DEBUG] skeleton proof-state preview:\n"
+                        f"{_preview_text(attempt_trace['proof_state'], limit=args.debug_char_limit)}",
+                        flush=True,
+                    )
         trace["skeleton"]["compile_attempts"].append(attempt_trace)
         persist()
 
@@ -908,8 +1749,36 @@ def main():
             "The previous skeleton failed to compile.\n\n"
             f"**Failed skeleton tactics:**\n```coq\n{rendered_skeleton}\n```\n\n"
             f"**Coq compiler error:**\n```\n{_parse_structured_error(stderr, stdout)}\n```\n\n"
-            "Generate a corrected skeleton that compiles when wrapped with this theorem and imports."
         )
+        # Accumulate history of previous failed attempts so the model can
+        # combine partial fixes instead of repeating the same mistakes.
+        if skeleton_attempt >= 2 and trace["skeleton"]["compile_attempts"]:
+            prev_attempts = []
+            for prev in trace["skeleton"]["compile_attempts"][:-1]:
+                if prev.get("status") == "compile_error":
+                    prev_skel = prev.get("rendered_text", "")[:300]
+                    prev_err = prev.get("stderr", prev.get("check_stderr", ""))[:200]
+                    prev_attempts.append(f"```coq\n{prev_skel}\n```\nError: {prev_err}")
+            if prev_attempts:
+                skeleton_error_context += (
+                    "**Earlier failed attempts (do not repeat these):**\n"
+                    + "\n---\n".join(prev_attempts) + "\n\n"
+                )
+        # Add pre-bound name awareness for "already used" errors
+        error_lower = (stderr + stdout).lower()
+        prebound = _extract_prebound_names(formal_statement)
+        if "already used" in error_lower and prebound:
+            skeleton_error_context += (
+                f"**Important:** The theorem signature already binds these names: {', '.join(prebound)}. "
+                "Do NOT re-introduce them with `intros`. Use fresh names or omit `intros` for parameters "
+                "that are already in scope.\n\n"
+            )
+        if re.search(r"has type.*while.*expected", error_lower):
+            skeleton_error_context += (
+                "**Important:** There is a type mismatch. Check that types in `assert` statements "
+                "match the Coq functions used (e.g., `Int_part` returns `Z`, not `nat`).\n\n"
+            )
+        skeleton_error_context += "Generate a corrected skeleton that compiles when wrapped with this theorem and imports."
         skeleton_structured_feedback = formatted_feedback
 
     if not step2_success:
@@ -934,6 +1803,11 @@ def main():
         return
 
     print(f"  Skeleton has {count_rendered_admits(rendered_skeleton)} admit(s) to fill.", flush=True)
+    if args.debug:
+        print(
+            f"[DEBUG] entering fill loop with slot_names={[slot.name for slot in proof_template.slots]}",
+            flush=True,
+        )
 
     # ------------------------------------------------------------------
     # Step 3: Iteratively fill each admit.
@@ -956,14 +1830,30 @@ def main():
               f"{remaining_admits} remaining)...", flush=True)
 
         _write_proof_to_file(target_path, formal_statement, proof_body, use_admitted=True)
+        snapshot_before_line = _should_snapshot_before_line(marked_proof, admit_idx)
         current_goal_state = _focused_proof_state(run_get_proof_state(
             repo_root,
             target_rel,
-            _proof_body_line_to_file_cursor(formal_statement, admit_idx),
+            _proof_body_line_to_file_cursor(
+                formal_statement,
+                admit_idx,
+                target_path=target_path,
+                before_line=snapshot_before_line,
+            ),
         ))
         error_context = ""
         structured_feedback_context = ""
         filled = False
+        if args.debug:
+            print(
+                f"[DEBUG] slot={current_slot.name}, admit_idx={admit_idx}, "
+                f"remaining_admits={remaining_admits}, goal_chars={len(current_goal_state)}",
+                flush=True,
+            )
+            print(
+                f"[DEBUG] goal preview:\n{_preview_text(current_goal_state, limit=args.debug_char_limit)}",
+                flush=True,
+            )
 
         for attempt in range(1, max_fill + 1):
             total_attempts += 1
@@ -976,6 +1866,12 @@ def main():
             trace["fills"].append(fill_trace)
             persist()
 
+            # Bump temperature on fill compile retries
+            fill_config = config
+            if attempt > 1:
+                fill_config = dict(config)
+                fill_config["temperature"] = max(config.get("temperature", 0.0), 0.4)
+
             fill_model_attempts: list[dict] = []
             try:
                 replacement = run_fill_goal(
@@ -983,10 +1879,15 @@ def main():
                     angelito_proof,
                     marked_proof,
                     current_goal_state,
-                    config,
+                    fill_config,
                     error_context,
                     structured_feedback_context,
                     debug_attempts=fill_model_attempts,
+                    log_metadata={
+                        "slot_name": current_slot.name,
+                        "fill_attempt": attempt,
+                        "admit_index": admit_idx,
+                    },
                 )
                 fill_trace["source"] = "model"
                 fill_trace["model_attempts"] = fill_model_attempts
@@ -999,6 +1900,16 @@ def main():
                 fail(f"  Fill model error: {e}")
 
             fill_trace["replacement"] = replacement
+            if args.debug:
+                print(
+                    f"[DEBUG] fill attempt {attempt} replacement chars={len(replacement)}",
+                    flush=True,
+                )
+                print(
+                    f"[DEBUG] replacement preview:\n"
+                    f"{_preview_text(replacement, limit=args.debug_char_limit)}",
+                    flush=True,
+                )
 
             candidate_slot_values = dict(slot_values)
             candidate_slot_values[current_slot.name] = replacement
@@ -1017,6 +1928,24 @@ def main():
             feedback, formatted_feedback = _build_structured_feedback_context(stdout, stderr)
             if feedback:
                 fill_trace["compiler_feedback"] = feedback
+            if args.debug:
+                print(
+                    f"[DEBUG] fill compile exit_code={exit_code}, stdout_chars={len(stdout)}, "
+                    f"stderr_chars={len(stderr)}, feedback_items={len(feedback)}",
+                    flush=True,
+                )
+                if stdout.strip():
+                    print(
+                        f"[DEBUG] fill stdout preview:\n"
+                        f"{_preview_text(stdout, limit=args.debug_char_limit)}",
+                        flush=True,
+                    )
+                if stderr.strip():
+                    print(
+                        f"[DEBUG] fill stderr preview:\n"
+                        f"{_preview_text(stderr, limit=args.debug_char_limit)}",
+                        flush=True,
+                    )
 
             if exit_code == 0:
                 fill_trace["status"] = "success"
@@ -1029,6 +1958,16 @@ def main():
 
             # Parse error for better feedback
             parsed_error = _parse_structured_error(stderr, stdout)
+            failed_goal_state = _capture_goal_state_after_replacement(
+                repo_root=repo_root,
+                target_rel=target_rel,
+                target_path=target_path,
+                formal_statement=formal_statement,
+                admit_idx=admit_idx,
+                replacement=replacement,
+            )
+            if failed_goal_state:
+                fill_trace["post_replacement_goal_state"] = failed_goal_state
             fill_trace["status"] = "compile_error"
             persist()
 
@@ -1036,10 +1975,51 @@ def main():
                 f"The previous replacement failed to compile.\n\n"
                 f"**Failed tactics:**\n```coq\n{replacement}\n```\n\n"
                 f"**Coq compiler error:**\n```\n{parsed_error}\n```\n\n"
-                f"Please fix the tactics for this sub-goal."
             )
+            # Add error-specific guidance (match on full stderr, not truncated)
+            error_lower = (stderr or stdout or parsed_error).lower()
+            error_hints = []
+            if "found no subterm matching" in error_lower:
+                error_hints.append(
+                    "The `rewrite` tactic failed because the term you tried to rewrite does not appear "
+                    "syntactically in the goal or hypothesis. Try a completely different approach. "
+                    "If `lra` is available, it can often solve linear arithmetic goals directly from "
+                    "hypotheses without needing `rewrite` at all."
+                )
+            if "unable to unify" in error_lower:
+                error_hints.append(
+                    "The tactic could not unify the expected and actual terms. "
+                    "The goal shape may differ from what you assumed. Use the goal state as ground truth. "
+                    "If the goal involves `^`, `x * y`, or other nonlinear terms over R, "
+                    "`lra` cannot handle it — use `nlra` or `nra` instead (available when Psatz is imported). "
+                    "Alternatively, `rewrite` the variables to concrete values first, then use `ring` or `nlra`."
+                )
+            if "not an equality" in error_lower or "not an equation" in error_lower:
+                error_hints.append(
+                    "`rewrite` requires an equality hypothesis. The hypothesis you used is not an equality."
+                )
+            if "no such goal" in error_lower or "no focused proof" in error_lower:
+                error_hints.append(
+                    "A previous tactic already closed the goal, so the next tactic had nothing to work on. "
+                    "Remove the extra tactics after the goal-closing one."
+                )
+            if error_hints:
+                error_context += "**Repair guidance:**\n" + "\n".join(f"- {h}" for h in error_hints) + "\n\n"
+            error_context += "Try a fundamentally different tactic approach instead of a small variation of the failed one."
+            if failed_goal_state and failed_goal_state != current_goal_state:
+                current_goal_state = failed_goal_state
+                error_context += (
+                    "\n\n**Residual Goal State After Running The Failed Tactics:**\n"
+                    f"```text\n{failed_goal_state}\n```\n"
+                )
             structured_feedback_context = formatted_feedback
             marked_proof = proof_template.render(slot_values, marked_slot=current_slot.name)
+            if args.debug:
+                print(
+                    f"[DEBUG] retrying slot={current_slot.name} after compile error, "
+                    f"structured_feedback_chars={len(structured_feedback_context)}",
+                    flush=True,
+                )
             print(f"    Attempt {attempt}: compile error, retrying...", flush=True)
 
         if not filled:

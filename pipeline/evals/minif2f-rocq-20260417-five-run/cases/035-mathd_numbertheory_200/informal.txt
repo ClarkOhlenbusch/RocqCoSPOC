@@ -1,0 +1,1 @@
+When you divide $139$ steps by $11$ steps, you get $12$ with a remainder of $7$. Therefore, Tim lands on step $7$.

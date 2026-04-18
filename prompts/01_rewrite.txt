@@ -2,7 +2,7 @@ You are an expert mathematician and a master of the Coq/Rocq proof assistant. Yo
 
 **Requirements:**
 1. Output a complete Angelito proof using the formal keywords: `PROVE`, `BEGIN`, `END`, `ASSUME`, `GOAL`, `SIMPLIFY`, `APPLY`, `SPLIT INTO`, `INDUCTION`, `FACT`, `WITNESS_AT`, `FOR_ALL`, `EXTRACT`, `SINCE`, `THEREFORE`, `CONCLUDE`, `BY`, `INDUCTIVE_HYPOTHESIS`.
-2. Every proof step must use the correct Angelito keyword — do not use loose natural language.
+2. Every proof step must use the correct Angelito keyword - do not use loose natural language as top-level proof structure.
 3. Every transformation or claim must have a `[BY ...]` justification.
 4. Name intermediate facts (`FACT h1:`, `FACT h2:`, etc.) so later steps can reference them.
 5. Use `INDUCTION` when the proof is inductive, with `PROVE BASE_CASE:` and `PROVE INDUCTIVE_CASE:` sub-blocks.
@@ -15,6 +15,13 @@ You are an expert mathematician and a master of the Coq/Rocq proof assistant. Yo
 12. The specification contains unrelated reference examples. Never copy theorem names, identifiers, or domains from the spec unless they also appear in the target theorem below.
 13. The target theorem is authoritative. The rewritten Angelito proof must prove exactly that theorem and nothing else.
 14. Angelito keywords are declarative proof-language keywords, not Rocq tactics. Do not confuse Angelito keywords with `intros`, `rewrite`, `apply`, `lia`, `reflexivity`, or any other Rocq/Ltac command.
+15. Step 1 is a structural bridge for later stages. Prefer the shortest faithful Angelito proof instead of a long derivation.
+16. Do not invent induction, case splits, witnesses, or named subgoals unless the informal proof really uses that proof shape.
+17. Do not expand routine algebra or arithmetic into many micro-steps. Collapse routine computation into one `FACT`, `SIMPLIFY`, or `THEREFORE` step with `[BY arithmetic]`, `[BY algebra]`, or `[BY computation]` when reasonable.
+18. For direct proofs with no real branching, prefer a single straight-line `BEGIN ... CONCLUDE ... END` block and avoid nested `PROVE` blocks.
+19. Keep continuation lines directly under the preceding Angelito keyword. Do not insert commentary before `PROVE` or after `END`.
+20. Do not use pseudo-mathematical notation that has no Rocq equivalent. Specifically: no set-builder notation like `card {a | ...}` or `{x | P x}`, no sigma notation like `sum_{j=0}^{k}` or `∑`, and no informal set comprehensions.
+21. Every FACT and THEREFORE body must be a symbolic proposition that a later stage can translate into a Rocq `assert`. Do not write English prose like "for each integer a, if ..." or "there are N things with ...". Use symbolic quantifiers (`∀`, `∃`) and equations/inequalities instead. If a claim cannot be stated symbolically (e.g. a counting argument over a set), collapse it into a coarser step or omit it and let later stages handle the gap. Example: write `FACT h: ∀ a x, 2^x ≤ a < 2^(x+1) → Int_part(ln(INR a)/ln 2) = x [BY ...]` not `FACT h: for each integer a, if 2^x ≤ a < 2^(x+1) then ... [BY ...]`.
 
 **Required outer shape:**
 PROVE theorem_name: proposition
@@ -22,6 +29,9 @@ BEGIN
   ...
   CONCLUDE: final statement [QED]
 END
+
+**Accuracy And Shape Guard:**
+{rewrite_shape_hint}
 
 **Target Formal Statement (authoritative):**
 {formal_statement}

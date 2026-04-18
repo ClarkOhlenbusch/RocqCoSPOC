@@ -38,8 +38,16 @@ function App() {
   const [files, setFiles] = useState([]);
   const [selectedName, setSelectedName] = useState("");
   const [trace, setTrace] = useState(null);
+  const [evalRuns, setEvalRuns] = useState([]);
+  const [selectedEvalRun, setSelectedEvalRun] = useState("");
+  const [evalSummary, setEvalSummary] = useState(null);
+  const [selectedEvalCase, setSelectedEvalCase] = useState("");
+  const [evalCaseDetail, setEvalCaseDetail] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingEvalRuns, setLoadingEvalRuns] = useState(false);
+  const [loadingEvalSummary, setLoadingEvalSummary] = useState(false);
+  const [loadingEvalCase, setLoadingEvalCase] = useState(false);
   const [startingRun, setStartingRun] = useState(false);
   const [activeRun, setActiveRun] = useState(null);
   const [form, setForm] = useState(INITIAL_FORM);
@@ -53,6 +61,66 @@ function App() {
       setSelectedName((current) => current || data.files?.[0]?.name || "");
     } catch (e) {
       setError(`Failed to load trace list: ${e}`);
+    }
+  }
+
+  async function loadEvalRuns() {
+    setLoadingEvalRuns(true);
+    try {
+      const res = await fetch("/api/evals");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || `Server returned ${res.status}`);
+      }
+      const runs = data.runs || [];
+      setEvalRuns(runs);
+      setSelectedEvalRun((current) => current || runs?.[0]?.name || "");
+    } catch (e) {
+      setError(`Failed to load eval runs: ${e}`);
+    } finally {
+      setLoadingEvalRuns(false);
+    }
+  }
+
+  async function openEvalRun(runName = selectedEvalRun) {
+    if (!runName) return;
+    setLoadingEvalSummary(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/evals/${encodeURIComponent(runName)}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || `Server returned ${res.status}`);
+      }
+      setEvalSummary(data);
+      setEvalCaseDetail(null);
+      const firstCase = data.cases?.[0]?.caseIndex;
+      setSelectedEvalCase((current) => current || String(firstCase || ""));
+    } catch (e) {
+      setError(`Failed to load eval run: ${e}`);
+    } finally {
+      setLoadingEvalSummary(false);
+    }
+  }
+
+  async function openEvalCase(caseIndex = selectedEvalCase) {
+    if (!selectedEvalRun || !caseIndex) return;
+    setLoadingEvalCase(true);
+    setError("");
+    try {
+      const res = await fetch(
+        `/api/evals/${encodeURIComponent(selectedEvalRun)}/cases/${encodeURIComponent(caseIndex)}`,
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || `Server returned ${res.status}`);
+      }
+      setEvalCaseDetail(data);
+      setTrace(data.trace || null);
+    } catch (e) {
+      setError(`Failed to load eval case details: ${e}`);
+    } finally {
+      setLoadingEvalCase(false);
     }
   }
 
@@ -130,6 +198,7 @@ function App() {
 
   useEffect(() => {
     loadTraceList();
+    loadEvalRuns();
   }, []);
 
   useEffect(() => {
@@ -156,7 +225,7 @@ function App() {
     };
   }, [activeRun?.id, activeRun?.status]);
 
-  const summary = useMemo(() => {
+  const traceSummary = useMemo(() => {
     if (!trace) return null;
     const fills = trace.fills || [];
     const totalAttempts = fills.length;
@@ -252,6 +321,80 @@ function App() {
         </button>
       </section>
 
+      <section className="panel">
+        <h2>Browse Eval Results</h2>
+        <div className="controls">
+          <button onClick={loadEvalRuns} disabled={loadingEvalRuns}>
+            {loadingEvalRuns ? "Refreshing..." : "Refresh Eval Runs"}
+          </button>
+          <select value={selectedEvalRun} onChange={(e) => setSelectedEvalRun(e.target.value)}>
+            <option value="">Select an eval run...</option>
+            {evalRuns.map((run) => (
+              <option key={run.name} value={run.name}>
+                {run.name}
+              </option>
+            ))}
+          </select>
+          <button onClick={() => openEvalRun()} disabled={!selectedEvalRun || loadingEvalSummary}>
+            {loadingEvalSummary ? "Loading..." : "Open Eval Run"}
+          </button>
+        </div>
+
+        {evalSummary && (
+          <>
+            <div className="run-meta">
+              <span>Run: {evalSummary.runName}</span>
+              <span>Dataset: {evalSummary.dataset || "unknown"}</span>
+              <span>Split: {evalSummary.split || "unknown"}</span>
+              <span>Generated: {evalSummary.generatedAt || "unknown"}</span>
+            </div>
+            <div className="summary-grid">
+              <SummaryCard label="Cases" value={evalSummary.aggregate?.num_cases ?? evalSummary.numCases ?? 0} />
+              <SummaryCard label="Successes" value={evalSummary.aggregate?.num_success ?? 0} />
+              <SummaryCard label="Success Rate" value={evalSummary.aggregate?.success_rate ?? 0} />
+              <SummaryCard label="Mean Runtime (s)" value={evalSummary.aggregate?.elapsed_sec_mean ?? 0} />
+              <SummaryCard label="Total Runtime (s)" value={evalSummary.aggregate?.elapsed_sec_total ?? 0} />
+              <SummaryCard label="Mean Fill Attempts" value={evalSummary.aggregate?.fill_attempts_mean ?? 0} />
+            </div>
+
+            <div className="controls">
+              <select value={selectedEvalCase} onChange={(e) => setSelectedEvalCase(e.target.value)}>
+                <option value="">Select a case...</option>
+                {(evalSummary.cases || []).map((entry) => (
+                  <option key={entry.caseIndex} value={String(entry.caseIndex)}>
+                    {entry.caseIndex} - {entry.caseName} | {entry.traceStatus}
+                  </option>
+                ))}
+              </select>
+              <button onClick={() => openEvalCase()} disabled={!selectedEvalCase || loadingEvalCase}>
+                {loadingEvalCase ? "Loading Case..." : "Open Case Details"}
+              </button>
+            </div>
+          </>
+        )}
+      </section>
+
+      {evalCaseDetail && (
+        <section className="panel">
+          <h2>
+            Eval Case #{evalCaseDetail.case.caseIndex} - {evalCaseDetail.case.caseName}
+          </h2>
+          <div className="run-meta">
+            <span>Status: {evalCaseDetail.case.traceStatus || "unknown"}</span>
+            <span>Failure Stage: {evalCaseDetail.case.failureStage || "none"}</span>
+            <span>Return Code: {evalCaseDetail.case.returnCode ?? "unknown"}</span>
+            <span>Elapsed (s): {evalCaseDetail.case.elapsedSec ?? "unknown"}</span>
+          </div>
+          <StateBlock title="Command" content={(evalCaseDetail.case.command || []).join(" ")} />
+          <StateBlock title="Informal input (.txt)" content={evalCaseDetail.artifacts?.informalText} open />
+          <StateBlock title="Formal statement (.v)" content={evalCaseDetail.artifacts?.formalText} />
+          <StateBlock title="Target proof file (.v)" content={evalCaseDetail.artifacts?.targetText} />
+          <StateBlock title="Pipeline stdout" content={evalCaseDetail.artifacts?.stdoutText} />
+          <StateBlock title="Pipeline stderr" content={evalCaseDetail.artifacts?.stderrText} />
+          <StateBlock title="Raw trace JSON" content={JSON.stringify(evalCaseDetail.trace || {}, null, 2)} />
+        </section>
+      )}
+
       {error && <section className="panel error">{error}</section>}
 
       {activeRun && (
@@ -289,13 +432,13 @@ function App() {
         <>
           <section className="panel summary-grid">
             <SummaryCard label="Status" value={trace.status || "unknown"} />
-            <SummaryCard label="Mode" value={summary?.mode || "unknown"} />
-            <SummaryCard label="Admits Filled" value={summary?.admitsFilled} />
-            <SummaryCard label="Total Attempts" value={summary?.totalAttempts} />
-            <SummaryCard label="Failed Attempts" value={summary?.failedAttempts} />
-            <SummaryCard label="XML Feedback Attempts" value={summary?.xmlFeedbackAttempts} />
-            <SummaryCard label="Format Retries" value={summary?.formatRetries} />
-            <SummaryCard label="Model Attempts" value={summary?.modelAttempts} />
+            <SummaryCard label="Mode" value={traceSummary?.mode || "unknown"} />
+            <SummaryCard label="Admits Filled" value={traceSummary?.admitsFilled} />
+            <SummaryCard label="Total Attempts" value={traceSummary?.totalAttempts} />
+            <SummaryCard label="Failed Attempts" value={traceSummary?.failedAttempts} />
+            <SummaryCard label="XML Feedback Attempts" value={traceSummary?.xmlFeedbackAttempts} />
+            <SummaryCard label="Format Retries" value={traceSummary?.formatRetries} />
+            <SummaryCard label="Model Attempts" value={traceSummary?.modelAttempts} />
           </section>
 
           <section className="panel">

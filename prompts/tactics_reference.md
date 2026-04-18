@@ -59,10 +59,13 @@ These are allowed as low-level support tactics, especially inside `by ...` or `{
 | `apply lemma.` / `eapply lemma.` | Lemma application |
 | `exact term.` | Exact proof term |
 | `simpl.` / `cbn.` | Definitional simplification |
+| `compute.` / `vm_compute.` | Closed computation / normalization for ground arithmetic goals |
 | `reflexivity.` | Close a reflexive equality |
 | `lia.` | Linear arithmetic when `Lia` is imported |
+| `lra.` | Linear real arithmetic when `Lra` or `Psatz` is imported |
 | `nia.` | Nonlinear arithmetic |
-| `ring.` | Ring equalities |
+| `ring.` / `ring_simplify.` | Ring equalities / ring normalization |
+| `field.` / `field_simplify.` | Rational-field normalization when the required field libraries are imported |
 | `destruct H as [x Hx].` | Case split / unpack |
 | `exists witness.` | Witness construction |
 | `split.` / `left.` / `right.` | Basic logical structure |

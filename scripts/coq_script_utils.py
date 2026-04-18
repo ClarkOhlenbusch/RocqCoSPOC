@@ -10,10 +10,17 @@ from typing import List, Sequence, Tuple
 
 DEFAULT_COQ_BIN = Path(r"C:\Users\clark\scoop\apps\coq\2025.01.0\bin")
 
+# WSL mount of the same Windows path
+_WSL_COQ_BIN = Path("/mnt/c/Users/clark/scoop/apps/coq/2025.01.0/bin")
+
 
 def _resolve_executable(preferred: Path, fallback_name: str) -> str:
     if preferred.exists():
         return str(preferred)
+    # Try WSL-mounted path if the Windows path doesn't resolve
+    wsl_candidate = _WSL_COQ_BIN / preferred.name
+    if wsl_candidate.exists():
+        return str(wsl_candidate)
     fallback = shutil.which(fallback_name)
     if fallback:
         return fallback

@@ -53,7 +53,7 @@ python pipeline/run.py --informal path/to/informal.txt --formal path/to/formal.v
 
 1. Rewrite emits strict Angelito only.
 2. Skeleton builds a Rocq scaffold with named Jinja2 slots.
-3. For direct proofs with no outer branching (`INDUCTION`, `APPLY ... SPLIT INTO`, etc.), the pipeline derives a deterministic direct skeleton such as `intros.` plus `admit.` instead of asking the model to invent structure.
+3. The skeleton stage asks the model to preserve the proof scaffold from Angelito, including useful direct-proof checkpoints such as intermediate `FACT` / `THEREFORE` steps translated into Rocq `assert` / `destruct` scaffolding with `admit.` leaves.
 4. Each slot is rendered first as `admit.` to capture the goal state.
 5. The model generates only the tactic block for the current slot.
 6. The pipeline renders that tactic block into the template, recompiles, and retries on failure.

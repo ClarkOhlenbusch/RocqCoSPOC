@@ -21,6 +21,7 @@ The pipeline runs through [pipeline/run.py](pipeline/run.py) or can be done manu
 | Tactics reference | [prompts/tactics_reference.md](prompts/tactics_reference.md) |
 | IDE setup | [docs/SETUP_IDE.md](docs/SETUP_IDE.md) |
 | Proof-state bridge | [docs/AUTOMATED_STATE_PIPELINE.md](docs/AUTOMATED_STATE_PIPELINE.md) |
+| Agent behavior & error recovery | [docs/AGENT_BEHAVIOR.md](docs/AGENT_BEHAVIOR.md) |
 | Automated pipeline | [pipeline/README.md](pipeline/README.md) |
 | Example inputs | [data/examples/README.md](data/examples/README.md) |
 

@@ -1,4 +1,4 @@
-You are an expert in Coq/Rocq theorem proving. You are given an Angelito proof and a formal theorem statement. Your task is to translate only the outermost proof structure into Rocq, leaving inner goals as `admit.` placeholders.
+You are an expert in Coq/Rocq theorem proving. You are given an Angelito proof and a formal theorem statement. Your task is to translate the proof shape into Rocq, preserving the main scaffold and intermediate checkpoints while leaving the hard proof obligations as `admit.` placeholders.
 
 Return only Rocq tactic lines. The first non-empty line of your answer must be a valid Rocq tactic such as `intros ... .`, `induction ... .`, `destruct ... .`, or a bullet line like `- admit.`. Do not restate the task. Do not restate the theorem. Do not explain your reasoning. Do not use markdown fences. Do not include comments.
 
@@ -14,7 +14,10 @@ Return only Rocq tactic lines. The first non-empty line of your answer must be a
 - `INDUCTION n` -> `induction n.` with bullet or brace blocks for the cases
 - `APPLY theorem SPLIT INTO: (1)... (2)...` -> `apply theorem.` followed by one `admit.` leaf per subgoal
 - `PROVE BASE_CASE:` / `PROVE INDUCTIVE_CASE:` -> bullet or brace blocks
-- All inner reasoning (`FACT`, `SIMPLIFY`, `THEREFORE`, `SINCE`, etc.) -> `admit.`
+- `FACT h: stmt [BY ...]` -> usually `assert (h : stmt).` followed by a brace block containing only `admit.`
+- `FACT h: exists ...` followed by later `ASSUME` bindings -> preserve that structure as `assert (h : exists ...).` then `destruct h as [...] .`
+- `SIMPLIFY ...`, `THEREFORE ...`, and major intermediate equalities -> preserve them as `assert (...) .` blocks when they are key checkpoints in the direct proof
+- Leave proofs of those assertions as standalone `admit.` leaves inside braces
 
 **Hard requirements:**
 1. Output only the tactic lines between `Proof.` and `Qed.`. Do not include `Proof.`, `Qed.`, `Admitted.`, the theorem statement, or any prose.
@@ -28,11 +31,17 @@ Return only Rocq tactic lines. The first non-empty line of your answer must be a
    `induction n.`
    `- admit.`
    `- admit.`
-8. Do not invent proof structure that is not present in the Angelito proof. If the Angelito proof has no `INDUCTION`, `DESTRUCT`, or `APPLY ... SPLIT INTO`, then the skeleton should usually just be introductions followed by a single `admit.`
+8. Do not invent proof structure that is not present in the Angelito proof. But do preserve useful direct-proof structure from Angelito `FACT`, `SIMPLIFY`, and `THEREFORE` steps as Rocq `assert` / `destruct` scaffolding instead of collapsing everything to a single final `admit.`
 9. Do not partially solve goals. Once a branch reaches `admit.`, stop writing tactics for that branch.
 10. If the formal statement begins with `forall` binders or implications, the skeleton must introduce them first with `intros ... .` before using `induction`, `destruct`, or other goal-opening tactics.
 11. After `intros n` and `induction n`, the inductive subgoal is usually `S n + 0 = S n` (or similar) with `IHn : n + 0 = n` already in context. It is **not** a top-level `forall m : nat, ...` that needs `pick m : nat.` or an extra `ASSUME` line. Do not emit `pick` or `intros` for a second parameter name that induction already scoped; use `admit.` for the leaf and let the fill step work on the real goal.
 12. If the Angelito text contains `PROVE INDUCTIVE_CASE:` followed by `ASSUME m : ...`, treat that `ASSUME` as naming the predecessor variable already introduced by `induction`. Do not translate it into `pick m : ...` or `intros m.` unless the actual Rocq goal in that branch visibly starts with a `forall` or implication binder.
+13. Preserve bullet and brace structure exactly. If you open branches with `induction`, `destruct`, or `apply ...` that creates multiple subgoals, put each branch on its own bullet or brace-delimited block.
+14. Do not emit inner proof tactics in the skeleton. Tactics like `simpl`, `cbn`, `rewrite`, `exact`, `reflexivity`, `lia`, `simplify lhs`, and `simplify rhs` belong in the fill step, so preserve only the scaffold around them and use `admit.` at the leaves.
+15. For direct proofs with many named intermediate facts, the skeleton should usually contain multiple `assert (...) . { admit. }` blocks, not a one-line `intros ... . admit.`
+16. It is acceptable for the skeleton to have many `admit.` placeholders if that preserves the proof plan faithfully.
+17. Every asserted proposition must itself be valid Rocq syntax. Do not copy pseudo-mathematical notation such as `card {a | ...}`, `sum_{j=...}`, `∑`, or set-builder braces from Angelito into the Rocq skeleton.
+18. If an Angelito checkpoint uses notation that is not directly expressible with the visible imports, preserve the proof plan at a coarser but still valid Rocq checkpoint instead of inventing unsupported syntax.
 
 **Formal Statement:**
 {formal_statement}

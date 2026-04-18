@@ -4,12 +4,28 @@
 # Local Coq/Rocq scratch and pipeline targets (testing only)
 coq/
 
-# Coq build artifacts
+# Coq/Rocq build artifacts
 *.vo
 *.vos
 *.vok
-.glob
+*.glob
 *.aux
+
+# Lia (tactic) cache — machine-local, noisy
+.lia.cache
+
+# Pipeline default trace output (see pipeline/README.md)
+pipeline/traces/
+
+# Pipeline eval runs — contain traces, model logs, compiled artifacts
+pipeline/evals/*/trace.json
+pipeline/evals/*/trace-model-log.jsonl
+pipeline/evals/*/target.v
+pipeline/evals/*/*.vo
+pipeline/evals/*/*.vos
+pipeline/evals/*/*.vok
+pipeline/evals/*/*.glob
+pipeline/evals/*/*.aux
 
 # Python
 __pycache__/

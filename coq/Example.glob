@@ -1,9 +1,15 @@
-DIGEST 2c680412b04c08d1c54f8ea762a58edf
+DIGEST 68e98fe0fc2c8c65dbe661f0659889df
 FRocqCoSPOC.Example
-prf 8:10 <> ex1
-R25:27 Coq.Init.Datatypes <> nat ind
-binder 21:21 <> n:1
-R35:37 Coq.Init.Logic <> ::type_scope:x_'='_x not
-R31:33 Coq.Init.Peano <> ::nat_scope:x_'+'_x not
-R30:30 RocqCoSPOC.Example <> n:1 var
-R38:38 RocqCoSPOC.Example <> n:1 var
+R31:38 RocqCoSPOC.Angelito <> <> lib
+R48:61 RocqCoSPOC.Angelito Ltac1 <> mod
+prf 73:75 <> ex1
+R90:92 Coq.Init.Datatypes <> nat ind
+binder 86:86 <> n:1
+R100:102 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R96:98 Coq.Init.Peano <> ::nat_scope:x_'+'_x not
+R95:95 RocqCoSPOC.Example <> n:1 var
+R103:103 RocqCoSPOC.Example <> n:1 var
+R145:147 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R141:143 Coq.Init.Peano <> ::nat_scope:x_'+'_x not
+R145:147 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R141:143 Coq.Init.Peano <> ::nat_scope:x_'+'_x not

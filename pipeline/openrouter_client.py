@@ -61,6 +61,18 @@ def _extract_message_text(content) -> str:
     return str(content).strip()
 
 
+def _payload_prompt_text(payload: dict) -> str:
+    messages = payload.get("messages") or []
+    rendered: list[str] = []
+    for msg in messages:
+        if not isinstance(msg, dict):
+            continue
+        role = str(msg.get("role", "user")).strip() or "user"
+        content = _extract_message_text(msg.get("content"))
+        rendered.append(f"[{role}]\n{content}".strip())
+    return "\n\n".join(part for part in rendered if part).strip()
+
+
 def _append_model_log(log_path: Optional[Path], entry: dict) -> None:
     if not log_path:
         return
@@ -143,6 +155,7 @@ def _request_chat(
                     "model": payload.get("model"),
                     "timeout_sec": timeout,
                     "error": str(e),
+                    "prompt_text": _payload_prompt_text(payload),
                     "prompt_preview": str(payload.get("messages", [{}])[0].get("content", ""))[:800],
                     "retry_sleep_sec": sleep_for,
                     "metadata": log_context or {},
@@ -168,6 +181,7 @@ def _request_chat(
                 "request_id": request_id,
                 "retry_after_sec": retry_after,
                 "raw_response": body_text,
+                "prompt_text": _payload_prompt_text(payload),
                 "prompt_preview": str(payload.get("messages", [{}])[0].get("content", ""))[:800],
                 "metadata": log_context or {},
             },

@@ -10,6 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "..", "..");
 const tracesDir = path.join(repoRoot, "pipeline", "traces");
+const evalsDir = path.join(repoRoot, "pipeline", "evals");
 const dashboardRunsDir = path.join(repoRoot, "pipeline", "dashboard-runs");
 const jobs = new Map();
 
@@ -51,6 +52,66 @@ function readTraceByName(name) {
   }
   const text = fs.readFileSync(full, "utf8");
   return JSON.parse(text);
+}
+
+function listEvalRuns() {
+  if (!fs.existsSync(evalsDir)) {
+    return [];
+  }
+  return fs
+    .readdirSync(evalsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => {
+      const runDir = path.join(evalsDir, entry.name);
+      const summaryPath = path.join(runDir, "summary.json");
+      if (!fs.existsSync(summaryPath)) {
+        return null;
+      }
+      const stat = fs.statSync(summaryPath);
+      return {
+        name: entry.name,
+        summaryPath,
+        updatedAt: new Date(stat.mtimeMs).toISOString(),
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
+}
+
+function getEvalRunDir(runName) {
+  const safe = path.basename(String(runName || ""));
+  if (!safe || safe === "." || safe === "..") {
+    throw new Error("Invalid eval run name.");
+  }
+  const runDir = path.join(evalsDir, safe);
+  if (!fs.existsSync(runDir)) {
+    return null;
+  }
+  return runDir;
+}
+
+function readJsonFile(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function resolveInsideRepo(filePath) {
+  const absolute = path.resolve(String(filePath || ""));
+  const relative = path.relative(repoRoot, absolute);
+  if (!relative || relative.startsWith("..") || path.isAbsolute(relative)) {
+    throw new Error(`Refusing to read file outside repository: ${absolute}`);
+  }
+  return absolute;
+}
+
+function readOptionalText(filePath) {
+  if (!filePath) return null;
+  try {
+    const resolved = resolveInsideRepo(filePath);
+    if (!fs.existsSync(resolved)) return null;
+    return fs.readFileSync(resolved, "utf8");
+  } catch {
+    return null;
+  }
 }
 
 function slugify(text) {
@@ -152,6 +213,113 @@ app.get("/api/traces/:name", (req, res) => {
       return;
     }
     res.json({ name: path.basename(req.params.name), trace });
+  } catch (e) {
+    res.status(400).json({ error: String(e.message || e) });
+  }
+});
+
+app.get("/api/evals", (_req, res) => {
+  const runs = listEvalRuns().map((run) => ({
+    name: run.name,
+    updatedAt: run.updatedAt,
+  }));
+  res.json({ evalsDir, runs });
+});
+
+app.get("/api/evals/:runName", (req, res) => {
+  try {
+    const runDir = getEvalRunDir(req.params.runName);
+    if (!runDir) {
+      res.status(404).json({ error: "Eval run not found." });
+      return;
+    }
+    const summaryPath = path.join(runDir, "summary.json");
+    if (!fs.existsSync(summaryPath)) {
+      res.status(404).json({ error: "summary.json not found for eval run." });
+      return;
+    }
+    const summary = readJsonFile(summaryPath);
+    const cases = (summary.results || []).map((result) => ({
+      caseIndex: result.case_index,
+      caseName: result.case_name,
+      split: result.split,
+      returnCode: result.return_code,
+      elapsedSec: result.elapsed_sec,
+      traceStatus: result.trace_status,
+      failureStage: result.failure_stage || null,
+      fillAttempts: result.counts?.fill_attempts ?? 0,
+      paths: result.paths || {},
+    }));
+    res.json({
+      runName: path.basename(req.params.runName),
+      generatedAt: summary.generated_at || null,
+      dataset: summary.dataset || null,
+      split: summary.split || null,
+      numCases: summary.num_cases || cases.length,
+      aggregate: summary.aggregate || {},
+      cases,
+    });
+  } catch (e) {
+    res.status(400).json({ error: String(e.message || e) });
+  }
+});
+
+app.get("/api/evals/:runName/cases/:caseIndex", (req, res) => {
+  try {
+    const runDir = getEvalRunDir(req.params.runName);
+    if (!runDir) {
+      res.status(404).json({ error: "Eval run not found." });
+      return;
+    }
+    const summaryPath = path.join(runDir, "summary.json");
+    if (!fs.existsSync(summaryPath)) {
+      res.status(404).json({ error: "summary.json not found for eval run." });
+      return;
+    }
+    const summary = readJsonFile(summaryPath);
+    const requestedIndex = Number(req.params.caseIndex);
+    if (!Number.isFinite(requestedIndex)) {
+      res.status(400).json({ error: "Case index must be numeric." });
+      return;
+    }
+
+    const result = (summary.results || []).find((entry) => entry.case_index === requestedIndex);
+    if (!result) {
+      res.status(404).json({ error: "Case not found in summary.json." });
+      return;
+    }
+
+    const tracePath = result.paths?.trace ? resolveInsideRepo(result.paths.trace) : null;
+    const trace = tracePath && fs.existsSync(tracePath) ? readJsonFile(tracePath) : result.trace || null;
+    const informalText = readOptionalText(result.paths?.informal);
+    const formalText = readOptionalText(result.paths?.formal);
+    const targetText = readOptionalText(result.paths?.target);
+    const stdoutText = readOptionalText(result.paths?.stdout);
+    const stderrText = readOptionalText(result.paths?.stderr);
+
+    res.json({
+      runName: path.basename(req.params.runName),
+      case: {
+        caseIndex: result.case_index,
+        caseName: result.case_name,
+        split: result.split,
+        returnCode: result.return_code,
+        elapsedSec: result.elapsed_sec,
+        traceStatus: result.trace_status,
+        failureStage: result.failure_stage || null,
+        counts: result.counts || {},
+        command: result.command || [],
+        paths: result.paths || {},
+      },
+      artifacts: {
+        informalText,
+        formalText,
+        targetText,
+        stdoutText,
+        stderrText,
+      },
+      trace,
+    });
   } catch (e) {
     res.status(400).json({ error: String(e.message || e) });
   }

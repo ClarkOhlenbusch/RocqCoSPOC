@@ -1,0 +1,9 @@
+﻿{
+  "dataset": "LLM4Rocq/miniF2F-rocq",
+  "split": "validation",
+  "seed": 42,
+  "num_cases": 5,
+  "run_id": "minif2f-rocq-20260417-five-run",
+  "selected_indices": [6, 26, 28, 35, 57],
+  "case_ids": ["006-aime_1994_p4", "026-mathd_numbertheory_84", "028-mathd_algebra_37", "035-mathd_numbertheory_200", "057-imo_1966_p5"]
+}
