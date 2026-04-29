@@ -10,8 +10,8 @@ fill_model:
   - "deepseek/deepseek-v3.2"
 
 # Max retries per sub-goal fill (compile-retry)
-max_fill_attempts: 3
-max_skeleton_attempts: 3
+max_fill_attempts: 5
+max_skeleton_attempts: 5
 
 # Generation defaults
 max_tokens: 2048

@@ -95,7 +95,7 @@ function readJsonFile(filePath) {
 }
 
 function resolveInsideRepo(filePath) {
-  const absolute = path.resolve(String(filePath || ""));
+  const absolute = path.resolve(repoRoot, String(filePath || ""));
   const relative = path.relative(repoRoot, absolute);
   if (!relative || relative.startsWith("..") || path.isAbsolute(relative)) {
     throw new Error(`Refusing to read file outside repository: ${absolute}`);

@@ -481,6 +481,31 @@ function App() {
               <summary>Tactic skeleton only (proof body, no lemma)</summary>
               <pre>{trace.skeleton?.text || "(missing skeleton)"}</pre>
             </details>
+            {(trace.skeleton?.compile_attempts || []).length > 0 && (
+              <details className="state-block">
+                <summary>Skeleton compile attempts ({trace.skeleton.compile_attempts.length})</summary>
+                {trace.skeleton.compile_attempts.map((att, i) => (
+                  <details key={i} className="transition-block" open={trace.skeleton.compile_attempts.length <= 3}>
+                    <summary>
+                      Attempt {att.attempt} | {att.status}
+                    </summary>
+                    {att.text && (
+                      <StateBlock title="Skeleton tactics" content={att.text} />
+                    )}
+                    {att.stderr && (
+                      <StateBlock title="Compile error" content={att.stderr} />
+                    )}
+                    {(att.model_attempts || []).map((ma, j) => (
+                      <details key={j} className="state-block">
+                        <summary>Format attempt {ma.format_attempt} | {ma.status}</summary>
+                        {ma.raw_output && <pre>{ma.raw_output}</pre>}
+                        {ma.error && <pre className="error">{ma.error}</pre>}
+                      </details>
+                    ))}
+                  </details>
+                ))}
+              </details>
+            )}
           </section>
 
           <section className="panel">

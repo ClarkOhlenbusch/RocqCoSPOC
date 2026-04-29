@@ -1,0 +1,253 @@
+{
+  "started_at": "2026-04-18T18:50:36",
+  "status": "failed",
+  "inputs": {
+    "informal": "/mnt/c/Users/clark/RocqCoSPOC/pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/informal.txt",
+    "formal": "/mnt/c/Users/clark/RocqCoSPOC/pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/formal.v",
+    "target": "/mnt/c/Users/clark/RocqCoSPOC/pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v",
+    "target_rel": "pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v"
+  },
+  "config": {
+    "max_fill_attempts": 5,
+    "max_skeleton_attempts": 5,
+    "rewrite_model": [
+      "deepseek/deepseek-v3.2"
+    ],
+    "skeleton_model": [
+      "deepseek/deepseek-v3.2"
+    ],
+    "fill_model": [
+      "deepseek/deepseek-v3.2"
+    ],
+    "request_retries": 4,
+    "request_backoff_base_sec": 1.5,
+    "request_backoff_multiplier": 2.0,
+    "request_backoff_max_sec": 20.0,
+    "request_backoff_jitter_sec": 0.35
+  },
+  "model_log_path": "/mnt/c/Users/clark/RocqCoSPOC/pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/trace-model-log.jsonl",
+  "rewrite": {
+    "text": "PROVE amc12a_2017_p2: ∀ x y : R, x ≠ 0 → y ≠ 0 → x + y = 4 * (x * y) → (1 / x) + (1 / y) = 4\nBEGIN\n  ASSUME x : R\n  ASSUME y : R\n  ASSUME hx : x ≠ 0\n  ASSUME hy : y ≠ 0\n  ASSUME hsum : x + y = 4 * (x * y)\n  GOAL: (1 / x) + (1 / y) = 4\n  SIMPLIFY LHS:\n    (1 / x) + (1 / y)\n    = (y + x) / (x * y) [BY field_simplification hx hy]\n  THEREFORE LHS = (x + y) / (x * y) [BY commutativity_of_addition]\n  FACT h1: (x + y) / (x * y) = (4 * (x * y)) / (x * y) [BY hsum]\n  SIMPLIFY RHS:\n    (4 * (x * y)) / (x * y)\n    = 4 [BY field_simplification (nonzero_product hx hy)]\n  THEREFORE (1 / x) + (1 / y) = 4 [BY transitivity_of_equality]\n  CONCLUDE: (1 / x) + (1 / y) = 4 [QED]\nEND",
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "deepseek/deepseek-v3.2",
+        "raw_output": "PROVE amc12a_2017_p2: ∀ x y : R, x ≠ 0 → y ≠ 0 → x + y = 4 * (x * y) → (1 / x) + (1 / y) = 4\nBEGIN\n  ASSUME x : R\n  ASSUME y : R\n  ASSUME hx : x ≠ 0\n  ASSUME hy : y ≠ 0\n  ASSUME hsum : x + y = 4 * (x * y)\n  GOAL: (1 / x) + (1 / y) = 4\n  SIMPLIFY LHS:\n    (1 / x) + (1 / y)\n    = (y + x) / (x * y) [BY field_simplification hx hy]\n  THEREFORE LHS = (x + y) / (x * y) [BY commutativity_of_addition]\n  FACT h1: (x + y) / (x * y) = (4 * (x * y)) / (x * y) [BY hsum]\n  SIMPLIFY RHS:\n    (4 * (x * y)) / (x * y)\n    = 4 [BY field_simplification (nonzero_product hx hy)]\n  THEREFORE (1 / x) + (1 / y) = 4 [BY transitivity_of_equality]\n  CONCLUDE: (1 / x) + (1 / y) = 4 [QED]\nEND",
+        "status": "parsed",
+        "parsed_output": "PROVE amc12a_2017_p2: ∀ x y : R, x ≠ 0 → y ≠ 0 → x + y = 4 * (x * y) → (1 / x) + (1 / y) = 4\nBEGIN\n  ASSUME x : R\n  ASSUME y : R\n  ASSUME hx : x ≠ 0\n  ASSUME hy : y ≠ 0\n  ASSUME hsum : x + y = 4 * (x * y)\n  GOAL: (1 / x) + (1 / y) = 4\n  SIMPLIFY LHS:\n    (1 / x) + (1 / y)\n    = (y + x) / (x * y) [BY field_simplification hx hy]\n  THEREFORE LHS = (x + y) / (x * y) [BY commutativity_of_addition]\n  FACT h1: (x + y) / (x * y) = (4 * (x * y)) / (x * y) [BY hsum]\n  SIMPLIFY RHS:\n    (4 * (x * y)) / (x * y)\n    = 4 [BY field_simplification (nonzero_product hx hy)]\n  THEREFORE (1 / x) + (1 / y) = 4 [BY transitivity_of_equality]\n  CONCLUDE: (1 / x) + (1 / y) = 4 [QED]\nEND"
+      }
+    ]
+  },
+  "skeleton": {
+    "compile_attempts": [
+      {
+        "attempt": 1,
+        "text": "intros x y hx hy hsum.\nassert (h1 : (1 / x) + (1 / y) = (x + y) / (x * y)).\n{\nadmit.\n}\nassert (h2 : (x + y) / (x * y) = (4 * (x * y)) / (x * y)).\n{\nadmit.\n}\nassert (h3 : (4 * (x * y)) / (x * y) = 4).\n{\nadmit.\n}\nadmit.",
+        "rendered_text": "intros x y hx hy hsum.\nassert (h1 : (1 / x) + (1 / y) = (x + y) / (x * y)).\n{\nadmit.\n}\nassert (h2 : (x + y) / (x * y) = (4 * (x * y)) / (x * y)).\n{\nadmit.\n}\nassert (h3 : (4 * (x * y)) / (x * y) = 4).\n{\nadmit.\n}\nadmit.",
+        "full_file_text": "Require Import Reals.\nRequire Import Lra.\nRequire Import Psatz.\nRequire Import Field.\n\nOpen Scope R_scope.\n\nTheorem amc12a_2017_p2:\n  forall (x y : R),\n  x <> 0 ->\n  y <> 0 ->\n  x + y = 4 * (x * y) ->\n  (1 / x) + (1 / y) = 4.\nProof.\n  intros x y hx hy hsum.\n  assert (h1 : (1 / x) + (1 / y) = (x + y) / (x * y)).\n  {\n  admit.\n  }\n  assert (h2 : (x + y) / (x * y) = (4 * (x * y)) / (x * y)).\n  {\n  admit.\n  }\n  assert (h3 : (4 * (x * y)) / (x * y) = 4).\n  {\n  admit.\n  }\n  admit.\nAdmitted.\n",
+        "slot_names": [
+          "slot_1",
+          "slot_2",
+          "slot_3",
+          "slot_4"
+        ],
+        "model_attempts": [
+          {
+            "format_attempt": 1,
+            "model": "deepseek/deepseek-v3.2",
+            "raw_output": "intros x y hx hy hsum.\nassert_goal ((1 / x) + (1 / y) = 4).\nsimplify lhs ((1 / x) + (1 / y) = (y + x) / (x * y)).\n{ admit. }\nassert_goal ((x + y) / (x * y) = 4).\nsimplify lhs ((x + y) / (x * y) = (4 * (x * y)) / (x * y)).\n{ admit. }\nsimplify rhs ((4 * (x * y)) / (x * y) = 4).\n{ admit. }\nadmit.",
+            "status": "invalid_format",
+            "error": "Skeleton used Angelito Ltac1 tactics, but the current proof source does not import them.\nDo not emit `assert_goal`, `pick`, or `simplify ...` unless the formal statement visibly imports `Angelito` together with `Import Angelito.Ltac1.`.\nExamples:\nassert_goal ((1 / x) + (1 / y) = 4).\nassert_goal ((x + y) / (x * y) = 4)."
+          },
+          {
+            "format_attempt": 2,
+            "model": "deepseek/deepseek-v3.2",
+            "raw_output": "intros x y hx hy hsum.\nassert (h1 : (1 / x) + (1 / y) = (x + y) / (x * y)).\n{ admit. }\nassert (h2 : (x + y) / (x * y) = (4 * (x * y)) / (x * y)).\n{ admit. }\nassert (h3 : (4 * (x * y)) / (x * y) = 4).\n{ admit. }\nadmit.",
+            "status": "parsed",
+            "parsed_output": "intros x y hx hy hsum.\nassert (h1 : (1 / x) + (1 / y) = (x + y) / (x * y)).\n{\nadmit.\n}\nassert (h2 : (x + y) / (x * y) = (4 * (x * y)) / (x * y)).\n{\nadmit.\n}\nassert (h3 : (4 * (x * y)) / (x * y) = 4).\n{\nadmit.\n}\nadmit."
+          }
+        ],
+        "status": "compiled",
+        "compiles": true,
+        "check_stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v ...\nProof check passed: pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v",
+        "stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v ...\nProof check passed: pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v",
+        "check_stderr": "",
+        "stderr": "",
+        "proof_state": "State 0:\nx, y : R\nhx : x <> 0\nhy : y <> 0\nhsum : x + y = 4 * (x * y)\n============================\n1 / x + 1 / y = (x + y) / (x * y)"
+      }
+    ],
+    "text": "intros x y hx hy hsum.\nassert (h1 : (1 / x) + (1 / y) = (x + y) / (x * y)).\n{\nadmit.\n}\nassert (h2 : (x + y) / (x * y) = (4 * (x * y)) / (x * y)).\n{\nadmit.\n}\nassert (h3 : (4 * (x * y)) / (x * y) = 4).\n{\nadmit.\n}\nadmit.",
+    "rendered_text": "intros x y hx hy hsum.\nassert (h1 : (1 / x) + (1 / y) = (x + y) / (x * y)).\n{\nadmit.\n}\nassert (h2 : (x + y) / (x * y) = (4 * (x * y)) / (x * y)).\n{\nadmit.\n}\nassert (h3 : (4 * (x * y)) / (x * y) = 4).\n{\nadmit.\n}\nadmit.",
+    "full_file_text": "Require Import Reals.\nRequire Import Lra.\nRequire Import Psatz.\nRequire Import Field.\n\nOpen Scope R_scope.\n\nTheorem amc12a_2017_p2:\n  forall (x y : R),\n  x <> 0 ->\n  y <> 0 ->\n  x + y = 4 * (x * y) ->\n  (1 / x) + (1 / y) = 4.\nProof.\n  intros x y hx hy hsum.\n  assert (h1 : (1 / x) + (1 / y) = (x + y) / (x * y)).\n  {\n  admit.\n  }\n  assert (h2 : (x + y) / (x * y) = (4 * (x * y)) / (x * y)).\n  {\n  admit.\n  }\n  assert (h3 : (4 * (x * y)) / (x * y) = 4).\n  {\n  admit.\n  }\n  admit.\nAdmitted.\n",
+    "slot_names": [
+      "slot_1",
+      "slot_2",
+      "slot_3",
+      "slot_4"
+    ],
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "deepseek/deepseek-v3.2",
+        "raw_output": "intros x y hx hy hsum.\nassert_goal ((1 / x) + (1 / y) = 4).\nsimplify lhs ((1 / x) + (1 / y) = (y + x) / (x * y)).\n{ admit. }\nassert_goal ((x + y) / (x * y) = 4).\nsimplify lhs ((x + y) / (x * y) = (4 * (x * y)) / (x * y)).\n{ admit. }\nsimplify rhs ((4 * (x * y)) / (x * y) = 4).\n{ admit. }\nadmit.",
+        "status": "invalid_format",
+        "error": "Skeleton used Angelito Ltac1 tactics, but the current proof source does not import them.\nDo not emit `assert_goal`, `pick`, or `simplify ...` unless the formal statement visibly imports `Angelito` together with `Import Angelito.Ltac1.`.\nExamples:\nassert_goal ((1 / x) + (1 / y) = 4).\nassert_goal ((x + y) / (x * y) = 4)."
+      },
+      {
+        "format_attempt": 2,
+        "model": "deepseek/deepseek-v3.2",
+        "raw_output": "intros x y hx hy hsum.\nassert (h1 : (1 / x) + (1 / y) = (x + y) / (x * y)).\n{ admit. }\nassert (h2 : (x + y) / (x * y) = (4 * (x * y)) / (x * y)).\n{ admit. }\nassert (h3 : (4 * (x * y)) / (x * y) = 4).\n{ admit. }\nadmit.",
+        "status": "parsed",
+        "parsed_output": "intros x y hx hy hsum.\nassert (h1 : (1 / x) + (1 / y) = (x + y) / (x * y)).\n{\nadmit.\n}\nassert (h2 : (x + y) / (x * y) = (4 * (x * y)) / (x * y)).\n{\nadmit.\n}\nassert (h3 : (4 * (x * y)) / (x * y) = 4).\n{\nadmit.\n}\nadmit."
+      }
+    ],
+    "compiles": true,
+    "check_stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v ...\nProof check passed: pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v",
+    "stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v ...\nProof check passed: pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v",
+    "check_stderr": "",
+    "stderr": ""
+  },
+  "fills": [
+    {
+      "slot_name": "slot_1",
+      "admit_index": 3,
+      "attempt": 1,
+      "current_goal_state": "State 0:\nx, y : R\nhx : x <> 0\nhy : y <> 0\nhsum : x + y = 4 * (x * y)\n============================\n1 / x + 1 / y = (x + y) / (x * y)",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "deepseek/deepseek-v3.2",
+          "raw_output": "```coq\nfield_simplify (hx, hy).\nfield_simplify.\nrewrite hsum.\nfield_simplify.\nreflexivity.\n```",
+          "status": "parsed",
+          "parsed_output": "field_simplify (hx, hy).\nfield_simplify.\nrewrite hsum.\nfield_simplify.\nreflexivity."
+        }
+      ],
+      "replacement": "field_simplify (hx, hy).\nfield_simplify.\nrewrite hsum.\nfield_simplify.\nreflexivity.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v ...",
+      "stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v ...",
+      "check_stderr": "File \".\\pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v\", line 18, characters 2-25:\nError: Cannot find a declared field structure over\n\"((x <> 0) * (y <> 0))%type\".\n\nProof check failed: pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v",
+      "stderr": "File \".\\pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v\", line 18, characters 2-25:\nError: Cannot find a declared field structure over\n\"((x <> 0) * (y <> 0))%type\".\n\nProof check failed: pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v",
+      "status": "compile_error"
+    },
+    {
+      "slot_name": "slot_1",
+      "admit_index": 3,
+      "attempt": 2,
+      "current_goal_state": "State 0:\nx, y : R\nhx : x <> 0\nhy : y <> 0\nhsum : x + y = 4 * (x * y)\n============================\n1 / x + 1 / y = (x + y) / (x * y)",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "deepseek/deepseek-v3.2",
+          "raw_output": "field_simplify.\nrewrite (Rplus_comm 1 / x 1 / y).\nfield_simplify.\nreflexivity.",
+          "status": "parsed",
+          "parsed_output": "field_simplify.\nrewrite (Rplus_comm 1 / x 1 / y).\nfield_simplify.\nreflexivity."
+        }
+      ],
+      "replacement": "field_simplify.\nrewrite (Rplus_comm 1 / x 1 / y).\nfield_simplify.\nreflexivity.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v ...",
+      "stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v ...",
+      "check_stderr": "File \".\\pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v\", line 19, characters 11-23:\nError:\nIn environment\nx, y : R\nhx : x <> 0\nhy : y <> 0\nhsum : x + y = 4 * (x * y)\nThe term \"Rplus_comm 1\" has type \"forall r2 : R, 1 + r2 = r2 + 1\"\nwhile it is expected to have type \"R\".\n\nProof check failed: pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v",
+      "stderr": "File \".\\pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v\", line 19, characters 11-23:\nError:\nIn environment\nx, y : R\nhx : x <> 0\nhy : y <> 0\nhsum : x + y = 4 * (x * y)\nThe term \"Rplus_comm 1\" has type \"forall r2 : R, 1 + r2 = r2 + 1\"\nwhile it is expected to have type \"R\".\n\nProof check failed: pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v",
+      "status": "compile_error"
+    },
+    {
+      "slot_name": "slot_1",
+      "admit_index": 3,
+      "attempt": 3,
+      "current_goal_state": "State 0:\nx, y : R\nhx : x <> 0\nhy : y <> 0\nhsum : x + y = 4 * (x * y)\n============================\n1 / x + 1 / y = (x + y) / (x * y)",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "deepseek/deepseek-v3.2",
+          "raw_output": "field.\nfield_simplify.\nrewrite hsum.\nfield_simplify.\nreflexivity.",
+          "status": "parsed",
+          "parsed_output": "field.\nfield_simplify.\nrewrite hsum.\nfield_simplify.\nreflexivity."
+        }
+      ],
+      "replacement": "field.\nfield_simplify.\nrewrite hsum.\nfield_simplify.\nreflexivity.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v ...",
+      "stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v ...",
+      "check_stderr": "File \".\\pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v\", line 19, characters 2-16:\nError: Cannot find a declared field structure over \"Prop\".\n\nProof check failed: pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v",
+      "stderr": "File \".\\pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v\", line 19, characters 2-16:\nError: Cannot find a declared field structure over \"Prop\".\n\nProof check failed: pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v",
+      "status": "compile_error"
+    },
+    {
+      "slot_name": "slot_1",
+      "admit_index": 3,
+      "attempt": 4,
+      "current_goal_state": "State 0:\nx, y : R\nhx : x <> 0\nhy : y <> 0\nhsum : x + y = 4 * (x * y)\n============================\n1 / x + 1 / y = (x + y) / (x * y)",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "deepseek/deepseek-v3.2",
+          "raw_output": "field_simplify (hx, hy).\nfield_simplify.\nreflexivity.",
+          "status": "parsed",
+          "parsed_output": "field_simplify (hx, hy).\nfield_simplify.\nreflexivity."
+        }
+      ],
+      "replacement": "field_simplify (hx, hy).\nfield_simplify.\nreflexivity.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v ...",
+      "stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v ...",
+      "check_stderr": "File \".\\pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v\", line 18, characters 2-25:\nError: Cannot find a declared field structure over\n\"((x <> 0) * (y <> 0))%type\".\n\nProof check failed: pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v",
+      "stderr": "File \".\\pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v\", line 18, characters 2-25:\nError: Cannot find a declared field structure over\n\"((x <> 0) * (y <> 0))%type\".\n\nProof check failed: pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v",
+      "status": "compile_error"
+    },
+    {
+      "slot_name": "slot_1",
+      "admit_index": 3,
+      "attempt": 5,
+      "current_goal_state": "State 0:\nx, y : R\nhx : x <> 0\nhy : y <> 0\nhsum : x + y = 4 * (x * y)\n============================\n1 / x + 1 / y = (x + y) / (x * y)",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "deepseek/deepseek-v3.2",
+          "raw_output": "field_simplify.\nfield_simplify.\nreflexivity.",
+          "status": "parsed",
+          "parsed_output": "field_simplify.\nfield_simplify.\nreflexivity."
+        }
+      ],
+      "replacement": "field_simplify.\nfield_simplify.\nreflexivity.",
+      "exit_code": 1,
+      "check_stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v ...",
+      "stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v ...",
+      "check_stderr": "File \".\\pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v\", line 21, characters 2-3:\nError: This proof is focused, but cannot be unfocused this way\n\nProof check failed: pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v",
+      "stderr": "File \".\\pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v\", line 21, characters 2-3:\nError: This proof is focused, but cannot be unfocused this way\n\nProof check failed: pipeline/evals/minif2f-rerun-10/062-amc12a_2017_p2/target.v",
+      "post_replacement_goal_state": "State 0:\nx, y : R\nhx : x <> 0\nhy : y <> 0\nhsum : x + y = 4 * (x * y)\n============================\ny <> 0 /\\ x <> 0",
+      "status": "compile_error"
+    }
+  ],
+  "summary": {},
+  "import_check": [
+    {
+      "import": "Require Import Reals.",
+      "ok": true,
+      "error": ""
+    },
+    {
+      "import": "Require Import Lra.",
+      "ok": true,
+      "error": ""
+    },
+    {
+      "import": "Require Import Psatz.",
+      "ok": true,
+      "error": ""
+    },
+    {
+      "import": "Require Import Field.",
+      "ok": true,
+      "error": ""
+    }
+  ],
+  "error": "Failed to fill admit #1 after 5 attempts.",
+  "ended_at": "2026-04-18T18:52:00"
+}

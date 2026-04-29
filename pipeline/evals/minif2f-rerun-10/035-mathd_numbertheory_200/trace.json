@@ -1,0 +1,175 @@
+{
+  "started_at": "2026-04-29T11:04:01",
+  "status": "success",
+  "inputs": {
+    "informal": "/mnt/c/Users/clark/RocqCoSPOC/pipeline/evals/minif2f-rerun-10/035-mathd_numbertheory_200/informal.txt",
+    "formal": "/mnt/c/Users/clark/RocqCoSPOC/pipeline/evals/minif2f-rerun-10/035-mathd_numbertheory_200/formal.v",
+    "target": "/mnt/c/Users/clark/RocqCoSPOC/pipeline/evals/minif2f-rerun-10/035-mathd_numbertheory_200/target.v",
+    "target_rel": "pipeline/evals/minif2f-rerun-10/035-mathd_numbertheory_200/target.v"
+  },
+  "config": {
+    "max_fill_attempts": 5,
+    "max_skeleton_attempts": 5,
+    "rewrite_model": [
+      "deepseek/deepseek-v3.2"
+    ],
+    "skeleton_model": [
+      "deepseek/deepseek-v3.2"
+    ],
+    "fill_model": [
+      "deepseek/deepseek-v3.2"
+    ],
+    "request_retries": 4,
+    "request_backoff_base_sec": 1.5,
+    "request_backoff_multiplier": 2.0,
+    "request_backoff_max_sec": 20.0,
+    "request_backoff_jitter_sec": 0.35
+  },
+  "model_log_path": "/mnt/c/Users/clark/RocqCoSPOC/pipeline/evals/minif2f-rerun-10/035-mathd_numbertheory_200/trace-model-log.jsonl",
+  "rewrite": {
+    "text": "PROVE mathd_numbertheory_200: 139 mod 11 = 7\nBEGIN\n  ASSUME a: ℕ\n  SIMPLIFY:\n    139 mod 11\n    = 7\n    [BY division algorithm]\n  THEREFORE 139 mod 11 = 7\n  CONCLUDE: 139 mod 11 = 7 [QED]\nEND",
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "deepseek/deepseek-v3.2",
+        "raw_output": "PROVE mathd_numbertheory_200: 139 mod 11 = 7\nBEGIN\n  ASSUME a: ℕ\n  SIMPLIFY:\n    139 mod 11\n    = 7\n    [BY division algorithm]\n  THEREFORE 139 mod 11 = 7\n  CONCLUDE: 139 mod 11 = 7 [QED]\nEND",
+        "status": "parsed",
+        "parsed_output": "PROVE mathd_numbertheory_200: 139 mod 11 = 7\nBEGIN\n  ASSUME a: ℕ\n  SIMPLIFY:\n    139 mod 11\n    = 7\n    [BY division algorithm]\n  THEREFORE 139 mod 11 = 7\n  CONCLUDE: 139 mod 11 = 7 [QED]\nEND"
+      }
+    ]
+  },
+  "skeleton": {
+    "compile_attempts": [
+      {
+        "attempt": 1,
+        "status": "model_error",
+        "error": "skeleton failed format validation:\n  - Attempt 1: Skeleton used Angelito Ltac1 tactics, but the current proof source does not import them.\nDo not emit `assert_goal`, `pick`, or `simplify ...` unless the formal statement visibly imports `Angelito` together with `Import Angelito.Ltac1.`.\nExamples:\nassert_goal (139 mod 11 = 7).\n  - Attempt 2: Skeleton must contain only outer proof structure and standalone `admit.` leaves.\nReplace inner proof work such as `simpl`, `rewrite`, `exact`, `reflexivity`, or `simplify ...` with `admit.`.\nExamples:\nexact H.\n\nRaw output:\nintros a.\nassert (139 mod 11 = 7).\n{ admit. }\nexact H.\n  - Attempt 3: Skeleton must contain only outer proof structure and standalone `admit.` leaves.\nReplace inner proof work such as `simpl`, `rewrite`, `exact`, `reflexivity`, or `simplify ...` with `admit.`.\nExamples:\nexact H.\n\nRaw output:\nintros a.\nassert (139 mod 11 = 7).\n{ admit. }\nexact H.",
+        "model_attempts": [
+          {
+            "format_attempt": 1,
+            "model": "deepseek/deepseek-v3.2",
+            "raw_output": "assert_goal (139 mod 11 = 7).\nadmit.",
+            "status": "invalid_format",
+            "error": "Skeleton used Angelito Ltac1 tactics, but the current proof source does not import them.\nDo not emit `assert_goal`, `pick`, or `simplify ...` unless the formal statement visibly imports `Angelito` together with `Import Angelito.Ltac1.`.\nExamples:\nassert_goal (139 mod 11 = 7)."
+          },
+          {
+            "format_attempt": 2,
+            "model": "deepseek/deepseek-v3.2",
+            "raw_output": "intros a.\nassert (139 mod 11 = 7).\n{ admit. }\nexact H.",
+            "status": "invalid_format",
+            "error": "Skeleton must contain only outer proof structure and standalone `admit.` leaves.\nReplace inner proof work such as `simpl`, `rewrite`, `exact`, `reflexivity`, or `simplify ...` with `admit.`.\nExamples:\nexact H.\n\nRaw output:\nintros a.\nassert (139 mod 11 = 7).\n{ admit. }\nexact H."
+          },
+          {
+            "format_attempt": 3,
+            "model": "deepseek/deepseek-v3.2",
+            "raw_output": "intros a.\nassert (139 mod 11 = 7).\n{ admit. }\nexact H.",
+            "status": "invalid_format",
+            "error": "Skeleton must contain only outer proof structure and standalone `admit.` leaves.\nReplace inner proof work such as `simpl`, `rewrite`, `exact`, `reflexivity`, or `simplify ...` with `admit.`.\nExamples:\nexact H.\n\nRaw output:\nintros a.\nassert (139 mod 11 = 7).\n{ admit. }\nexact H."
+          }
+        ]
+      },
+      {
+        "attempt": 2,
+        "text": "admit.",
+        "rendered_text": "admit.",
+        "full_file_text": "Require Import Arith.\nRequire Import Lia.\n\nTheorem mathd_numbertheory_200 :\n  139 mod 11 = 7.\nProof.\n  admit.\nAdmitted.\n",
+        "slot_names": [
+          "slot_1"
+        ],
+        "model_attempts": [
+          {
+            "format_attempt": 1,
+            "model": "deepseek/deepseek-v3.2",
+            "raw_output": "intros a.\nassert (139 mod 11 = 7).\n{ admit. }\nexact H.",
+            "status": "invalid_format",
+            "error": "Skeleton must contain only outer proof structure and standalone `admit.` leaves.\nReplace inner proof work such as `simpl`, `rewrite`, `exact`, `reflexivity`, or `simplify ...` with `admit.`.\nExamples:\nexact H.\n\nRaw output:\nintros a.\nassert (139 mod 11 = 7).\n{ admit. }\nexact H."
+          },
+          {
+            "format_attempt": 2,
+            "model": "deepseek/deepseek-v3.2",
+            "raw_output": "admit.",
+            "status": "parsed",
+            "parsed_output": "admit."
+          }
+        ],
+        "status": "compiled",
+        "compiles": true,
+        "check_stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/035-mathd_numbertheory_200/target.v ...\nProof check passed: pipeline/evals/minif2f-rerun-10/035-mathd_numbertheory_200/target.v",
+        "stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/035-mathd_numbertheory_200/target.v ...\nProof check passed: pipeline/evals/minif2f-rerun-10/035-mathd_numbertheory_200/target.v",
+        "check_stderr": "",
+        "stderr": "",
+        "proof_state": "State 0:\n============================\n139 mod 11 = 7"
+      }
+    ],
+    "text": "admit.",
+    "rendered_text": "admit.",
+    "full_file_text": "Require Import Arith.\nRequire Import Lia.\n\nTheorem mathd_numbertheory_200 :\n  139 mod 11 = 7.\nProof.\n  admit.\nAdmitted.\n",
+    "slot_names": [
+      "slot_1"
+    ],
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "deepseek/deepseek-v3.2",
+        "raw_output": "intros a.\nassert (139 mod 11 = 7).\n{ admit. }\nexact H.",
+        "status": "invalid_format",
+        "error": "Skeleton must contain only outer proof structure and standalone `admit.` leaves.\nReplace inner proof work such as `simpl`, `rewrite`, `exact`, `reflexivity`, or `simplify ...` with `admit.`.\nExamples:\nexact H.\n\nRaw output:\nintros a.\nassert (139 mod 11 = 7).\n{ admit. }\nexact H."
+      },
+      {
+        "format_attempt": 2,
+        "model": "deepseek/deepseek-v3.2",
+        "raw_output": "admit.",
+        "status": "parsed",
+        "parsed_output": "admit."
+      }
+    ],
+    "compiles": true,
+    "check_stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/035-mathd_numbertheory_200/target.v ...\nProof check passed: pipeline/evals/minif2f-rerun-10/035-mathd_numbertheory_200/target.v",
+    "stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/035-mathd_numbertheory_200/target.v ...\nProof check passed: pipeline/evals/minif2f-rerun-10/035-mathd_numbertheory_200/target.v",
+    "check_stderr": "",
+    "stderr": ""
+  },
+  "fills": [
+    {
+      "slot_name": "slot_1",
+      "admit_index": 0,
+      "attempt": 1,
+      "current_goal_state": "State 0:\n============================\n139 mod 11 = 7",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "deepseek/deepseek-v3.2",
+          "raw_output": "```coq\nvm_compute.\nreflexivity.\n```",
+          "status": "parsed",
+          "parsed_output": "vm_compute.\nreflexivity."
+        }
+      ],
+      "replacement": "vm_compute.\nreflexivity.",
+      "exit_code": 0,
+      "check_stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/035-mathd_numbertheory_200/target.v ...\nProof check passed: pipeline/evals/minif2f-rerun-10/035-mathd_numbertheory_200/target.v",
+      "stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/035-mathd_numbertheory_200/target.v ...\nProof check passed: pipeline/evals/minif2f-rerun-10/035-mathd_numbertheory_200/target.v",
+      "check_stderr": "",
+      "stderr": "",
+      "status": "success"
+    }
+  ],
+  "summary": {
+    "admits_filled": 1,
+    "total_attempts": 1,
+    "slot_count": 1
+  },
+  "import_check": [
+    {
+      "import": "Require Import Arith.",
+      "ok": true,
+      "error": ""
+    },
+    {
+      "import": "Require Import Lia.",
+      "ok": true,
+      "error": ""
+    }
+  ],
+  "ended_at": "2026-04-29T11:05:03"
+}

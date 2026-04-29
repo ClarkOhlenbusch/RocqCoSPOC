@@ -1,0 +1,5 @@
+Let $x, y$ be our two numbers. Then $x+y = 4xy$. Thus, 
+
+$ \frac{1}{x} + \frac{1}{y} = \frac{x+y}{xy} = 4$. 
+
+$\textbf{C}$.

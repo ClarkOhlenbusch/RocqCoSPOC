@@ -1,0 +1,246 @@
+{
+  "started_at": "2026-04-18T19:34:53",
+  "status": "failed",
+  "inputs": {
+    "informal": "/mnt/c/Users/clark/RocqCoSPOC/pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/informal.txt",
+    "formal": "/mnt/c/Users/clark/RocqCoSPOC/pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/formal.v",
+    "target": "/mnt/c/Users/clark/RocqCoSPOC/pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v",
+    "target_rel": "pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v"
+  },
+  "config": {
+    "max_fill_attempts": 5,
+    "max_skeleton_attempts": 5,
+    "rewrite_model": [
+      "deepseek/deepseek-v3.2"
+    ],
+    "skeleton_model": [
+      "deepseek/deepseek-v3.2"
+    ],
+    "fill_model": [
+      "deepseek/deepseek-v3.2"
+    ],
+    "request_retries": 4,
+    "request_backoff_base_sec": 1.5,
+    "request_backoff_multiplier": 2.0,
+    "request_backoff_max_sec": 20.0,
+    "request_backoff_jitter_sec": 0.35
+  },
+  "model_log_path": "/mnt/c/Users/clark/RocqCoSPOC/pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/trace-model-log.jsonl",
+  "rewrite": {
+    "text": "PROVE mathd_numbertheory_202: (19^19 + 99^99) mod 10 = 8\nBEGIN\n  ASSUME\n  SIMPLIFY LHS:\n    (19^19 + 99^99) mod 10 = (9^19 + 9^99) mod 10 [BY units_digit_lemma]\n  FACT pattern: ∀k, (9^2k) mod 10 = 1 ∧ (9^(2k+1)) mod 10 = 9 [BY odd_even_power_pattern]\n  FACT h19: (9^19) mod 10 = 9 [BY pattern]\n  FACT h99: (9^99) mod 10 = 9 [BY pattern]\n  THEREFORE (9^19 + 9^99) mod 10 = (9 + 9) mod 10 [BY h19, h99]\n  SIMPLIFY:\n    (9 + 9) mod 10 = 18 mod 10 [BY arithmetic]\n  SIMPLIFY:\n    18 mod 10 = 8 [BY arithmetic]\n  THEREFORE (19^19 + 99^99) mod 10 = 8 [BY chain_of_equalities]\n  CONCLUDE: (19^19 + 99^99) mod 10 = 8 [QED]\nEND",
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "deepseek/deepseek-v3.2",
+        "raw_output": "PROVE mathd_numbertheory_202: (19^19 + 99^99) mod 10 = 8\nBEGIN\n  ASSUME\n  SIMPLIFY LHS:\n    (19^19 + 99^99) mod 10 = (9^19 + 9^99) mod 10 [BY units_digit_lemma]\n  FACT pattern: ∀k, (9^2k) mod 10 = 1 ∧ (9^(2k+1)) mod 10 = 9 [BY odd_even_power_pattern]\n  FACT h19: (9^19) mod 10 = 9 [BY pattern]\n  FACT h99: (9^99) mod 10 = 9 [BY pattern]\n  THEREFORE (9^19 + 9^99) mod 10 = (9 + 9) mod 10 [BY h19, h99]\n  SIMPLIFY:\n    (9 + 9) mod 10 = 18 mod 10 [BY arithmetic]\n  SIMPLIFY:\n    18 mod 10 = 8 [BY arithmetic]\n  THEREFORE (19^19 + 99^99) mod 10 = 8 [BY chain_of_equalities]\n  CONCLUDE: (19^19 + 99^99) mod 10 = 8 [QED]\nEND",
+        "status": "parsed",
+        "parsed_output": "PROVE mathd_numbertheory_202: (19^19 + 99^99) mod 10 = 8\nBEGIN\n  ASSUME\n  SIMPLIFY LHS:\n    (19^19 + 99^99) mod 10 = (9^19 + 9^99) mod 10 [BY units_digit_lemma]\n  FACT pattern: ∀k, (9^2k) mod 10 = 1 ∧ (9^(2k+1)) mod 10 = 9 [BY odd_even_power_pattern]\n  FACT h19: (9^19) mod 10 = 9 [BY pattern]\n  FACT h99: (9^99) mod 10 = 9 [BY pattern]\n  THEREFORE (9^19 + 9^99) mod 10 = (9 + 9) mod 10 [BY h19, h99]\n  SIMPLIFY:\n    (9 + 9) mod 10 = 18 mod 10 [BY arithmetic]\n  SIMPLIFY:\n    18 mod 10 = 8 [BY arithmetic]\n  THEREFORE (19^19 + 99^99) mod 10 = 8 [BY chain_of_equalities]\n  CONCLUDE: (19^19 + 99^99) mod 10 = 8 [QED]\nEND"
+      }
+    ]
+  },
+  "skeleton": {
+    "compile_attempts": [
+      {
+        "attempt": 1,
+        "text": "\nassert ((19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10).\n{\nadmit.\n}\nassert (forall k, (9 ^ (2 * k)) mod 10 = 1 /\\ (9 ^ (2 * k + 1)) mod 10 = 9).\n{\nadmit.\n}\nassert (h19 : (9 ^ 19) mod 10 = 9).\n{\nadmit.\n}\nassert (h99 : (9 ^ 99) mod 10 = 9).\n{\nadmit.\n}\nassert ((9 ^ 19 + 9 ^ 99) mod 10 = (9 + 9) mod 10).\n{\nadmit.\n}\nassert ((9 + 9) mod 10 = 18 mod 10).\n{\nadmit.\n}\nassert (18 mod 10 = 8).\n{\nadmit.\n}\nadmit.",
+        "rendered_text": "assert ((19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10).\n{\nadmit.\n}\nassert (forall k, (9 ^ (2 * k)) mod 10 = 1 /\\ (9 ^ (2 * k + 1)) mod 10 = 9).\n{\nadmit.\n}\nassert (h19 : (9 ^ 19) mod 10 = 9).\n{\nadmit.\n}\nassert (h99 : (9 ^ 99) mod 10 = 9).\n{\nadmit.\n}\nassert ((9 ^ 19 + 9 ^ 99) mod 10 = (9 + 9) mod 10).\n{\nadmit.\n}\nassert ((9 + 9) mod 10 = 18 mod 10).\n{\nadmit.\n}\nassert (18 mod 10 = 8).\n{\nadmit.\n}\nadmit.",
+        "full_file_text": "Require Import Coq.Arith.PeanoNat.\n\nTheorem mathd_numbertheory_202 :\n  (19^19 + 99^99) mod 10 = 8.\nProof.\n  assert ((19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10).\n  {\n  admit.\n  }\n  assert (forall k, (9 ^ (2 * k)) mod 10 = 1 /\\ (9 ^ (2 * k + 1)) mod 10 = 9).\n  {\n  admit.\n  }\n  assert (h19 : (9 ^ 19) mod 10 = 9).\n  {\n  admit.\n  }\n  assert (h99 : (9 ^ 99) mod 10 = 9).\n  {\n  admit.\n  }\n  assert ((9 ^ 19 + 9 ^ 99) mod 10 = (9 + 9) mod 10).\n  {\n  admit.\n  }\n  assert ((9 + 9) mod 10 = 18 mod 10).\n  {\n  admit.\n  }\n  assert (18 mod 10 = 8).\n  {\n  admit.\n  }\n  admit.\nAdmitted.\n",
+        "slot_names": [
+          "slot_1",
+          "slot_2",
+          "slot_3",
+          "slot_4",
+          "slot_5",
+          "slot_6",
+          "slot_7",
+          "slot_8"
+        ],
+        "model_attempts": [
+          {
+            "format_attempt": 1,
+            "model": "deepseek/deepseek-v3.2",
+            "raw_output": "intros.\nassert_goal ((19 ^ 19 + 99 ^ 99) mod 10 = 8).\nsimplify lhs ((19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10).\n{ admit. }\nassert (pattern : forall k, (9 ^ (2 * k)) mod 10 = 1 /\\ (9 ^ (2 * k + 1)) mod 10 = 9).\n{ admit. }\nassert (h19 : (9 ^ 19) mod 10 = 9).\n{ admit. }\nassert (h99 : (9 ^ 99) mod 10 = 9).\n{ admit. }\nassert_goal ((9 ^ 19 + 9 ^ 99) mod 10 = (9 + 9) mod 10).\n{ admit. }\nsimplify lhs ((9 + 9) mod 10 = 18 mod 10).\n{ admit. }\nsimplify lhs (18 mod 10 = 8).\n{ admit. }\nadmit.",
+            "status": "invalid_format",
+            "error": "Skeleton used Angelito Ltac1 tactics, but the current proof source does not import them.\nDo not emit `assert_goal`, `pick`, or `simplify ...` unless the formal statement visibly imports `Angelito` together with `Import Angelito.Ltac1.`.\nExamples:\nassert_goal ((19 ^ 19 + 99 ^ 99) mod 10 = 8).\nassert_goal ((9 ^ 19 + 9 ^ 99) mod 10 = (9 + 9) mod 10)."
+          },
+          {
+            "format_attempt": 2,
+            "model": "deepseek/deepseek-v3.2",
+            "raw_output": "intros.\nassert ((19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10).\n{ admit. }\nassert (forall k, (9 ^ (2 * k)) mod 10 = 1 /\\ (9 ^ (2 * k + 1)) mod 10 = 9).\n{ admit. }\nassert (h19 : (9 ^ 19) mod 10 = 9).\n{ admit. }\nassert (h99 : (9 ^ 99) mod 10 = 9).\n{ admit. }\nassert ((9 ^ 19 + 9 ^ 99) mod 10 = (9 + 9) mod 10).\n{ admit. }\nassert ((9 + 9) mod 10 = 18 mod 10).\n{ admit. }\nassert (18 mod 10 = 8).\n{ admit. }\nadmit.",
+            "status": "parsed",
+            "parsed_output": "\nassert ((19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10).\n{\nadmit.\n}\nassert (forall k, (9 ^ (2 * k)) mod 10 = 1 /\\ (9 ^ (2 * k + 1)) mod 10 = 9).\n{\nadmit.\n}\nassert (h19 : (9 ^ 19) mod 10 = 9).\n{\nadmit.\n}\nassert (h99 : (9 ^ 99) mod 10 = 9).\n{\nadmit.\n}\nassert ((9 ^ 19 + 9 ^ 99) mod 10 = (9 + 9) mod 10).\n{\nadmit.\n}\nassert ((9 + 9) mod 10 = 18 mod 10).\n{\nadmit.\n}\nassert (18 mod 10 = 8).\n{\nadmit.\n}\nadmit."
+          }
+        ],
+        "status": "compiled",
+        "compiles": true,
+        "check_stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v ...\nProof check passed: pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v",
+        "stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v ...\nProof check passed: pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v",
+        "check_stderr": "",
+        "stderr": "",
+        "proof_state": "State 0:\n============================\n(19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10"
+      }
+    ],
+    "text": "\nassert ((19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10).\n{\nadmit.\n}\nassert (forall k, (9 ^ (2 * k)) mod 10 = 1 /\\ (9 ^ (2 * k + 1)) mod 10 = 9).\n{\nadmit.\n}\nassert (h19 : (9 ^ 19) mod 10 = 9).\n{\nadmit.\n}\nassert (h99 : (9 ^ 99) mod 10 = 9).\n{\nadmit.\n}\nassert ((9 ^ 19 + 9 ^ 99) mod 10 = (9 + 9) mod 10).\n{\nadmit.\n}\nassert ((9 + 9) mod 10 = 18 mod 10).\n{\nadmit.\n}\nassert (18 mod 10 = 8).\n{\nadmit.\n}\nadmit.",
+    "rendered_text": "assert ((19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10).\n{\nadmit.\n}\nassert (forall k, (9 ^ (2 * k)) mod 10 = 1 /\\ (9 ^ (2 * k + 1)) mod 10 = 9).\n{\nadmit.\n}\nassert (h19 : (9 ^ 19) mod 10 = 9).\n{\nadmit.\n}\nassert (h99 : (9 ^ 99) mod 10 = 9).\n{\nadmit.\n}\nassert ((9 ^ 19 + 9 ^ 99) mod 10 = (9 + 9) mod 10).\n{\nadmit.\n}\nassert ((9 + 9) mod 10 = 18 mod 10).\n{\nadmit.\n}\nassert (18 mod 10 = 8).\n{\nadmit.\n}\nadmit.",
+    "full_file_text": "Require Import Coq.Arith.PeanoNat.\n\nTheorem mathd_numbertheory_202 :\n  (19^19 + 99^99) mod 10 = 8.\nProof.\n  assert ((19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10).\n  {\n  admit.\n  }\n  assert (forall k, (9 ^ (2 * k)) mod 10 = 1 /\\ (9 ^ (2 * k + 1)) mod 10 = 9).\n  {\n  admit.\n  }\n  assert (h19 : (9 ^ 19) mod 10 = 9).\n  {\n  admit.\n  }\n  assert (h99 : (9 ^ 99) mod 10 = 9).\n  {\n  admit.\n  }\n  assert ((9 ^ 19 + 9 ^ 99) mod 10 = (9 + 9) mod 10).\n  {\n  admit.\n  }\n  assert ((9 + 9) mod 10 = 18 mod 10).\n  {\n  admit.\n  }\n  assert (18 mod 10 = 8).\n  {\n  admit.\n  }\n  admit.\nAdmitted.\n",
+    "slot_names": [
+      "slot_1",
+      "slot_2",
+      "slot_3",
+      "slot_4",
+      "slot_5",
+      "slot_6",
+      "slot_7",
+      "slot_8"
+    ],
+    "model_attempts": [
+      {
+        "format_attempt": 1,
+        "model": "deepseek/deepseek-v3.2",
+        "raw_output": "intros.\nassert_goal ((19 ^ 19 + 99 ^ 99) mod 10 = 8).\nsimplify lhs ((19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10).\n{ admit. }\nassert (pattern : forall k, (9 ^ (2 * k)) mod 10 = 1 /\\ (9 ^ (2 * k + 1)) mod 10 = 9).\n{ admit. }\nassert (h19 : (9 ^ 19) mod 10 = 9).\n{ admit. }\nassert (h99 : (9 ^ 99) mod 10 = 9).\n{ admit. }\nassert_goal ((9 ^ 19 + 9 ^ 99) mod 10 = (9 + 9) mod 10).\n{ admit. }\nsimplify lhs ((9 + 9) mod 10 = 18 mod 10).\n{ admit. }\nsimplify lhs (18 mod 10 = 8).\n{ admit. }\nadmit.",
+        "status": "invalid_format",
+        "error": "Skeleton used Angelito Ltac1 tactics, but the current proof source does not import them.\nDo not emit `assert_goal`, `pick`, or `simplify ...` unless the formal statement visibly imports `Angelito` together with `Import Angelito.Ltac1.`.\nExamples:\nassert_goal ((19 ^ 19 + 99 ^ 99) mod 10 = 8).\nassert_goal ((9 ^ 19 + 9 ^ 99) mod 10 = (9 + 9) mod 10)."
+      },
+      {
+        "format_attempt": 2,
+        "model": "deepseek/deepseek-v3.2",
+        "raw_output": "intros.\nassert ((19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10).\n{ admit. }\nassert (forall k, (9 ^ (2 * k)) mod 10 = 1 /\\ (9 ^ (2 * k + 1)) mod 10 = 9).\n{ admit. }\nassert (h19 : (9 ^ 19) mod 10 = 9).\n{ admit. }\nassert (h99 : (9 ^ 99) mod 10 = 9).\n{ admit. }\nassert ((9 ^ 19 + 9 ^ 99) mod 10 = (9 + 9) mod 10).\n{ admit. }\nassert ((9 + 9) mod 10 = 18 mod 10).\n{ admit. }\nassert (18 mod 10 = 8).\n{ admit. }\nadmit.",
+        "status": "parsed",
+        "parsed_output": "\nassert ((19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10).\n{\nadmit.\n}\nassert (forall k, (9 ^ (2 * k)) mod 10 = 1 /\\ (9 ^ (2 * k + 1)) mod 10 = 9).\n{\nadmit.\n}\nassert (h19 : (9 ^ 19) mod 10 = 9).\n{\nadmit.\n}\nassert (h99 : (9 ^ 99) mod 10 = 9).\n{\nadmit.\n}\nassert ((9 ^ 19 + 9 ^ 99) mod 10 = (9 + 9) mod 10).\n{\nadmit.\n}\nassert ((9 + 9) mod 10 = 18 mod 10).\n{\nadmit.\n}\nassert (18 mod 10 = 8).\n{\nadmit.\n}\nadmit."
+      }
+    ],
+    "compiles": true,
+    "check_stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v ...\nProof check passed: pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v",
+    "stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v ...\nProof check passed: pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v",
+    "check_stderr": "",
+    "stderr": ""
+  },
+  "fills": [
+    {
+      "slot_name": "slot_1",
+      "admit_index": 2,
+      "attempt": 1,
+      "current_goal_state": "State 0:\n============================\n(19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "deepseek/deepseek-v3.2",
+          "raw_output": "```coq\nvm_compute.\nreflexivity.\n```",
+          "status": "parsed",
+          "parsed_output": "vm_compute.\nreflexivity."
+        }
+      ],
+      "replacement": "vm_compute.\nreflexivity.",
+      "exit_code": 3,
+      "check_stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v ...",
+      "stdout": "Checking coq/Angelito.v ...\nChecking pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v ...",
+      "check_stderr": "Fatal error: out of memory\nProof check failed: pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v",
+      "stderr": "Fatal error: out of memory\nProof check failed: pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v",
+      "post_replacement_goal_state": "State 0:\n============================\n(19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10\nmathd_numbertheory_202 < Fatal error: out of memory",
+      "status": "compile_error"
+    },
+    {
+      "slot_name": "slot_1",
+      "admit_index": 2,
+      "attempt": 2,
+      "current_goal_state": "State 0:\n============================\n(19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10\nmathd_numbertheory_202 < Fatal error: out of memory",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "deepseek/deepseek-v3.2",
+          "raw_output": "simpl.\nrewrite (Nat.mod_add (19 ^ 19) (99 ^ 99) 10).\nrewrite (Nat.mod_add (9 ^ 19) (9 ^ 99) 10).\nrewrite Nat.mod_mul_left_mod.\nrewrite Nat.mod_mul_left_mod.\nreflexivity.",
+          "status": "parsed",
+          "parsed_output": "simpl.\nrewrite (Nat.mod_add (19 ^ 19) (99 ^ 99) 10).\nrewrite (Nat.mod_add (9 ^ 19) (9 ^ 99) 10).\nrewrite Nat.mod_mul_left_mod.\nrewrite Nat.mod_mul_left_mod.\nreflexivity."
+        }
+      ],
+      "replacement": "simpl.\nrewrite (Nat.mod_add (19 ^ 19) (99 ^ 99) 10).\nrewrite (Nat.mod_add (9 ^ 19) (9 ^ 99) 10).\nrewrite Nat.mod_mul_left_mod.\nrewrite Nat.mod_mul_left_mod.\nreflexivity.",
+      "exit_code": 124,
+      "check_stdout": "",
+      "stdout": "",
+      "check_stderr": "Proof check timed out after 60 seconds for pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v",
+      "stderr": "Proof check timed out after 60 seconds for pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v",
+      "status": "compile_error"
+    },
+    {
+      "slot_name": "slot_1",
+      "admit_index": 2,
+      "attempt": 3,
+      "current_goal_state": "State 0:\n============================\n(19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10\nmathd_numbertheory_202 < Fatal error: out of memory",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "deepseek/deepseek-v3.2",
+          "raw_output": "```coq\nsimpl.\nreflexivity.\n```",
+          "status": "parsed",
+          "parsed_output": "simpl.\nreflexivity."
+        }
+      ],
+      "replacement": "simpl.\nreflexivity.",
+      "exit_code": 124,
+      "check_stdout": "",
+      "stdout": "",
+      "check_stderr": "Proof check timed out after 60 seconds for pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v",
+      "stderr": "Proof check timed out after 60 seconds for pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v",
+      "status": "compile_error"
+    },
+    {
+      "slot_name": "slot_1",
+      "admit_index": 2,
+      "attempt": 4,
+      "current_goal_state": "State 0:\n============================\n(19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10\nmathd_numbertheory_202 < Fatal error: out of memory",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "deepseek/deepseek-v3.2",
+          "raw_output": "```coq\nsimpl.\nreflexivity.\n```",
+          "status": "parsed",
+          "parsed_output": "simpl.\nreflexivity."
+        }
+      ],
+      "replacement": "simpl.\nreflexivity.",
+      "exit_code": 124,
+      "check_stdout": "",
+      "stdout": "",
+      "check_stderr": "Proof check timed out after 60 seconds for pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v",
+      "stderr": "Proof check timed out after 60 seconds for pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v",
+      "status": "compile_error"
+    },
+    {
+      "slot_name": "slot_1",
+      "admit_index": 2,
+      "attempt": 5,
+      "current_goal_state": "State 0:\n============================\n(19 ^ 19 + 99 ^ 99) mod 10 = (9 ^ 19 + 9 ^ 99) mod 10\nmathd_numbertheory_202 < Fatal error: out of memory",
+      "source": "model",
+      "model_attempts": [
+        {
+          "format_attempt": 1,
+          "model": "deepseek/deepseek-v3.2",
+          "raw_output": "```coq\nsimpl.\nreflexivity.\n```",
+          "status": "parsed",
+          "parsed_output": "simpl.\nreflexivity."
+        }
+      ],
+      "replacement": "simpl.\nreflexivity.",
+      "exit_code": 124,
+      "check_stdout": "",
+      "stdout": "",
+      "check_stderr": "Proof check timed out after 60 seconds for pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v",
+      "stderr": "Proof check timed out after 60 seconds for pipeline/evals/minif2f-rerun-10/163-mathd_numbertheory_202/target.v",
+      "status": "compile_error"
+    }
+  ],
+  "summary": {},
+  "import_check": [
+    {
+      "import": "Require Import Coq.Arith.PeanoNat.",
+      "ok": true,
+      "error": ""
+    }
+  ],
+  "error": "Failed to fill admit #1 after 5 attempts.",
+  "ended_at": "2026-04-18T19:45:09"
+}
